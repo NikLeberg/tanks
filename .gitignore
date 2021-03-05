@@ -1,0 +1,7 @@
+# VS Code Dateien
+.vscode
+build
+
+# VS Studio Dateien
+.vs
+out
