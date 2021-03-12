@@ -1,0 +1,29 @@
+digraph G {
+
+    ein [label="Eingaben", shape=rectangle]
+    net [label="Netzwerk", shape=rectangle]
+
+    gui [label="GUI", shape=rectangle]
+    steu [label="Steuerung", shape=rectangle]
+    audio [label="Hintergrund-Sound", shape=rectangle]
+
+    guis [label="GUI-Elemente", shape=cylinder]
+
+    but [label="2.1\nButtons", shape=circle]
+    fsm [label="2.2\nFSM\nGame", shape=circle]
+    sce [label="2.2\nScene", shape=circle]
+
+    ein -> but [label="Maus"]
+    ein -> fsm [label="wasd"]
+    net -> fsm [label="Net-Input"]
+    fsm -> net [label="Net-Output"]
+    but -> sce [label="Klicks"]
+    but -> audio [label="Button-Sounds"]
+    sce -> fsm [label="Events"]
+    fsm -> sce [label="Wechsel"]
+    fsm -> steu
+    sce -> guis [dir=both]
+    guis -> but
+    guis -> gui
+    
+}

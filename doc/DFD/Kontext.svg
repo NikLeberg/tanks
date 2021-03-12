@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="309pt" height="152pt" viewBox="0.00 0.00 308.65 152.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 148)">
+<title>G</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-148 304.6485,-148 304.6485,4 -4,4"/>
+<!-- ein -->
+<g id="node1" class="node">
+<title>ein</title>
+<polygon fill="none" stroke="#000000" points="74.6376,-117 5.8926,-117 5.8926,-81 74.6376,-81 74.6376,-117"/>
+<text text-anchor="middle" x="40.2651" y="-94.8" font-family="Times,serif" font-size="14.00" fill="#000000">Eingaben</text>
+</g>
+<!-- game -->
+<g id="node6" class="node">
+<title>game</title>
+<ellipse fill="none" stroke="#000000" cx="151.4799" cy="-72" rx="34.8996" ry="34.8996"/>
+<text text-anchor="middle" x="151.4799" y="-76.2" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
+<text text-anchor="middle" x="151.4799" y="-59.4" font-family="Times,serif" font-size="14.00" fill="#000000">Game</text>
+</g>
+<!-- ein&#45;&gt;game -->
+<g id="edge1" class="edge">
+<title>ein-&gt;game</title>
+<path fill="none" stroke="#000000" d="M74.8445,-90.605C85.1943,-88.0924 96.6838,-85.303 107.5502,-82.665"/>
+<polygon fill="#000000" stroke="#000000" points="108.4119,-86.0575 117.3039,-80.297 106.7604,-79.2551 108.4119,-86.0575"/>
+</g>
+<!-- res -->
+<g id="node2" class="node">
+<title>res</title>
+<polygon fill="none" stroke="#000000" points="80.2967,-63 .2335,-63 .2335,-27 80.2967,-27 80.2967,-63"/>
+<text text-anchor="middle" x="40.2651" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">Ressourcen</text>
+</g>
+<!-- res&#45;&gt;game -->
+<g id="edge2" class="edge">
+<title>res-&gt;game</title>
+<path fill="none" stroke="#000000" d="M80.4162,-54.7476C89.1862,-56.8767 98.5133,-59.1411 107.4262,-61.3049"/>
+<polygon fill="#000000" stroke="#000000" points="106.7178,-64.7345 117.2612,-63.6926 108.3693,-57.9321 106.7178,-64.7345"/>
+</g>
+<!-- bild -->
+<g id="node3" class="node">
+<title>bild</title>
+<polygon fill="none" stroke="#000000" points="300.7582,-144 222.32,-144 222.32,-108 300.7582,-108 300.7582,-144"/>
+<text text-anchor="middle" x="261.5391" y="-121.8" font-family="Times,serif" font-size="14.00" fill="#000000">Bildschirm</text>
+</g>
+<!-- net -->
+<g id="node4" class="node">
+<title>net</title>
+<polygon fill="none" stroke="#000000" points="296.9485,-90 226.1297,-90 226.1297,-54 296.9485,-54 296.9485,-90"/>
+<text text-anchor="middle" x="261.5391" y="-67.8" font-family="Times,serif" font-size="14.00" fill="#000000">Netzwerk</text>
+</g>
+<!-- audio -->
+<g id="node5" class="node">
+<title>audio</title>
+<polygon fill="none" stroke="#000000" points="288.5391,-36 234.5391,-36 234.5391,0 288.5391,0 288.5391,-36"/>
+<text text-anchor="middle" x="261.5391" y="-13.8" font-family="Times,serif" font-size="14.00" fill="#000000">Audio</text>
+</g>
+<!-- game&#45;&gt;bild -->
+<g id="edge3" class="edge">
+<title>game-&gt;bild</title>
+<path fill="none" stroke="#000000" d="M183.0185,-87.4742C193.142,-92.4413 204.5713,-98.049 215.5125,-103.4173"/>
+<polygon fill="#000000" stroke="#000000" points="214.0296,-106.5882 224.5489,-107.8509 217.113,-100.3039 214.0296,-106.5882"/>
+</g>
+<!-- game&#45;&gt;net -->
+<g id="edge4" class="edge">
+<title>game-&gt;net</title>
+<path fill="none" stroke="#000000" d="M186.6059,-72C195.944,-72 206.1659,-72 215.9741,-72"/>
+<polygon fill="#000000" stroke="#000000" points="215.9913,-75.5001 225.9913,-72 215.9912,-68.5001 215.9913,-75.5001"/>
+</g>
+<!-- game&#45;&gt;audio -->
+<g id="edge5" class="edge">
+<title>game-&gt;audio</title>
+<path fill="none" stroke="#000000" d="M183.0185,-56.5258C196.2306,-50.0433 211.6669,-42.4696 225.3396,-35.7611"/>
+<polygon fill="#000000" stroke="#000000" points="227.0387,-38.8261 234.4746,-31.279 223.9553,-32.5418 227.0387,-38.8261"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="542pt" height="668pt" viewBox="0.00 0.00 542.35 667.99">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 663.9903)">
+<title>G</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-663.9903 538.3535,-663.9903 538.3535,4 -4,4"/>
+<!-- ein -->
+<g id="node1" class="node">
+<title>ein</title>
+<polygon fill="none" stroke="#000000" points="201.5766,-659.9903 132.8316,-659.9903 132.8316,-623.9903 201.5766,-623.9903 201.5766,-659.9903"/>
+<text text-anchor="middle" x="167.2041" y="-637.7903" font-family="Times,serif" font-size="14.00" fill="#000000">Eingaben</text>
+</g>
+<!-- ui -->
+<g id="node7" class="node">
+<title>ui</title>
+<ellipse fill="none" stroke="#000000" cx="167.2041" cy="-557.5746" rx="29.3315" ry="29.3315"/>
+<text text-anchor="middle" x="167.2041" y="-561.7746" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+<text text-anchor="middle" x="167.2041" y="-544.9746" font-family="Times,serif" font-size="14.00" fill="#000000">UI</text>
+</g>
+<!-- ein&#45;&gt;ui -->
+<g id="edge1" class="edge">
+<title>ein-&gt;ui</title>
+<path fill="none" stroke="#000000" d="M167.2041,-623.6733C167.2041,-615.9224 167.2041,-606.5687 167.2041,-597.3684"/>
+<polygon fill="#000000" stroke="#000000" points="170.7042,-597.1398 167.2041,-587.1399 163.7042,-597.1399 170.7042,-597.1398"/>
+</g>
+<!-- res -->
+<g id="node2" class="node">
+<title>res</title>
+<polygon fill="none" stroke="#000000" points="300.2357,-659.9903 220.1725,-659.9903 220.1725,-623.9903 300.2357,-623.9903 300.2357,-659.9903"/>
+<text text-anchor="middle" x="260.2041" y="-637.7903" font-family="Times,serif" font-size="14.00" fill="#000000">Ressourcen</text>
+</g>
+<!-- bild -->
+<g id="node3" class="node">
+<title>bild</title>
+<polygon fill="none" stroke="#000000" points="183.4232,-36 104.985,-36 104.985,0 183.4232,0 183.4232,-36"/>
+<text text-anchor="middle" x="144.2041" y="-13.8" font-family="Times,serif" font-size="14.00" fill="#000000">Bildschirm</text>
+</g>
+<!-- net -->
+<g id="node4" class="node">
+<title>net</title>
+<polygon fill="none" stroke="#000000" points="70.6135,-450.1639 -.2053,-450.1639 -.2053,-414.1639 70.6135,-414.1639 70.6135,-450.1639"/>
+<text text-anchor="middle" x="35.2041" y="-427.9639" font-family="Times,serif" font-size="14.00" fill="#000000">Netzwerk</text>
+</g>
+<!-- audio -->
+<g id="node5" class="node">
+<title>audio</title>
+<polygon fill="none" stroke="#000000" points="464.2041,-154.3894 410.2041,-154.3894 410.2041,-118.3894 464.2041,-118.3894 464.2041,-154.3894"/>
+<text text-anchor="middle" x="437.2041" y="-132.1894" font-family="Times,serif" font-size="14.00" fill="#000000">Audio</text>
+</g>
+<!-- rend -->
+<g id="node6" class="node">
+<title>rend</title>
+<ellipse fill="none" stroke="#000000" cx="144.2041" cy="-136.3894" rx="47.679" ry="47.679"/>
+<text text-anchor="middle" x="144.2041" y="-140.5894" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
+<text text-anchor="middle" x="144.2041" y="-123.7894" font-family="Times,serif" font-size="14.00" fill="#000000">Renderer</text>
+</g>
+<!-- rend&#45;&gt;bild -->
+<g id="edge3" class="edge">
+<title>rend-&gt;bild</title>
+<path fill="none" stroke="#000000" d="M144.2041,-88.5772C144.2041,-74.2823 144.2041,-59.067 144.2041,-46.438"/>
+<polygon fill="#000000" stroke="#000000" points="147.7042,-46.0935 144.2041,-36.0935 140.7042,-46.0936 147.7042,-46.0935"/>
+<text text-anchor="middle" x="158.5933" y="-58.2" font-family="Times,serif" font-size="14.00" fill="#000000">Pixel</text>
+</g>
+<!-- ui&#45;&gt;net -->
+<g id="edge4" class="edge">
+<title>ui-&gt;net</title>
+<path fill="none" stroke="#000000" d="M128.7168,-548.0553C95.6204,-539.0324 51.5442,-524.7265 40.6725,-510.159 30.2166,-496.1486 28.897,-476.4951 30.1675,-460.4222"/>
+<polygon fill="#000000" stroke="#000000" points="128.023,-551.4923 138.5867,-550.6803 129.8223,-544.7275 128.023,-551.4923"/>
+<polygon fill="#000000" stroke="#000000" points="33.6463,-460.8056 31.3063,-450.4725 26.6918,-460.0095 33.6463,-460.8056"/>
+<text text-anchor="middle" x="62.9699" y="-497.559" font-family="Times,serif" font-size="14.00" fill="#000000">Befehle</text>
+</g>
+<!-- ui&#45;&gt;rend -->
+<g id="edge2" class="edge">
+<title>ui-&gt;rend</title>
+<path fill="none" stroke="#000000" d="M159.7651,-529.0623C150.6917,-492.6804 135.8781,-427.6632 130.3303,-370.9689 126.6568,-333.429 129.867,-278.7443 136.2041,-201.9788 136.4265,-199.285 136.6757,-196.5315 136.9449,-193.752"/>
+<polygon fill="#000000" stroke="#000000" points="140.4439,-193.9423 137.9952,-183.6344 133.4813,-193.2195 140.4439,-193.9423"/>
+<text text-anchor="middle" x="143.641" y="-349.9689" font-family="Times,serif" font-size="14.00" fill="#000000">GUI</text>
+</g>
+<!-- ent -->
+<g id="node8" class="node">
+<title>ent</title>
+<ellipse fill="none" stroke="#000000" cx="220.2041" cy="-432.1639" rx="43.3909" ry="43.3909"/>
+<text text-anchor="middle" x="220.2041" y="-444.7639" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+<text text-anchor="middle" x="220.2041" y="-427.9639" font-family="Times,serif" font-size="14.00" fill="#000000">Entity</text>
+<text text-anchor="middle" x="220.2041" y="-411.1639" font-family="Times,serif" font-size="14.00" fill="#000000">Handler</text>
+</g>
+<!-- ui&#45;&gt;ent -->
+<g id="edge7" class="edge">
+<title>ui-&gt;ent</title>
+<path fill="none" stroke="#000000" d="M178.7043,-530.3624C184.7105,-516.1503 192.2495,-498.3112 199.2484,-481.7502"/>
+<polygon fill="#000000" stroke="#000000" points="202.6222,-482.7578 203.2911,-472.1841 196.1744,-480.0328 202.6222,-482.7578"/>
+<text text-anchor="middle" x="222.5856" y="-497.559" font-family="Times,serif" font-size="14.00" fill="#000000">Steuerung</text>
+</g>
+<!-- audeng -->
+<g id="node11" class="node">
+<title>audeng</title>
+<ellipse fill="none" stroke="#000000" cx="437.2041" cy="-278.0739" rx="41.0911" ry="41.0911"/>
+<text text-anchor="middle" x="437.2041" y="-290.6739" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+<text text-anchor="middle" x="437.2041" y="-273.8739" font-family="Times,serif" font-size="14.00" fill="#000000">Audio</text>
+<text text-anchor="middle" x="437.2041" y="-257.0739" font-family="Times,serif" font-size="14.00" fill="#000000">Engine</text>
+</g>
+<!-- ui&#45;&gt;audeng -->
+<g id="edge5" class="edge">
+<title>ui-&gt;audeng</title>
+<path fill="none" stroke="#000000" d="M195.6171,-548.7177C254.8651,-528.4874 390.3159,-472.6097 441.2041,-370.9689 447.6592,-358.076 449.1228,-342.8712 448.2924,-328.5374"/>
+<polygon fill="#000000" stroke="#000000" points="451.75,-327.9242 447.3208,-318.2996 444.7813,-328.5856 451.75,-327.9242"/>
+<text text-anchor="middle" x="481.2788" y="-436.3639" font-family="Times,serif" font-size="14.00" fill="#000000">Hintergrundmusik,</text>
+<text text-anchor="middle" x="481.2788" y="-419.5639" font-family="Times,serif" font-size="14.00" fill="#000000">Klicks</text>
+</g>
+<!-- ent&#45;&gt;rend -->
+<g id="edge8" class="edge">
+<title>ent-&gt;rend</title>
+<path fill="none" stroke="#000000" d="M193.3249,-397.7556C178.3199,-376.4497 160.9654,-347.8072 152.3857,-319.3689 140.1284,-278.7409 138.4272,-230.7461 139.6073,-194.1061"/>
+<polygon fill="#000000" stroke="#000000" points="143.1054,-194.221 140.0101,-184.0884 136.111,-193.9396 143.1054,-194.221"/>
+<text text-anchor="middle" x="173.6133" y="-282.2739" font-family="Times,serif" font-size="14.00" fill="#000000">Textur,</text>
+<text text-anchor="middle" x="173.6133" y="-265.4739" font-family="Times,serif" font-size="14.00" fill="#000000">Ort</text>
+</g>
+<!-- ents -->
+<g id="node9" class="node">
+<title>ents</title>
+<path fill="none" stroke="#000000" d="M270.0317,-292.8011C270.0317,-294.607 254.8696,-296.0739 236.2041,-296.0739 217.5386,-296.0739 202.3765,-294.607 202.3765,-292.8011 202.3765,-292.8011 202.3765,-263.3466 202.3765,-263.3466 202.3765,-261.5408 217.5386,-260.0739 236.2041,-260.0739 254.8696,-260.0739 270.0317,-261.5408 270.0317,-263.3466 270.0317,-263.3466 270.0317,-292.8011 270.0317,-292.8011"/>
+<path fill="none" stroke="#000000" d="M270.0317,-292.8011C270.0317,-290.9953 254.8696,-289.5284 236.2041,-289.5284 217.5386,-289.5284 202.3765,-290.9953 202.3765,-292.8011"/>
+<text text-anchor="middle" x="236.2041" y="-273.8739" font-family="Times,serif" font-size="14.00" fill="#000000">Entitäten</text>
+</g>
+<!-- ent&#45;&gt;ents -->
+<g id="edge10" class="edge">
+<title>ent-&gt;ents</title>
+<path fill="none" stroke="#000000" d="M215.0416,-378.8431C214.6767,-365.2565 215.1171,-350.7215 217.2041,-337.3689 218.8519,-326.8264 222.0539,-315.5981 225.3665,-305.7803"/>
+<polygon fill="#000000" stroke="#000000" points="211.5519,-379.1664 215.4637,-389.0126 218.5459,-378.8761 211.5519,-379.1664"/>
+<polygon fill="#000000" stroke="#000000" points="228.7392,-306.7424 228.7981,-296.1477 222.1451,-304.3932 228.7392,-306.7424"/>
+</g>
+<!-- world -->
+<g id="node10" class="node">
+<title>world</title>
+<ellipse fill="none" stroke="#000000" cx="324.2041" cy="-278.0739" rx="36.7082" ry="36.7082"/>
+<text text-anchor="middle" x="324.2041" y="-282.2739" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+<text text-anchor="middle" x="324.2041" y="-265.4739" font-family="Times,serif" font-size="14.00" fill="#000000">World</text>
+</g>
+<!-- ent&#45;&gt;world -->
+<g id="edge11" class="edge">
+<title>ent-&gt;world</title>
+<path fill="none" stroke="#000000" d="M219.0739,-388.8756C220.6801,-371.2845 225.3479,-351.7588 236.7793,-337.3689 249.5198,-321.3312 261.9807,-330.4542 279.2041,-319.3689 283.0186,-316.9138 286.8149,-314.126 290.4926,-311.1853"/>
+<polygon fill="#000000" stroke="#000000" points="292.9374,-313.7016 298.3152,-304.5731 288.4185,-308.3556 292.9374,-313.7016"/>
+<text text-anchor="middle" x="269.9165" y="-349.9689" font-family="Times,serif" font-size="14.00" fill="#000000">Zerstörung</text>
+</g>
+<!-- ent&#45;&gt;audeng -->
+<g id="edge9" class="edge">
+<title>ent-&gt;audeng</title>
+<path fill="none" stroke="#000000" d="M262.2683,-422.2908C294.822,-413.0795 339.6885,-396.8092 372.2041,-370.9689 381.5079,-363.5751 396.4962,-342.4889 409.7365,-322.2721"/>
+<polygon fill="#000000" stroke="#000000" points="412.7871,-324.0003 415.2823,-313.7034 406.9105,-320.1968 412.7871,-324.0003"/>
+<text text-anchor="middle" x="418.8009" y="-349.9689" font-family="Times,serif" font-size="14.00" fill="#000000">Effekte</text>
+</g>
+<!-- world&#45;&gt;rend -->
+<g id="edge13" class="edge">
+<title>world-&gt;rend</title>
+<path fill="none" stroke="#000000" d="M297.4794,-252.7176C291.5621,-247.3392 285.251,-241.7792 279.2041,-236.7788 250.9727,-213.4333 217.9987,-188.8658 191.7063,-169.8776"/>
+<polygon fill="#000000" stroke="#000000" points="193.581,-166.9148 183.419,-163.9173 189.4938,-172.5976 193.581,-166.9148"/>
+<text text-anchor="middle" x="281.4166" y="-206.1788" font-family="Times,serif" font-size="14.00" fill="#000000">Aussehen</text>
+</g>
+<!-- world&#45;&gt;ent -->
+<g id="edge12" class="edge">
+<title>world-&gt;ent</title>
+<path fill="none" stroke="#000000" d="M321.4181,-314.7951C318.6383,-332.8946 313.1219,-354.3451 302.2041,-370.9689 293.2451,-384.6102 280.1551,-396.342 267.0531,-405.7779"/>
+<polygon fill="#000000" stroke="#000000" points="264.7589,-403.1068 258.4847,-411.6441 268.7134,-408.8828 264.7589,-403.1068"/>
+<text text-anchor="middle" x="342.2609" y="-358.3689" font-family="Times,serif" font-size="14.00" fill="#000000">Kollision</text>
+<text text-anchor="middle" x="342.2609" y="-341.5689" font-family="Times,serif" font-size="14.00" fill="#000000">Physik</text>
+</g>
+<!-- audeng&#45;&gt;audio -->
+<g id="edge6" class="edge">
+<title>audeng-&gt;audio</title>
+<path fill="none" stroke="#000000" d="M437.2041,-236.712C437.2041,-213.4804 437.2041,-185.1008 437.2041,-164.4619"/>
+<polygon fill="#000000" stroke="#000000" points="440.7042,-164.4428 437.2041,-154.4429 433.7042,-164.4429 440.7042,-164.4428"/>
+<text text-anchor="middle" x="448.4804" y="-206.1788" font-family="Times,serif" font-size="14.00" fill="#000000">Ton</text>
+</g>
+</g>
+</svg>

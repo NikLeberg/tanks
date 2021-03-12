@@ -1,0 +1,25 @@
+digraph G {
+
+    steu [label="Steuerung", shape=rectangle]
+    kol [label="Killision,\nPhysik", shape=rectangle]
+    tex [label="Textur,\nOrt", shape=rectangle]
+    eff [label="Effekte", shape=rectangle]
+    zer [label="Zerstörung", shape=rectangle]
+
+    log [label="3.3\nLogik", shape=circle]
+    phy [label="3.1\nPhysik", shape=circle]
+    ani [label="3.2\nAnimation", shape=circle]
+    ents [label="Entitäten", shape=cylinder]
+
+    steu -> log
+    kol -> phy
+    log -> tex
+    log -> eff
+    log -> zer
+    phy -> log [label="Position,\nKollision"]
+    log -> phy [label="Bewegung"]
+    ani -> log [label="Ausschnitt"]
+    log -> ani [label="Events,\nZeit"]
+    log -> ents [dir=both]
+    
+}

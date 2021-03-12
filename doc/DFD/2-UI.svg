@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="325pt" height="528pt" viewBox="0.00 0.00 324.58 527.92">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 523.9235)">
+<title>G</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-523.9235 320.5828,-523.9235 320.5828,4 -4,4"/>
+<!-- ein -->
+<g id="node1" class="node">
+<title>ein</title>
+<polygon fill="none" stroke="#000000" points="273.5738,-519.9235 204.8288,-519.9235 204.8288,-483.9235 273.5738,-483.9235 273.5738,-519.9235"/>
+<text text-anchor="middle" x="239.2013" y="-497.7235" font-family="Times,serif" font-size="14.00" fill="#000000">Eingaben</text>
+</g>
+<!-- but -->
+<g id="node7" class="node">
+<title>but</title>
+<ellipse fill="none" stroke="#000000" cx="150.2013" cy="-389.0065" rx="42.2343" ry="42.2343"/>
+<text text-anchor="middle" x="150.2013" y="-393.2065" font-family="Times,serif" font-size="14.00" fill="#000000">2.1</text>
+<text text-anchor="middle" x="150.2013" y="-376.4065" font-family="Times,serif" font-size="14.00" fill="#000000">Buttons</text>
+</g>
+<!-- ein&#45;&gt;but -->
+<g id="edge1" class="edge">
+<title>ein-&gt;but</title>
+<path fill="none" stroke="#000000" d="M224.9019,-483.7814C213.5673,-469.4009 197.2833,-448.7409 182.8103,-430.3786"/>
+<polygon fill="#000000" stroke="#000000" points="185.2513,-427.8214 176.3122,-422.1343 179.7537,-432.1546 185.2513,-427.8214"/>
+<text text-anchor="middle" x="225.7532" y="-453.3235" font-family="Times,serif" font-size="14.00" fill="#000000">Maus</text>
+</g>
+<!-- fsm -->
+<g id="node8" class="node">
+<title>fsm</title>
+<ellipse fill="none" stroke="#000000" cx="211.2013" cy="-130.095" rx="41.0911" ry="41.0911"/>
+<text text-anchor="middle" x="211.2013" y="-142.695" font-family="Times,serif" font-size="14.00" fill="#000000">2.2</text>
+<text text-anchor="middle" x="211.2013" y="-125.895" font-family="Times,serif" font-size="14.00" fill="#000000">FSM</text>
+<text text-anchor="middle" x="211.2013" y="-109.095" font-family="Times,serif" font-size="14.00" fill="#000000">Game</text>
+</g>
+<!-- ein&#45;&gt;fsm -->
+<g id="edge2" class="edge">
+<title>ein-&gt;fsm</title>
+<path fill="none" stroke="#000000" d="M245.4028,-483.5986C261.0575,-434.2813 298.3048,-295.3151 260.2013,-189.3901 257.3097,-181.3517 252.8037,-173.6282 247.6706,-166.5642"/>
+<polygon fill="#000000" stroke="#000000" points="250.3434,-164.3006 241.416,-158.5952 244.8369,-168.6225 250.3434,-164.3006"/>
+<text text-anchor="middle" x="290.5842" y="-316.2896" font-family="Times,serif" font-size="14.00" fill="#000000">wasd</text>
+</g>
+<!-- net -->
+<g id="node2" class="node">
+<title>net</title>
+<polygon fill="none" stroke="#000000" points="216.6107,-36 145.7919,-36 145.7919,0 216.6107,0 216.6107,-36"/>
+<text text-anchor="middle" x="181.2013" y="-13.8" font-family="Times,serif" font-size="14.00" fill="#000000">Netzwerk</text>
+</g>
+<!-- net&#45;&gt;fsm -->
+<g id="edge3" class="edge">
+<title>net-&gt;fsm</title>
+<path fill="none" stroke="#000000" d="M186.0917,-36.2732C189.2763,-48.1723 193.5981,-64.3206 197.7584,-79.8654"/>
+<polygon fill="#000000" stroke="#000000" points="194.489,-81.1876 200.4553,-89.9428 201.251,-79.3779 194.489,-81.1876"/>
+<text text-anchor="middle" x="223.4131" y="-58.2" font-family="Times,serif" font-size="14.00" fill="#000000">Net-Input</text>
+</g>
+<!-- gui -->
+<g id="node3" class="node">
+<title>gui</title>
+<polygon fill="none" stroke="#000000" points="76.2013,-36 22.2013,-36 22.2013,0 76.2013,0 76.2013,-36"/>
+<text text-anchor="middle" x="49.2013" y="-13.8" font-family="Times,serif" font-size="14.00" fill="#000000">GUI</text>
+</g>
+<!-- steu -->
+<g id="node4" class="node">
+<title>steu</title>
+<polygon fill="none" stroke="#000000" points="316.4647,-36 243.9379,-36 243.9379,0 316.4647,0 316.4647,-36"/>
+<text text-anchor="middle" x="280.2013" y="-13.8" font-family="Times,serif" font-size="14.00" fill="#000000">Steuerung</text>
+</g>
+<!-- audio -->
+<g id="node5" class="node">
+<title>audio</title>
+<polygon fill="none" stroke="#000000" points="158.5682,-277.1398 33.8344,-277.1398 33.8344,-241.1398 158.5682,-241.1398 158.5682,-277.1398"/>
+<text text-anchor="middle" x="96.2013" y="-254.9398" font-family="Times,serif" font-size="14.00" fill="#000000">Hintergrund-Sound</text>
+</g>
+<!-- guis -->
+<g id="node6" class="node">
+<title>guis</title>
+<path fill="none" stroke="#000000" d="M98.6047,-144.8223C98.6047,-146.6281 76.4613,-148.095 49.2013,-148.095 21.9413,-148.095 -.2021,-146.6281 -.2021,-144.8223 -.2021,-144.8223 -.2021,-115.3678 -.2021,-115.3678 -.2021,-113.5619 21.9413,-112.095 49.2013,-112.095 76.4613,-112.095 98.6047,-113.5619 98.6047,-115.3678 98.6047,-115.3678 98.6047,-144.8223 98.6047,-144.8223"/>
+<path fill="none" stroke="#000000" d="M98.6047,-144.8223C98.6047,-143.0165 76.4613,-141.5496 49.2013,-141.5496 21.9413,-141.5496 -.2021,-143.0165 -.2021,-144.8223"/>
+<text text-anchor="middle" x="49.2013" y="-125.895" font-family="Times,serif" font-size="14.00" fill="#000000">GUI-Elemente</text>
+</g>
+<!-- guis&#45;&gt;gui -->
+<g id="edge12" class="edge">
+<title>guis-&gt;gui</title>
+<path fill="none" stroke="#000000" d="M49.2013,-112.085C49.2013,-94.3773 49.2013,-67.0784 49.2013,-46.4382"/>
+<polygon fill="#000000" stroke="#000000" points="52.7014,-46.3377 49.2013,-36.3377 45.7014,-46.3377 52.7014,-46.3377"/>
+</g>
+<!-- guis&#45;&gt;but -->
+<g id="edge11" class="edge">
+<title>guis-&gt;but</title>
+<path fill="none" stroke="#000000" d="M39.9305,-148.4039C25.3689,-179.9035 1.1528,-245.6328 25.2013,-294.0896 41.3238,-326.5758 74.4697,-350.9387 102.5798,-366.8439"/>
+<polygon fill="#000000" stroke="#000000" points="101.0466,-369.9944 111.5016,-371.7103 104.3986,-363.8491 101.0466,-369.9944"/>
+</g>
+<!-- but&#45;&gt;audio -->
+<g id="edge6" class="edge">
+<title>but-&gt;audio</title>
+<path fill="none" stroke="#000000" d="M119.9767,-359.2364C112.5596,-350.2097 105.516,-339.7787 101.1957,-328.8896 96.0539,-315.9299 94.5203,-300.5607 94.3924,-287.5521"/>
+<polygon fill="#000000" stroke="#000000" points="97.8963,-287.3429 94.5671,-277.2847 90.8973,-287.2237 97.8963,-287.3429"/>
+<text text-anchor="middle" x="143.2041" y="-316.2896" font-family="Times,serif" font-size="14.00" fill="#000000">Button-Sounds</text>
+</g>
+<!-- sce -->
+<g id="node9" class="node">
+<title>sce</title>
+<ellipse fill="none" stroke="#000000" cx="211.2013" cy="-259.1398" rx="34.8996" ry="34.8996"/>
+<text text-anchor="middle" x="211.2013" y="-263.3398" font-family="Times,serif" font-size="14.00" fill="#000000">2.2</text>
+<text text-anchor="middle" x="211.2013" y="-246.5398" font-family="Times,serif" font-size="14.00" fill="#000000">Scene</text>
+</g>
+<!-- but&#45;&gt;sce -->
+<g id="edge5" class="edge">
+<title>but-&gt;sce</title>
+<path fill="none" stroke="#000000" d="M172.5051,-352.983C176.9636,-345.1709 181.4301,-336.8584 185.2013,-328.8896 189.2204,-320.3969 193.0537,-311.1025 196.4825,-302.1466"/>
+<polygon fill="#000000" stroke="#000000" points="199.8221,-303.208 200.0341,-292.6153 193.2626,-300.7638 199.8221,-303.208"/>
+<text text-anchor="middle" x="210.4748" y="-316.2896" font-family="Times,serif" font-size="14.00" fill="#000000">Klicks</text>
+</g>
+<!-- fsm&#45;&gt;net -->
+<g id="edge4" class="edge">
+<title>fsm-&gt;net</title>
+<path fill="none" stroke="#000000" d="M172.8884,-114.6487C154.3898,-105.0067 133.9651,-90.6114 123.4411,-70.8 116.8011,-58.3001 125.131,-47.2297 137.3465,-38.4955"/>
+<polygon fill="#000000" stroke="#000000" points="139.2617,-41.4253 145.8167,-33.1016 135.5017,-35.5209 139.2617,-41.4253"/>
+<text text-anchor="middle" x="156.0814" y="-58.2" font-family="Times,serif" font-size="14.00" fill="#000000">Net-Output</text>
+</g>
+<!-- fsm&#45;&gt;steu -->
+<g id="edge9" class="edge">
+<title>fsm-&gt;steu</title>
+<path fill="none" stroke="#000000" d="M236.5559,-97.2186C242.6261,-88.7965 248.8836,-79.6213 254.2013,-70.8 258.9787,-62.8751 263.6298,-53.9496 267.646,-45.7231"/>
+<polygon fill="#000000" stroke="#000000" points="270.9036,-47.0227 272.0387,-36.4888 264.5823,-44.0157 270.9036,-47.0227"/>
+</g>
+<!-- fsm&#45;&gt;sce -->
+<g id="edge8" class="edge">
+<title>fsm-&gt;sce</title>
+<path fill="none" stroke="#000000" d="M211.2013,-171.7249C211.2013,-185.1316 211.2013,-200.0533 211.2013,-213.7186"/>
+<polygon fill="#000000" stroke="#000000" points="207.7014,-213.8777 211.2013,-223.8778 214.7014,-213.8778 207.7014,-213.8777"/>
+<text text-anchor="middle" x="235.2981" y="-193.5901" font-family="Times,serif" font-size="14.00" fill="#000000">Wechsel</text>
+</g>
+<!-- sce&#45;&gt;guis -->
+<g id="edge10" class="edge">
+<title>sce-&gt;guis</title>
+<path fill="none" stroke="#000000" d="M175.5951,-230.7769C146.9485,-207.9578 107.1147,-176.2273 79.868,-154.5233"/>
+<polygon fill="#000000" stroke="#000000" points="173.7177,-233.7561 183.7202,-237.2491 178.0792,-228.2809 173.7177,-233.7561"/>
+<polygon fill="#000000" stroke="#000000" points="81.8451,-151.6235 71.8426,-148.1305 77.4836,-157.0987 81.8451,-151.6235"/>
+</g>
+<!-- sce&#45;&gt;fsm -->
+<g id="edge7" class="edge">
+<title>sce-&gt;fsm</title>
+<path fill="none" stroke="#000000" d="M183.888,-236.8492C168.9084,-224.3192 152.9881,-210.3722 151.0989,-206.1901 148.0251,-199.3855 148.2182,-196.2787 151.0989,-189.3901 155.3852,-179.1401 162.4022,-169.7617 170.157,-161.6374"/>
+<polygon fill="#000000" stroke="#000000" points="172.7174,-164.0292 177.4291,-154.5398 167.8281,-159.0197 172.7174,-164.0292"/>
+<text text-anchor="middle" x="170.2525" y="-193.5901" font-family="Times,serif" font-size="14.00" fill="#000000">Events</text>
+</g>
+</g>
+</svg>

@@ -1,0 +1,30 @@
+digraph G {
+
+    ein [label="Eingaben", shape=rectangle]
+    res [label="Ressourcen", shape=rectangle]
+    bild [label="Bildschirm", shape=rectangle]
+    net [label="Netzwerk", shape=rectangle]
+    audio [label="Audio", shape=rectangle]
+
+    rend [label="1\nRenderer", shape=circle]
+    ui [label="2\nUI", shape=circle]
+    ent [label="3\nEntity\nHandler", shape=circle]
+    ents [label="Entitäten", shape=cylinder]
+    world [label="4\nWorld", shape=circle]
+    audeng [label="5\nAudio\nEngine", shape=circle]
+
+    ein -> ui
+    ui -> rend [label="GUI"]
+    rend -> bild [label="Pixel"]
+    ui -> net [label="Befehle",dir=both]
+    ui -> audeng [label="Hintergrundmusik,\nKlicks"]
+    audeng -> audio [label="Ton"]
+    ui -> ent [label="Steuerung"]
+    ent -> rend [label="Textur,\nOrt"]
+    ent -> audeng [label="Effekte"]
+    ent -> ents [dir=both]
+    ent -> world [label="Zerstörung"]
+    world -> ent [label="Kollision\nPhysik"]
+    world -> rend [label="Aussehen"]
+    
+}

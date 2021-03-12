@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="621pt" height="328pt" viewBox="0.00 0.00 620.96 327.84">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 323.8389)">
+<title>G</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-323.8389 616.9645,-323.8389 616.9645,4 -4,4"/>
+<!-- steu -->
+<g id="node1" class="node">
+<title>steu</title>
+<polygon fill="none" stroke="#000000" points="363.5155,-319.8389 290.9887,-319.8389 290.9887,-283.8389 363.5155,-283.8389 363.5155,-319.8389"/>
+<text text-anchor="middle" x="327.2521" y="-297.6389" font-family="Times,serif" font-size="14.00" fill="#000000">Steuerung</text>
+</g>
+<!-- log -->
+<g id="node6" class="node">
+<title>log</title>
+<ellipse fill="none" stroke="#000000" cx="327.2521" cy="-211.8772" rx="34.9233" ry="34.9233"/>
+<text text-anchor="middle" x="327.2521" y="-216.0772" font-family="Times,serif" font-size="14.00" fill="#000000">3.3</text>
+<text text-anchor="middle" x="327.2521" y="-199.2772" font-family="Times,serif" font-size="14.00" fill="#000000">Logik</text>
+</g>
+<!-- steu&#45;&gt;log -->
+<g id="edge1" class="edge">
+<title>steu-&gt;log</title>
+<path fill="none" stroke="#000000" d="M327.2521,-283.6338C327.2521,-275.9421 327.2521,-266.6081 327.2521,-257.2515"/>
+<polygon fill="#000000" stroke="#000000" points="330.7522,-257.1662 327.2521,-247.1662 323.7522,-257.1662 330.7522,-257.1662"/>
+</g>
+<!-- kol -->
+<g id="node2" class="node">
+<title>kol</title>
+<polygon fill="none" stroke="#000000" points="68.2581,-232.4791 .2461,-232.4791 .2461,-191.2753 68.2581,-191.2753 68.2581,-232.4791"/>
+<text text-anchor="middle" x="34.2521" y="-216.0772" font-family="Times,serif" font-size="14.00" fill="#000000">Killision,</text>
+<text text-anchor="middle" x="34.2521" y="-199.2772" font-family="Times,serif" font-size="14.00" fill="#000000">Physik</text>
+</g>
+<!-- phy -->
+<g id="node7" class="node">
+<title>phy</title>
+<ellipse fill="none" stroke="#000000" cx="67.2521" cy="-53.6578" rx="38.0355" ry="38.0355"/>
+<text text-anchor="middle" x="67.2521" y="-57.8578" font-family="Times,serif" font-size="14.00" fill="#000000">3.1</text>
+<text text-anchor="middle" x="67.2521" y="-41.0578" font-family="Times,serif" font-size="14.00" fill="#000000">Physik</text>
+</g>
+<!-- kol&#45;&gt;phy -->
+<g id="edge2" class="edge">
+<title>kol-&gt;phy</title>
+<path fill="none" stroke="#000000" d="M37.0195,-191.1325C39.5079,-173.5299 43.4972,-147.6501 48.2521,-125.3156 49.9669,-117.261 52.0114,-108.7563 54.1137,-100.5297"/>
+<polygon fill="#000000" stroke="#000000" points="57.5451,-101.242 56.6885,-90.6818 50.7727,-99.4713 57.5451,-101.242"/>
+</g>
+<!-- tex -->
+<g id="node3" class="node">
+<title>tex</title>
+<polygon fill="none" stroke="#000000" points="438.5708,-74.2597 381.9334,-74.2597 381.9334,-33.0559 438.5708,-33.0559 438.5708,-74.2597"/>
+<text text-anchor="middle" x="410.2521" y="-57.8578" font-family="Times,serif" font-size="14.00" fill="#000000">Textur,</text>
+<text text-anchor="middle" x="410.2521" y="-41.0578" font-family="Times,serif" font-size="14.00" fill="#000000">Ort</text>
+</g>
+<!-- eff -->
+<g id="node4" class="node">
+<title>eff</title>
+<polygon fill="none" stroke="#000000" points="513.946,-71.6578 456.5582,-71.6578 456.5582,-35.6578 513.946,-35.6578 513.946,-71.6578"/>
+<text text-anchor="middle" x="485.2521" y="-49.4578" font-family="Times,serif" font-size="14.00" fill="#000000">Effekte</text>
+</g>
+<!-- zer -->
+<g id="node5" class="node">
+<title>zer</title>
+<polygon fill="none" stroke="#000000" points="613.178,-71.6578 531.3262,-71.6578 531.3262,-35.6578 613.178,-35.6578 613.178,-71.6578"/>
+<text text-anchor="middle" x="572.2521" y="-49.4578" font-family="Times,serif" font-size="14.00" fill="#000000">Zerstörung</text>
+</g>
+<!-- log&#45;&gt;tex -->
+<g id="edge3" class="edge">
+<title>log-&gt;tex</title>
+<path fill="none" stroke="#000000" d="M349.3998,-184.4098C355.2837,-176.4453 361.3562,-167.5597 366.2521,-158.9156 379.9031,-134.8136 391.7705,-105.6323 399.729,-84.1142"/>
+<polygon fill="#000000" stroke="#000000" points="403.09,-85.112 403.2076,-74.5179 396.5091,-82.7264 403.09,-85.112"/>
+</g>
+<!-- log&#45;&gt;eff -->
+<g id="edge4" class="edge">
+<title>log-&gt;eff</title>
+<path fill="none" stroke="#000000" d="M355.1355,-190.7283C380.5948,-170.7153 418.5266,-139.0852 447.2521,-107.3156 454.7165,-99.0602 462.0072,-89.3098 468.1737,-80.4007"/>
+<polygon fill="#000000" stroke="#000000" points="471.2443,-82.1072 473.9304,-71.8585 465.4394,-78.1952 471.2443,-82.1072"/>
+</g>
+<!-- log&#45;&gt;zer -->
+<g id="edge5" class="edge">
+<title>log-&gt;zer</title>
+<path fill="none" stroke="#000000" d="M359.7899,-198.6355C400.3949,-181.2209 470.8641,-148.0082 523.2521,-107.3156 533.6042,-99.2746 543.6252,-88.9213 551.8783,-79.4575"/>
+<polygon fill="#000000" stroke="#000000" points="554.5797,-81.6835 558.3637,-71.7874 549.2343,-77.1638 554.5797,-81.6835"/>
+</g>
+<!-- log&#45;&gt;phy -->
+<g id="edge7" class="edge">
+<title>log-&gt;phy</title>
+<path fill="none" stroke="#000000" d="M292.2586,-210.0751C227.8511,-205.9474 94.5304,-193.3557 66.3797,-158.9156 53.2704,-142.8775 51.941,-120.4063 54.5299,-100.3431"/>
+<polygon fill="#000000" stroke="#000000" points="57.9926,-100.8545 56.1397,-90.4229 51.083,-99.7332 57.9926,-100.8545"/>
+<text text-anchor="middle" x="97.1883" y="-137.9156" font-family="Times,serif" font-size="14.00" fill="#000000">Bewegung</text>
+</g>
+<!-- ani -->
+<g id="node8" class="node">
+<title>ani</title>
+<ellipse fill="none" stroke="#000000" cx="225.2521" cy="-53.6578" rx="53.8161" ry="53.8161"/>
+<text text-anchor="middle" x="225.2521" y="-57.8578" font-family="Times,serif" font-size="14.00" fill="#000000">3.2</text>
+<text text-anchor="middle" x="225.2521" y="-41.0578" font-family="Times,serif" font-size="14.00" fill="#000000">Animation</text>
+</g>
+<!-- log&#45;&gt;ani -->
+<g id="edge9" class="edge">
+<title>log-&gt;ani</title>
+<path fill="none" stroke="#000000" d="M293.0107,-204.5255C268.743,-197.3341 237.8902,-183.7148 222.6497,-158.9156 214.8733,-146.262 212.2953,-131.0377 212.3992,-116.1491"/>
+<polygon fill="#000000" stroke="#000000" points="215.9059,-116.081 212.8686,-105.9309 208.9133,-115.7597 215.9059,-116.081"/>
+<text text-anchor="middle" x="244.0533" y="-146.3156" font-family="Times,serif" font-size="14.00" fill="#000000">Events,</text>
+<text text-anchor="middle" x="244.0533" y="-129.5156" font-family="Times,serif" font-size="14.00" fill="#000000">Zeit</text>
+</g>
+<!-- ents -->
+<g id="node9" class="node">
+<title>ents</title>
+<path fill="none" stroke="#000000" d="M364.0797,-68.3851C364.0797,-70.1909 348.9176,-71.6578 330.2521,-71.6578 311.5866,-71.6578 296.4245,-70.1909 296.4245,-68.3851 296.4245,-68.3851 296.4245,-38.9305 296.4245,-38.9305 296.4245,-37.1247 311.5866,-35.6578 330.2521,-35.6578 348.9176,-35.6578 364.0797,-37.1247 364.0797,-38.9305 364.0797,-38.9305 364.0797,-68.3851 364.0797,-68.3851"/>
+<path fill="none" stroke="#000000" d="M364.0797,-68.3851C364.0797,-66.5792 348.9176,-65.1124 330.2521,-65.1124 311.5866,-65.1124 296.4245,-66.5792 296.4245,-68.3851"/>
+<text text-anchor="middle" x="330.2521" y="-49.4578" font-family="Times,serif" font-size="14.00" fill="#000000">Entitäten</text>
+</g>
+<!-- log&#45;&gt;ents -->
+<g id="edge10" class="edge">
+<title>log-&gt;ents</title>
+<path fill="none" stroke="#000000" d="M347.6299,-171.4678C349.0983,-167.3074 350.3529,-163.0783 351.2521,-158.9156 356.9242,-132.6569 349.5477,-102.5917 342.0205,-81.3352"/>
+<polygon fill="#000000" stroke="#000000" points="344.2886,-170.4005 343.882,-180.9875 350.802,-172.9648 344.2886,-170.4005"/>
+<polygon fill="#000000" stroke="#000000" points="345.2851,-80.0727 338.4842,-71.9488 338.7346,-82.5407 345.2851,-80.0727"/>
+</g>
+<!-- phy&#45;&gt;log -->
+<g id="edge6" class="edge">
+<title>phy-&gt;log</title>
+<path fill="none" stroke="#000000" d="M92.1007,-82.8528C118.5231,-113.8829 156.615,-158.5705 157.1385,-158.9156 195.332,-184.0981 246.1743,-197.8604 282.3019,-204.9928"/>
+<polygon fill="#000000" stroke="#000000" points="282.07,-208.5104 292.5442,-206.9158 283.3617,-201.6306 282.07,-208.5104"/>
+<text text-anchor="middle" x="183.3089" y="-146.3156" font-family="Times,serif" font-size="14.00" fill="#000000">Position,</text>
+<text text-anchor="middle" x="183.3089" y="-129.5156" font-family="Times,serif" font-size="14.00" fill="#000000">Kollision</text>
+</g>
+<!-- ani&#45;&gt;log -->
+<g id="edge8" class="edge">
+<title>ani-&gt;log</title>
+<path fill="none" stroke="#000000" d="M253.1671,-99.8208C258.2221,-108.2809 263.4205,-117.0483 268.2521,-125.3156 276.9214,-140.1495 277.9344,-144.557 287.3699,-158.9156 291.1072,-164.603 295.2456,-170.4883 299.4004,-176.1767"/>
+<polygon fill="#000000" stroke="#000000" points="296.6809,-178.3852 305.4546,-184.3242 302.2995,-174.21 296.6809,-178.3852"/>
+<text text-anchor="middle" x="317.1932" y="-137.9156" font-family="Times,serif" font-size="14.00" fill="#000000">Ausschnitt</text>
+</g>
+</g>
+</svg>

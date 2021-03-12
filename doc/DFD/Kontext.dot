@@ -1,0 +1,16 @@
+digraph G {
+    rankdir="LR";
+
+    ein [label="Eingaben", shape=rectangle]
+    res [label="Ressourcen", shape=rectangle]
+    bild [label="Bildschirm", shape=rectangle]
+    net [label="Netzwerk", shape=rectangle]
+    audio [label="Audio", shape=rectangle]
+    game [label="0\nGame", shape=circle]
+
+    ein -> game
+    res -> game
+    game -> bild
+    game -> net
+    game -> audio
+}
