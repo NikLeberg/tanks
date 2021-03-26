@@ -65,6 +65,7 @@ static void struct_one_added_to_one_equals_two(void **state) {
 /**
  * @brief Testprogramm
  * 
+ * @return int Anzahl fehlgeschlagener Tests
  */
 int main(void) {
     const struct CMUnitTest adder[] = {

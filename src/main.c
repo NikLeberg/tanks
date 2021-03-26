@@ -1,11 +1,11 @@
 /**
- * @file adder.h
- * @author Leuenberger Niklaus (leuen4@bfh.ch)
+ * @file main.c
+ * @author Weber Jan (webej14@bfh.ch)
  * @brief Main
  * @version 0.1
- * @date 2021-03-05
+ * @date 2021-03-19
  * 
- * @copyright Copyright (c) 2021 Leuenberger Niklaus
+ * @copyright Copyright (c) 2021 Weber Jan
  * 
  */
 
@@ -25,6 +25,27 @@
 #include <SDL_mixer.h>
 #include <SDL_net.h>
 
+
+/*
+ * Typdeklarationen
+ * 
+ */
+
+/* ... */
+
+
+/*
+ * Variablendeklarationen
+ * 
+ */
+
+/* ... */
+
+
+/*
+ * Öffentliche Funktionen
+ * 
+ */
 
 /**
  * @brief Main

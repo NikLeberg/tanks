@@ -1012,10 +1012,10 @@ void _function_called(const char *const function,
              */
             if (cmp != 0) {
                 value_node = value_node->next;
-                expected_call = (FuncOrderingValue *)value_node->value;
+                expected_call = (FuncOrderingValue *)value_node->value; // cppcheck-suppress nullPointerRedundantCheck
 
                 cmp = strcmp(expected_call->function, function);
-                while (value_node->refcount < -1 &&
+                while (value_node->refcount < -1 && // cppcheck-suppress nullPointerRedundantCheck
                        cmp != 0 &&
                        value_node != first_value_node->prev) {
                     value_node = value_node->next;

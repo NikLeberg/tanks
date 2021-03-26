@@ -8,3 +8,8 @@ out
 
 # QtCreator
 CMakeLists.txt.user
+
+# Doxygen Output
+doc/doxygen/html
+doc/doxygen/latex
+doxy.log
