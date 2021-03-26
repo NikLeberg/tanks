@@ -1,11 +1,14 @@
 /**
  * @file adder.c
  * @author Leuenberger Niklaus (leuen4@bfh.ch)
- * @brief Addition von Ganzzahlen
- * @version 0.1
+ * @brief Addition von Ganzzahlen (Vorlage)
+ * @version 0.2
  * @date 2021-03-05
  * 
  * @copyright Copyright (c) 2021 Leuenberger Niklaus
+ * 
+ * Dieses Modul dient als Vorlage für andere Module.
+ * Im eventuellen Release ist dies zu entfernen.
  * 
  */
 

@@ -144,7 +144,7 @@ static void sdl_can_create_window(void **state) {
 /**
  * @brief Erstelle Fenster
  * 
- * @param state[out] Pointer auf SDL_Window
+ * @param[out] state Pointer auf SDL_Window
  */
 static int createWindow(void **state) {
     SDL_Window *window = SDL_CreateWindow("test",
@@ -159,7 +159,7 @@ static int createWindow(void **state) {
 /**
  * @brief Zerstöre Fenster
  * 
- * @param state[in] Pointer auf SDL_Window
+ * @param[in] state Pointer auf SDL_Window
  */
 static int destroyWindow(void **state) {
     SDL_Event e;
@@ -173,10 +173,9 @@ static int destroyWindow(void **state) {
 /**
  * @brief Teste ob Renderer erstellt werden kann
  * 
- * @param state[in] Pointer auf SDL_Window
+ * @param[in] state Pointer auf SDL_Window
  */
 static void sdl_can_create_renderer(void **state) {
-    (void) state;
     SDL_Window *window = (SDL_Window*)*state;
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
     assert_non_null(renderer);
@@ -187,6 +186,7 @@ static void sdl_can_create_renderer(void **state) {
 /**
  * @brief Testprogramm
  * 
+ * @return int Anzahl fehlgeschlagener Tests
  */
 int main(void) {
     int failed = 0;
