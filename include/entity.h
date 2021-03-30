@@ -18,6 +18,7 @@
  */
 
 #include "sdlWrapper.h"
+#include "scene.h"
 
 
 /*
@@ -26,38 +27,117 @@
  */
 
 /**
+ * @brief Status der Entität
+ * Werden per \ref EntityHandler_AddEntity() Entitäten hinzugefügt, so werden diese erst im nächsten
+ * Update / Draw - Zyklus aktiv geschaltet.
+ */
+typedef enum {
+    ENTITY_STATE_CREATED = 0, //!< Erstellt aber noch nicht aktiv und wird daher noch nicht gezeichnet.
+    ENTITY_STATE_ACTIVE       //!< Aktiv und wird gezeichnet.
+} entityState_t;
+
+/**
  * @brief 2D-Vektor
  * 
- * @note Keine kartesischen Koordinaten!
- * @note Ursprung ist oben links
+ * @warning Keine kartesischen Koordinaten, Ursprung ist oben links!
  * 
  */
 typedef struct {
-    double x; //!< X Komponente
-    double y; //!< Y Komponente
+    float x; //!< X Komponente
+    float y; //!< Y Komponente
 } entityVector_t;
 
 /**
  * @brief Physikalische Daten einer Entität
- * 
+ *
+ * @note Es herrscht eine konstante Beschleunigung nach unten (Erdbeschleunigung).
  * @warning Nur das physics-Modul darf Werte dieser Struktur verändern.
  * Für Manipulationen stehen diverse Physics_Set*() Funktionen zur verfügung.
  * 
  */
 typedef struct {
-    entityVector_t position;     //!< Position der linken unteren Ecke der Entität
-    entityVector_t velocity;     //!< Geschwindigkeit der Positionsänderung
-    entityVector_t acceleration; //!< Beschleunigung
+    entityVector_t position;     //!< Position des Zentrums der Entität [m]
+    entityVector_t velocity;     //!< Geschwindigkeit der Positionsänderung [m/s]
+    float rotation;              //!< Rotation der Entität um das Zentrum, positiv = Gegen-Uhrzeigersinn [rad]
     SDL_Rect aabb;               //!< Kollisionsbox / Axis-Aligned Bounding Box
 } entityPhysics_t;
+
+/**
+ * @brief Einzelteile einer Entität
+ * 
+ */
+typedef struct {
+    sprite_t sprite;                 //!< alle Felder ausser textur werden automatisch von \ref EntityHandler_Update() aktualisiert
+    entityVector_t relativePosition; //!< Position relativ zum Mittelpunkt der Entität
+    float relativeRotation;          //!< Rotation um den Mittelpunkt relativ zur Rotation der Entität, positiv = Gegen-Uhrzeigersinn [rad]
+    const char *name;                //!< Name des Einzelteils
+} entityPart_t;
+
+struct entity_s;
+
+/**
+ * @brief Callbacks für interaktive Entitäten
+ *
+ * Entitäten können durch Nutzung folgender Callbacks interaktiv gestaltet werden.
+ * Die Reihenfolge der Funktionsaufrufe ist folgende:
+ * - \ref entityCallbacks_t.onUpdate aller Entitäten
+ * - Dann berechnet der EntityHandler die Positionen und Rotationen neu.
+ * - Danach wird die Physik aller Entitäten verarbeitet. Beim Auftreten einer Kollision
+ *   wird durch das physics-Modul der Callback \ref entityCallbacks_t.onCollision aufgerufen.
+ * - \ref entityCallbacks_t.onDraw aller Entitäten
+ */
+typedef struct {
+    /**
+     * @brief Update
+     *
+     * Jeder Zyklus kann die Entität hiermit auf Eingabeevents reagieren.
+     * @note Dieser Callback darf NULL sein.
+     *
+     * @param self Pointer auf die Entität die gerade aufgerufen wird
+     * @param inputEvents Eingabeevents für die Entität (bsp.: nach links oder nach rechts)
+     * 
+     * @return Fehlercode gemäss \ref error.h
+     */
+    int (*onUpdate)(struct entity_s *self, inputEvent_t *inputEvents);
+
+    /**
+     * @brief Kollision mit der Welt oder anderen Entitäten
+     * 
+     * @note Ist dieser Callback NULL, so wird die Kollision ignoriert.
+
+     * @param self Pointer auf die Entität die gerade aufgerufen wird
+     * 
+     * @return Fehlercode gemäss \ref error.h
+     */
+    int (*onCollision)(struct entity_s *self);
+
+    /**
+     * @brief Zeichnen
+     *
+     * Jeder Zyklus wird die Entität hiermit aufgefordert sich selbst zu zeichnen.
+     * @note Ist dieser Callback NULL, so wird die standart Zeichnen Funktion des
+     * EntityHandlers verwendet.
+
+     * @param self Pointer auf die Entität die gerade aufgerufen wird
+     * 
+     * @return Fehlercode gemäss \ref error.h
+     */
+    int (*onDraw)(struct entity_s *self);
+} entityCallbacks_t;
 
 /**
  * @brief Datenstruktur einer Entität
  * 
  */
-typedef struct {
-    entityPhysics_t physics; //!< Physikdaten der Entität, wird vom physics-Modul verwaltet.
-    void *data;              //!< Pointer auf optionale Daten der Entität, zur freien Benutzung.
+typedef struct entity_s {
+    entityState_t state;         //!< Status der Entität, darf nur von EntityHandler verändert werden.
+    entityPhysics_t physics;     //!< Physikdaten der Entität, wird vom physics-Modul verwaltet.
+    list_t *parts;               //!< Liste an Einzelteilen aus deren die Entität besteht.
+    entityCallbacks_t callbacks; //!< Funktionscallbacks für interaktive Entitäten
+
+    const char *owner;           //!< Eigentümer der Entität, Spielername
+    const char *name;            //!< Name der Entität
+    void *data;                  //!< Pointer auf optionale Daten der Entität, zur freien Benutzung.
 } entity_t;
 
 
