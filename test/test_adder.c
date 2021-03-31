@@ -56,7 +56,7 @@ static void five_added_to_negative_five_equals_zero(void **state) {
  */
 static void struct_one_added_to_one_equals_two(void **state) {
     (void) state;
-    addition_t addition = {1, 1};
+    addition_t addition = {1, 1, 0};
     assert_int_equal(add2(&addition), 2);
     assert_int_equal(addition.result, 2);
     return;
