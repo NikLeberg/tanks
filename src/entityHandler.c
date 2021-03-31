@@ -61,7 +61,7 @@ static struct {
  *
  * @return ERR_OK oder ERR_FAIL
  */
-int validateEntity(entity_t *entity);
+static int validateEntity(entity_t *entity);
 
 /**
  * @brief Validation einer Entitätsteilstruktur.
@@ -72,7 +72,7 @@ int validateEntity(entity_t *entity);
  *
  * @return ERR_OK oder ERR_FAIL
  */
-int validatePart(entityPart_t *part);
+static int validatePart(entityPart_t *part);
 
 /**
  * @brief Rufe onUpdate Callbacks auf.
@@ -80,11 +80,12 @@ int validatePart(entityPart_t *part);
  * Wird durch List_Foreach() für jede Entität der Liste aufgerufen und
  * führt dann \ref entityCallbacks_t.onUpdate aus, falls vorhanden.
  * 
- * @param data Pointer auf eine Entität
+ * @param data opaker Pointer auf eine Entität
+ * @param userData opaker Pointer auf Eingabeevents
  *
  * @return ERR_OK oder Fehler des Entity-Callbacks
  */
-int callOnUpdate(void *data);
+static int callOnUpdate(void *data, void *userData);
 
 /**
  * @brief Berechne die Positionen der Einzelteile.
@@ -94,24 +95,25 @@ int callOnUpdate(void *data);
  * Koordinaten aus den Grundkoordinaten der Entität und den relativen
  * Angaben berechnet werden.
  * 
- * @param data Pointer auf eine Entität
+ * @param data opaker Pointer auf eine Entität
  *
  * @return ERR_OK oder ERR_FAIL falls Rechnung ungültig wurde
  */
-int calculatePartsPositions(void *data);
+static int calculatePartsPositions(void *data);
 
 /**
  * @brief Berechne die Position eines Einzelteils.
  *
  * Errechnet anhand der absoluten Position der gesamten Entität und den
- * relativen Angaben in den Einzelteilen die tatsächclichen absoluten
+ * relativen Angaben in den Einzelteilen die tatsächlichen absoluten
  * Koordinaten des Einzelteils.
  * 
- * @param data Pointer auf Entitätsteil
+ * @param data opaker Pointer auf Entitätsteil
+ * @param userData Pointer auf übergeordnete Entität
  *
  * @return immer ERR_OK
  */
-int calculatePartPosition(void *data);
+static int calculatePartPosition(void *data, void *userData);
 
 /**
  * @brief Rufe onDraw Callbacks auf.
@@ -120,35 +122,36 @@ int calculatePartPosition(void *data);
  * führt dann \ref entityCallbacks_t.onDraw aus, falls vorhanden. Ist der
  * Callback NULL, so wird \ref defaultDrawEntity() aufgerufen.
  * 
- * @param data Pointer auf eine Entität
+ * @param data opaker Pointer auf eine Entität
  *
  * @return ERR_OK oder Fehler des Entity-Callbacks
  */
-int callOnDraw(void *data);
+static int callOnDraw(void *data);
 
 /**
  * @brief Standart Zeichnungsfunktion.
  * 
- * @note Die Reihenfolde in der die Entitäten gezeichnet werden ist
+ * @note Die Reihenfolge in der die Entitäten gezeichnet werden ist
  * durch ihre Position innerhalb der Liste vorgegeben.
  * 
  * @param entity zu zeichnende Entität
  *
  * @return ERR_OK oder ERR_FAIL
  */
-int defaultDrawEntity(entity_t *entity);
+static int defaultDrawEntity(entity_t *entity);
 
 /**
  * @brief Standart Zeichnungsfunktion für ein Einzelteil.
  * 
- * @note Die Reihenfolde in der die Einzelteile gezeichnet werden ist
+ * @note Die Reihenfolge in der die Einzelteile gezeichnet werden ist
  * durch ihre Position innerhalb der Liste vorgegeben.
  * 
  * @param data Pointer auf zu zeichnendes Einzelteil
+ * @param userData Pointer auf übergeordnete Entität
  *
  * @return ERR_OK oder Fehler von \ref SDLW_DrawTexture()
  */
-int defaultDrawEntityPart(void *data);
+static int defaultDrawEntityPart(void *data, void *userData);
 
 
 /*
@@ -157,20 +160,20 @@ int defaultDrawEntityPart(void *data);
  */
 
 int EntityHandler_Update(inputEvent_t *inputEvents) {
+    int ret = ERR_OK;
     // Alle Entitäten aktualisieren
-    entityHandler.currentEvents = inputEvents;
-    assert(List_Foreach(entityHandler.entityList, callOnUpdate) == 0);
-    entityHandler.currentEvents = NULL;
+    ret = List_ForeachArg(entityHandler.entityList, callOnUpdate, inputEvents);
+    if (ret) return ret;
     // Physik aktualisieren
-    Physics_Update(entityHandler.entityList);
+    //ret = Physics_Update(entityHandler.entityList); noch nicht implementiert
+    //if (ret) return ret;
     // Positionen der Einzelteile neu berechnen
-    assert(List_Foreach(entityHandler.entityList, callOnUpdate) == 0);
-    return ERR_OK;
+    ret = List_Foreach(entityHandler.entityList, calculatePartsPositions);
+    return ret;
 }
 
 int EntityHandler_Draw() {
-    assert(List_Foreach(entityHandler.entityList, callOnDraw) == 0);
-    return ERR_OK;
+    return List_Foreach(entityHandler.entityList, callOnDraw);
 }
 
 int EntityHandler_AddEntity(entity_t *entity) {
@@ -189,14 +192,16 @@ int EntityHandler_RemoveEntity(entity_t *entity) {
 }
 
 int EntityHandler_RemoveAllEntities() {
+    if (!entityHandler.entityList || !entityHandler.entityList->listHead) {
+        return ERR_OK;
+    }
     entity_t *entity;
     do {
         entity = entityHandler.entityList->listHead->data;
         EntityHandler_RemoveAllEntityParts(entity);
         List_Remove(entityHandler.entityList, entity);
-    } while (entity);
-    List_Destroy(entityHandler.entityList);
-    entityHandler.entityList = NULL;
+    } while (entityHandler.entityList->listHead);
+    List_Destroy(&entityHandler.entityList);
     return ERR_OK;
 }
 
@@ -216,9 +221,8 @@ int EntityHandler_RemoveEntityPart(entity_t *entity, entityPart_t *part) {
 }
 
 int EntityHandler_RemoveAllEntityParts(entity_t *entity) {
-    if (entity) {
-        List_Destroy(entity->parts);
-        entity->parts = NULL;
+    if (entity && entity->parts) {
+        List_Destroy(&entity->parts);
     }
     return ERR_OK;
 }
@@ -229,7 +233,7 @@ int EntityHandler_RemoveAllEntityParts(entity_t *entity) {
  * 
  */
 
-int validateEntity(entity_t *entity) {
+static int validateEntity(entity_t *entity) {
     if (!entity) {
         return ERR_PARAMETER;
     }
@@ -241,56 +245,56 @@ int validateEntity(entity_t *entity) {
     return ret;
 }
 
-int validatePart(entityPart_t *part) {
+static int validatePart(entityPart_t *part) {
     if (!part) {
         return ERR_PARAMETER;
     }
     int ret = ERR_OK;
-    if (!part->sprite.destination->w || !part->sprite.destination->h // Grösse muss bekannt sein
+    if (!part->sprite.destination.w || !part->sprite.destination.h // Grösse muss bekannt sein
     || !part->name) { // Muss Namen haben
         ret = ERR_FAIL;
     }
     return ret;
 }
 
-int callOnUpdate(void *data) {
+static int callOnUpdate(void *data, void *userData) {
     entity_t *entity = (entity_t*)data;
+    inputEvent_t *inputEvents = (inputEvent_t*)userData;
     int ret = ERR_OK;
     entity->state = ENTITY_STATE_ACTIVE;
     if (entity->callbacks.onUpdate) { // Callback darf NULL sein
-        ret = entity->callbacks.onUpdate(entity, entityHandler.currentEvents);
+        ret = entity->callbacks.onUpdate(entity, inputEvents);
     }
     return ret;
 }
 
-int calculatePartsPositions(void *data) {
+static int calculatePartsPositions(void *data) {
     entity_t *entity = (entity_t*)data;
     if (entity->parts) {
-        entityHandler.currentEntity = entity;
-        assert(List_Foreach(entity->parts, calculatePartPosition) == 0);
-        entityHandler.currentEntity = NULL;
+        assert(List_ForeachArg(entity->parts, calculatePartPosition, entity) == 0);
     }
     return ERR_OK;
 }
 
-int calculatePartPosition(void *data) {
+static int calculatePartPosition(void *data, void *userData) {
     entityPart_t *entityPart = (entityPart_t*)data;
+    entity_t *entity = (entity_t*)userData;
     // Absolute Position des Sprites
-    entityPart->sprite.positionX = entityHandler.currentEntity->physics.position.x;
-    entityPart->sprite.positionY = entityHandler.currentEntity->physics.position.y;
+    entityPart->sprite.position.x = entity->physics.position.x;
+    entityPart->sprite.position.y = entity->physics.position.y;
     // Relative Position des Sprites
-    entityPart->sprite.destination->x = entityPart->relativePosition.x; // Nötig?
-    entityPart->sprite.destination->y = entityPart->relativePosition.y;
+    entityPart->sprite.destination.x = entityPart->relativePosition.x; // Nötig?
+    entityPart->sprite.destination.y = entityPart->relativePosition.y;
     // Rotation
     entityPart->sprite.rotation = entityPart->relativeRotation;
-    entityPart->sprite.rotation += entityHandler.currentEntity->physics.rotation; // Nötig?
+    entityPart->sprite.rotation += entity->physics.rotation; // Nötig?
     // Rotationsachse
-    entityPart->sprite.pivot->x = entityHandler.currentEntity->physics.position.x;
-    entityPart->sprite.pivot->y = entityHandler.currentEntity->physics.position.y;
+    entityPart->sprite.pivot.x = entity->physics.position.x;
+    entityPart->sprite.pivot.y = entity->physics.position.y;
     return ERR_OK;
 }
 
-int callOnDraw(void *data) {
+static int callOnDraw(void *data) {
     entity_t *entity = (entity_t*)data;
     int ret = ERR_OK;
     if (entity->state == ENTITY_STATE_ACTIVE) {
@@ -304,14 +308,14 @@ int callOnDraw(void *data) {
     return ret;
 }
 
-int defaultDrawEntity(entity_t *entity) {
-    entityHandler.currentEntity = entity;
-    assert(List_Foreach(entity->parts, defaultDrawEntityPart) == 0);
-    entityHandler.currentEntity = NULL;
+static int defaultDrawEntity(entity_t *entity) {
+    assert(List_ForeachArg(entity->parts, defaultDrawEntityPart, entity) == 0);
     return ERR_OK;
 }
 
-int defaultDrawEntityPart(void *data) {
+static int defaultDrawEntityPart(void *data, void *userData) {
     entityPart_t *part = (entityPart_t*)data;
+    entity_t *entity = (entity_t*)userData;
+    (void) entity;
     return SDLW_DrawTexture(part->sprite);
 }

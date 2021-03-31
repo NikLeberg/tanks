@@ -6,6 +6,19 @@
  * @date 2021-03-19
  * 
  * @copyright Copyright (c) 2021 Leuenberger Niklaus
+ *
+ * Eine Entität \ref entity_t ist ein Spielobjekt mit Physik. Diese Entität kann
+ * sich als ganzes bewegen und obliegt der Spielphysik mittels einer einzelnen
+ * Kollisionsbox \ref entityPhysics_t.aabb.
+ *      z.B. ein gesamter Panzer.
+ * Jede Entität wiederum ist aus mindestens einem Einzelteil \ref entityPart_t
+ * aufgebaut. Die maximale Anzahl an Teilen ist unbeschränkt. Diese bestehen
+ * Hauptsächlich aus einer Textur und Angaben wie sie relativ zur gesamten
+ * Entität platziert werden sollen. Vorteil dadurch ist, dass sich diese Teile
+ * einzeln Animieren lassen. Oder aber, dass ein Panzer verschiedene Waffentypen
+ * haben kann.
+ *      z.B. Panzerrohr, Fahrkabine, Chassis und Raupen
+ * Erweiterte Dokumentation ist in \ref Entitaet zu finden.
  * 
  */
 
@@ -19,6 +32,7 @@
 
 #include "sdlWrapper.h"
 #include "scene.h"
+#include "list.h"
 
 
 /*
@@ -93,7 +107,7 @@ typedef struct {
      * Jeder Zyklus kann die Entität hiermit auf Eingabeevents reagieren.
      * @note Dieser Callback darf NULL sein.
      *
-     * @param self Pointer auf die Entität die gerade aufgerufen wird
+     * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
      * @param inputEvents Eingabeevents für die Entität (bsp.: nach links oder nach rechts)
      * 
      * @return Fehlercode gemäss \ref error.h
@@ -105,7 +119,7 @@ typedef struct {
      * 
      * @note Ist dieser Callback NULL, so wird die Kollision ignoriert.
 
-     * @param self Pointer auf die Entität die gerade aufgerufen wird
+     * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
      * 
      * @return Fehlercode gemäss \ref error.h
      */
@@ -118,7 +132,7 @@ typedef struct {
      * @note Ist dieser Callback NULL, so wird die standart Zeichnen Funktion des
      * EntityHandlers verwendet.
 
-     * @param self Pointer auf die Entität die gerade aufgerufen wird
+     * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
      * 
      * @return Fehlercode gemäss \ref error.h
      */

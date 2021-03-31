@@ -43,9 +43,9 @@
  */
 
 /**
- * @brief Führe ein Update der Physik und aller Entitäten aus
+ * @brief Führe ein Update der Physik und aller Entitäten aus.
  * 
- * Aktualisiert zuerst die Physik der Entitäten und danach die Entitäten selbst.
+ * Aktualisiert zuerst die Entitäten und danach deren Physik.
  * 
  * @param[in] inputEvents Eingabeevents für die Entitäten (bsp.: nach links oder nach rechts)
  *
@@ -54,7 +54,7 @@
 int EntityHandler_Update(inputEvent_t *inputEvents);
 
 /**
- * @brief Zeichne alle Entitäten
+ * @brief Zeichne alle Entitäten.
  * 
  * Iteriert über alle vorhandenen Entitäten und weist diese an sich selbst zu zeichnen.
  * 
@@ -63,7 +63,7 @@ int EntityHandler_Update(inputEvent_t *inputEvents);
 int EntityHandler_Draw();
 
 /**
- * @brief Füge eine Entität hinzu
+ * @brief Füge eine Entität hinzu.
  * 
  * Fügt die gegebene Entität der internen Liste aller Entitäten hinzu.
  * Die Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der Lebensdauer
@@ -78,7 +78,7 @@ int EntityHandler_Draw();
 int EntityHandler_AddEntity(entity_t *entity);
 
 /**
- * @brief Entferne eine Entität
+ * @brief Entferne eine Entität.
  * 
  * Entfernt die gegebene Entität aus der internen Liste aller Entitäten.
  * Nach dem Aufruf darf der Speicher für die Entität freigegeben werden.
@@ -92,7 +92,7 @@ int EntityHandler_AddEntity(entity_t *entity);
 int EntityHandler_RemoveEntity(entity_t *entity);
 
 /**
- * @brief Entferne alle Entitäten
+ * @brief Entferne alle Entitäten.
  * 
  * Entferne alle Entitäten aus der internen Liste.
  * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
@@ -103,7 +103,7 @@ int EntityHandler_RemoveEntity(entity_t *entity);
 int EntityHandler_RemoveAllEntities();
 
 /**
- * @brief Füge ein Einzelteil einer Entität hinzu
+ * @brief Füge ein Einzelteil einer Entität hinzu.
  * 
  * Fügt das gegebene Teil der Liste an Teilen der Entität hinzu.
  * Die Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der Lebensdauer
@@ -118,7 +118,7 @@ int EntityHandler_RemoveAllEntities();
 int EntityHandler_AddEntityPart(entity_t *entity, entityPart_t *part);
 
 /**
- * @brief Entferne ein Einzelteil einer Entität
+ * @brief Entferne ein Einzelteil einer Entität.
  * 
  * Entfernt das gegebene Teil aus der Liste aller Teile in der Entität.
  * Nach dem Aufruf darf der Speicher für das Einzelteil freigegeben werden.
@@ -132,7 +132,7 @@ int EntityHandler_AddEntityPart(entity_t *entity, entityPart_t *part);
 int EntityHandler_RemoveEntityPart(entity_t *entity, entityPart_t *part);
 
 /**
- * @brief Entferne alle Einzelteile einer Entität
+ * @brief Entferne alle Einzelteile einer Entität.
  * 
  * Entferne alle Einzelteile aus der internen Liste.
  * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
