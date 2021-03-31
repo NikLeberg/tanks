@@ -53,11 +53,11 @@ test_cppcheck:
 test_doc:
   stage: test
   script: |
-    touch doxy.log
     doxygen ./doc/doxygen/Doxyfile
     sed -i 's#/builds/leuen4/tanks/##g' doxy.log 
     doxygen_junit --input doxy.log --output doxy_junit.xml
     test ! -s doxy.log
+    touch doxy_junit.xml
   artifacts:
     when: always
     reports:
