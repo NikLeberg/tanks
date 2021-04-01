@@ -43,8 +43,6 @@
  */
 static struct {
     list_t *entityList;          //!< Liste der aktiven Entitäten
-    inputEvent_t *currentEvents; //!< Aktive Events, nur während Update-Phase gültig
-    entity_t *currentEntity;     //!< aktuelle Entität für List_Foreach - Callback
 } entityHandler;
 
 
