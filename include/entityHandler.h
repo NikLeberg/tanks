@@ -47,7 +47,7 @@
  * 
  * Aktualisiert zuerst die Entitäten und danach deren Physik.
  * 
- * @param[in] inputEvents Eingabeevents für die Entitäten (bsp.: nach links oder nach rechts)
+ * @param[in] inputEvents Eingabeevents für die Entitäten
  *
  * @return ERR_OK, ERR_PARAMETER oder ERR_FAIL
  */
@@ -56,7 +56,8 @@ int EntityHandler_Update(inputEvent_t *inputEvents);
 /**
  * @brief Zeichne alle Entitäten.
  * 
- * Iteriert über alle vorhandenen Entitäten und weist diese an sich selbst zu zeichnen.
+ * Iteriert über alle vorhandenen Entitäten und weist diese an sich selbst zu
+ * zeichnen.
  * 
  * @return ERR_OK oder ERR_FAIL
  */
@@ -65,11 +66,11 @@ int EntityHandler_Draw();
 /**
  * @brief Füge eine Entität hinzu.
  * 
- * Fügt die gegebene Entität der internen Liste aller Entitäten hinzu.
- * Die Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der Lebensdauer
- * gültig bleiben (static).
- * @note Wird in einem laufendem Zyklus die Entität hinzugefügt, so ist diese erst
- * ab dem nächsten Aufruf von \ref EntityHandler_Update() aktiv und sichtbar.
+ * Fügt die gegebene Entität der internen Liste aller Entitäten hinzu. Die
+ * Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der
+ * Lebensdauer gültig bleiben (static).
+ * @note Wird in einem laufendem Zyklus die Entität hinzugefügt, so ist diese
+ * erst nach Aufruf von \ref EntityHandler_Update() aktiv und sichtbar.
  * 
  * @param entity neue Entität
  *
@@ -83,7 +84,7 @@ int EntityHandler_AddEntity(entity_t *entity);
  * Entfernt die gegebene Entität aus der internen Liste aller Entitäten.
  * Nach dem Aufruf darf der Speicher für die Entität freigegeben werden.
  * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
- * Dies heiss nach \ref EntityHandler_Draw() aber vor \ref EntityHandler_Update().
+ * Heisst nach \ref EntityHandler_Draw() aber vor \ref EntityHandler_Update().
  * 
  * @param entity zu entfernende Entität
  *
@@ -96,7 +97,7 @@ int EntityHandler_RemoveEntity(entity_t *entity);
  * 
  * Entferne alle Entitäten aus der internen Liste.
  * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
- * Dies heisst nach \ref EntityHandler_Draw() aber vor \ref EntityHandler_Update().
+ * Heisst nach \ref EntityHandler_Draw() aber vor \ref EntityHandler_Update().
  * 
  * @return int ERR_OK, ERR_PARAMETER oder ERR_FAIL
  */
@@ -105,9 +106,9 @@ int EntityHandler_RemoveAllEntities();
 /**
  * @brief Füge ein Einzelteil einer Entität hinzu.
  * 
- * Fügt das gegebene Teil der Liste an Teilen der Entität hinzu.
- * Die Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der Lebensdauer
- * gültig bleiben (static).
+ * Fügt das gegebene Teil der Liste an Teilen der Entität hinzu. Die
+ * Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der
+ * Lebensdauer gültig bleiben (static).
  * @note Gleiche Zyklusbedingungen wie \ref EntityHandler_AddEntity()
  * 
  * @param entity Entität der das Teil gehört

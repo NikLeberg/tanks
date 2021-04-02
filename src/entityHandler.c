@@ -42,7 +42,7 @@
  * 
  */
 static struct {
-    list_t *entityList;          //!< Liste der aktiven Entitäten
+    list_t *entityList; //!< Liste der aktiven Entitäten
 } entityHandler;
 
 
@@ -75,7 +75,7 @@ static int validatePart(entityPart_t *part);
 /**
  * @brief Rufe onUpdate Callbacks auf.
  *
- * Wird durch List_Foreach() für jede Entität der Liste aufgerufen und
+ * Wird durch List_ForeachArg() für jede Entität der Liste aufgerufen und
  * führt dann \ref entityCallbacks_t.onUpdate aus, falls vorhanden.
  * 
  * @param data opaker Pointer auf eine Entität
@@ -129,8 +129,11 @@ static int callOnDraw(void *data);
 /**
  * @brief Standart Zeichnungsfunktion.
  * 
- * @note Die Reihenfolge in der die Entitäten gezeichnet werden ist
- * durch ihre Position innerhalb der Liste vorgegeben.
+ * @note Die Reihenfolge in der die Entitäten gezeichnet werden ist durch
+ * ihre Position innerhalb der Liste vorgegeben. Neue Entitäten werden am
+ * Anfang der Liste hinzugefügt. In der Standardmässigen defaultDrawEntity()
+ * wird über die Liste von vorne her iteriert. Daher werden die später
+ * hinzugefügten Entitäten zuerst gezeichnet.
  * 
  * @param entity zu zeichnende Entität
  *
@@ -141,8 +144,11 @@ static int defaultDrawEntity(entity_t *entity);
 /**
  * @brief Standart Zeichnungsfunktion für ein Einzelteil.
  * 
- * @note Die Reihenfolge in der die Einzelteile gezeichnet werden ist
- * durch ihre Position innerhalb der Liste vorgegeben.
+ * @note Die Reihenfolge in der die Einzelteile gezeichnet werden ist durch
+ * ihre Position innerhalb der Liste vorgegeben. Neue Teile werden am Anfang
+ * der Liste hinzugefügt. In der Standardmässigen defaultDrawEntity() wird über
+ * die Liste von vorne her iteriert. Daher werden die ersten Teile zuerst
+ * gezeichnet. Spätere überzeichnen vorher gezeichnete.
  * 
  * @param data Pointer auf zu zeichnendes Einzelteil
  * @param userData Pointer auf übergeordnete Entität
@@ -161,7 +167,9 @@ int EntityHandler_Update(inputEvent_t *inputEvents) {
     int ret = ERR_OK;
     // Alle Entitäten aktualisieren
     ret = List_ForeachArg(entityHandler.entityList, callOnUpdate, inputEvents);
-    if (ret) return ret;
+    if (ret) {
+        return ret;
+    }
     // Physik aktualisieren
     //ret = Physics_Update(entityHandler.entityList); noch nicht implementiert
     //if (ret) return ret;
@@ -237,7 +245,7 @@ static int validateEntity(entity_t *entity) {
     }
     int ret = ERR_OK;
     if (entity->state != ENTITY_STATE_CREATED // Zustand muss CREATED sein
-    || !entity->owner || !entity->name) {  // Muss Eigentümer und Namen haben
+        || !entity->owner || !entity->name) { // Muss Eigentümer und Namen haben
         ret = ERR_FAIL;
     }
     return ret;
@@ -248,16 +256,17 @@ static int validatePart(entityPart_t *part) {
         return ERR_PARAMETER;
     }
     int ret = ERR_OK;
-    if (!part->sprite.destination.w || !part->sprite.destination.h // Grösse muss bekannt sein
-    || !part->name) { // Muss Namen haben
+    if (!part->sprite.destination.w    // Breite muss bekannt sein
+        || !part->sprite.destination.h // Höhe muss bekannt sein
+        || !part->name) {              // Muss Namen haben
         ret = ERR_FAIL;
     }
     return ret;
 }
 
 static int callOnUpdate(void *data, void *userData) {
-    entity_t *entity = (entity_t*)data;
-    inputEvent_t *inputEvents = (inputEvent_t*)userData;
+    entity_t *entity = (entity_t *)data;
+    inputEvent_t *inputEvents = (inputEvent_t *)userData;
     int ret = ERR_OK;
     entity->state = ENTITY_STATE_ACTIVE;
     if (entity->callbacks.onUpdate) { // Callback darf NULL sein
@@ -267,36 +276,34 @@ static int callOnUpdate(void *data, void *userData) {
 }
 
 static int calculatePartsPositions(void *data) {
-    entity_t *entity = (entity_t*)data;
+    entity_t *entity = (entity_t *)data;
+    int ret = ERR_OK;
     if (entity->parts) {
-        assert(List_ForeachArg(entity->parts, calculatePartPosition, entity) == 0);
+        ret = List_ForeachArg(entity->parts, calculatePartPosition, entity);
     }
-    return ERR_OK;
+    return ret;
 }
 
 static int calculatePartPosition(void *data, void *userData) {
-    entityPart_t *entityPart = (entityPart_t*)data;
-    entity_t *entity = (entity_t*)userData;
+    entityPart_t *entityPart = (entityPart_t *)data;
+    entity_t *entity = (entity_t *)userData;
     // Absolute Position des Sprites
     entityPart->sprite.position.x = entity->physics.position.x;
     entityPart->sprite.position.y = entity->physics.position.y;
     // Relative Position des Sprites
-    entityPart->sprite.destination.x = entityPart->relativePosition.x; // Nötig?
+    entityPart->sprite.destination.x = entityPart->relativePosition.x;
     entityPart->sprite.destination.y = entityPart->relativePosition.y;
     // Rotation
     entityPart->sprite.rotation = entityPart->relativeRotation;
-    entityPart->sprite.rotation += entity->physics.rotation; // Nötig?
-    // Rotationsachse
-    entityPart->sprite.pivot.x = entity->physics.position.x;
-    entityPart->sprite.pivot.y = entity->physics.position.y;
+    entityPart->sprite.rotation += entity->physics.rotation;
     return ERR_OK;
 }
 
 static int callOnDraw(void *data) {
-    entity_t *entity = (entity_t*)data;
+    entity_t *entity = (entity_t *)data;
     int ret = ERR_OK;
     if (entity->state == ENTITY_STATE_ACTIVE) {
-        // Wenn Callback NULL ist, dann wird die Standard Zeichnen Funktion verwendet.
+        // Callback darf NULL sein, dann wird Standardfunktion verwendet.
         if (entity->callbacks.onDraw) {
             ret = entity->callbacks.onDraw(entity);
         } else {
@@ -307,13 +314,12 @@ static int callOnDraw(void *data) {
 }
 
 static int defaultDrawEntity(entity_t *entity) {
-    assert(List_ForeachArg(entity->parts, defaultDrawEntityPart, entity) == 0);
-    return ERR_OK;
+    return List_ForeachArg(entity->parts, defaultDrawEntityPart, entity);
 }
 
 static int defaultDrawEntityPart(void *data, void *userData) {
-    entityPart_t *part = (entityPart_t*)data;
-    entity_t *entity = (entity_t*)userData;
-    (void) entity;
+    entityPart_t *part = (entityPart_t *)data;
+    entity_t *entity = (entity_t *)userData;
+    (void)entity;
     return SDLW_DrawTexture(part->sprite);
 }
