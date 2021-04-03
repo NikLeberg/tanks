@@ -36,7 +36,7 @@
  * @param state unbenutzt
  */
 static void an_entity_can_be_added_and_removed(void **state) {
-    (void) state;
+    (void)state;
     entity_t entity = {.owner = "Testuser", .name = "Test"};
     assert_int_equal(EntityHandler_AddEntity(&entity), ERR_OK);
     assert_int_equal(EntityHandler_RemoveEntity(&entity), ERR_OK);
@@ -48,7 +48,7 @@ static void an_entity_can_be_added_and_removed(void **state) {
  * @param state unbenutzt
  */
 static void invalid_entities_cant_be_added(void **state) {
-    (void) state;
+    (void)state;
     entity_t entityOk = {.state = ENTITY_STATE_CREATED, .owner = "Testuser", .name = "Test"};
     // NULL als Entität
     assert_int_not_equal(EntityHandler_AddEntity(NULL), ERR_OK);
@@ -72,7 +72,7 @@ static void invalid_entities_cant_be_added(void **state) {
  * @param state unbenutzt
  */
 static void one_hundred_entities_can_be_added_and_removed(void **state) {
-    (void) state;
+    (void)state;
     entity_t entityOk = {.owner = "Testuser", .name = "Test"};
     entity_t entityArray[100];
     for (int i = 0; i < 100; ++i) {
@@ -104,7 +104,7 @@ static void one_hundred_entities_can_be_added_and_removed(void **state) {
  */
 static int setupOneEntity(void **state) {
     static entity_t entity = {.owner = "Testuser", .name = "Test", .parts = NULL};
-    *state = (void*)&entity;
+    *state = (void *)&entity;
     return (EntityHandler_AddEntity(&entity) != ERR_OK);
 }
 
@@ -114,7 +114,7 @@ static int setupOneEntity(void **state) {
  * @param[in] state Pointer auf entity_t*
  */
 static int teardownOneEntity(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     int ret = EntityHandler_RemoveEntity(entity);
     entity = NULL;
     return ret != ERR_OK;
@@ -126,7 +126,7 @@ static int teardownOneEntity(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void an_entitypart_can_be_added_and_removed(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     entityPart_t part = {.name = "Test", .sprite.destination.h = 10, .sprite.destination.w = 10};
     assert_int_equal(EntityHandler_AddEntityPart(entity, &part), ERR_OK);
     assert_int_equal(EntityHandler_RemoveEntityPart(entity, &part), ERR_OK);
@@ -138,7 +138,7 @@ static void an_entitypart_can_be_added_and_removed(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void invalid_entityparts_cant_be_added(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     entityPart_t partOk = {.name = "Test", .sprite.destination.h = 10, .sprite.destination.w = 10};
     // NULL
     assert_int_not_equal(EntityHandler_AddEntityPart(entity, NULL), ERR_OK);
@@ -154,7 +154,7 @@ static void invalid_entityparts_cant_be_added(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void one_hundred_entityparts_can_be_added_and_removed(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     entityPart_t partOk = {.name = "Test", .sprite.destination.h = 10, .sprite.destination.w = 10};
     entityPart_t partArray[100];
     for (int i = 0; i < 100; ++i) {
@@ -218,6 +218,7 @@ static int onDraw(entity_t *self) {
 }
 
 int __wrap_SDLW_DrawTexture(sprite_t sprite) {
+    (void)sprite;
     function_called();
     return mock_type(int);
 }
@@ -239,7 +240,7 @@ static int setupOneEntityAndOnePart(void **state) {
     part.name = "Test";
     part.sprite.destination.h = 10;
     part.sprite.destination.w = 10;
-    *state = (void*)&entity;
+    *state = (void *)&entity;
     return (EntityHandler_AddEntity(&entity) != ERR_OK) || (EntityHandler_AddEntityPart(&entity, &part) != ERR_OK);
 }
 
@@ -249,7 +250,7 @@ static int setupOneEntityAndOnePart(void **state) {
  * @param[in] state Pointer auf entity_t*
  */
 static int teardownOneEntityAndOnePart(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     int ret = EntityHandler_RemoveAllEntityParts(entity);
     if (!ret) {
         ret = EntityHandler_RemoveEntity(entity);
@@ -265,8 +266,8 @@ static int teardownOneEntityAndOnePart(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void update_callback_gets_called_with_input(void **state) {
-    entity_t *entity = (entity_t*)*state;
-    inputEvent_t *inputEvents = (inputEvent_t*)0xDEADBEEF;
+    entity_t *entity = (entity_t *)*state;
+    inputEvent_t *inputEvents = (inputEvent_t *)0xDEADBEEF;
     expect_function_call(onUpdate);
     expect_value(onUpdate, self, entity);
     expect_value(onUpdate, inputEvents, inputEvents);
@@ -281,8 +282,8 @@ static void update_callback_gets_called_with_input(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void error_in_update_callback_is_cascaded_up(void **state) {
-    entity_t *entity = (entity_t*)*state;
-    inputEvent_t *inputEvents = (inputEvent_t*)0xDEADBEEF;
+    entity_t *entity = (entity_t *)*state;
+    inputEvent_t *inputEvents = (inputEvent_t *)0xDEADBEEF;
     expect_function_call(onUpdate);
     expect_value(onUpdate, self, entity);
     expect_value(onUpdate, inputEvents, inputEvents);
@@ -297,7 +298,7 @@ static void error_in_update_callback_is_cascaded_up(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void draw_callback_gets_called(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
     // onDraw wird aufgerufen
     expect_function_call(onDraw);
@@ -314,9 +315,9 @@ static void draw_callback_gets_called(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void default_draw_gets_called_if_no_callback_defined(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
-    entity->callbacks.onDraw = NULL; // Callback entfernen
+    entity->callbacks.onDraw = NULL;     // Callback entfernen
     // SDLW_DrawTexture wird aufgerufen (durch die Standard Zeichnen Funktion)
     expect_function_call(__wrap_SDLW_DrawTexture);
     will_return(__wrap_SDLW_DrawTexture, ERR_OK);
@@ -330,7 +331,7 @@ static void default_draw_gets_called_if_no_callback_defined(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void error_in_draw_callback_is_cascaded_up(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
     expect_function_call(onDraw);
     expect_value(onDraw, self, entity);
@@ -345,9 +346,9 @@ static void error_in_draw_callback_is_cascaded_up(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void error_in_default_draw_is_cascaded_up(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
-    entity->callbacks.onDraw = NULL; // Callback entfernen
+    entity->callbacks.onDraw = NULL;     // Callback entfernen
     expect_function_call(__wrap_SDLW_DrawTexture);
     will_return(__wrap_SDLW_DrawTexture, ERR_FAIL);
     assert_int_equal(EntityHandler_Draw(), ERR_FAIL);
@@ -360,7 +361,8 @@ static void error_in_default_draw_is_cascaded_up(void **state) {
  * @param state Pointer auf entity_t*
  */
 static void draw_callback_doesnt_get_called_if_state_is_equal_to_created(void **state) {
-    entity_t *entity = (entity_t*)*state;
+    entity_t *entity = (entity_t *)*state;
+    (void)entity;
     assert_int_equal(EntityHandler_Draw(), ERR_OK);
 }
 
