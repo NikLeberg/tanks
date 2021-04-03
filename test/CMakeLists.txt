@@ -31,5 +31,6 @@ macro(add_custom_test _TEST_NAME _TEST_SOURCES)
     endif()
 endmacro()
 
-add_custom_test(test_sdl test_sdl.c)
+add_custom_test(test_sdl "test_sdl.c")
 add_custom_test(test_adder "test_adder.c;../src/adder.c")
+add_custom_test(test_list "test_list.c;../src/list.c")
