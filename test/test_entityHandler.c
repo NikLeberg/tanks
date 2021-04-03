@@ -217,18 +217,28 @@ static int onDraw(entity_t *self) {
     return mock_type(int);
 }
 
+int __wrap_SDLW_DrawTexture(sprite_t sprite) {
+    function_called();
+    return mock_type(int);
+}
+
 /**
  * @brief Setup: Entität und Einzelteil erstellen und hinzufügen
  * 
  * @param[out] state Pointer auf entity_t
  */
 static int setupOneEntityAndOnePart(void **state) {
-    static entity_t entity = {
-        .owner = "Testuser", .name = "Test", .parts = NULL,
-        .callbacks = {.onUpdate = onUpdate, .onCollision = onCollision, .onDraw = onDraw}
-    };
+    static entity_t entity = {0};
+    entity.owner = "Testuser";
+    entity.name = "Test";
+    entity.callbacks.onUpdate = onUpdate;
+    entity.callbacks.onCollision = onCollision;
+    entity.callbacks.onDraw = onDraw;
     entity.state = ENTITY_STATE_CREATED;
-    static entityPart_t part = {.name = "Test", .sprite.destination.h = 10, .sprite.destination.w = 10};
+    static entityPart_t part = {0};
+    part.name = "Test";
+    part.sprite.destination.h = 10;
+    part.sprite.destination.w = 10;
     *state = (void*)&entity;
     return (EntityHandler_AddEntity(&entity) != ERR_OK) || (EntityHandler_AddEntityPart(&entity, &part) != ERR_OK);
 }
@@ -240,7 +250,10 @@ static int setupOneEntityAndOnePart(void **state) {
  */
 static int teardownOneEntityAndOnePart(void **state) {
     entity_t *entity = (entity_t*)*state;
-    int ret = EntityHandler_RemoveEntity(entity);
+    int ret = EntityHandler_RemoveAllEntityParts(entity);
+    if (!ret) {
+        ret = EntityHandler_RemoveEntity(entity);
+    }
     entity = NULL;
     return ret != ERR_OK;
 }
@@ -286,9 +299,27 @@ static void error_in_update_callback_is_cascaded_up(void **state) {
 static void draw_callback_gets_called(void **state) {
     entity_t *entity = (entity_t*)*state;
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
+    // onDraw wird aufgerufen
     expect_function_call(onDraw);
     expect_value(onDraw, self, entity);
     will_return(onDraw, ERR_OK);
+    assert_int_equal(EntityHandler_Draw(), ERR_OK);
+}
+
+/**
+ * @brief Wird \ref EntityHandler_Draw() aufgerufen und ist kein onDraw
+ * Callback definiert, wird die Standard-Zeichnen-Funktion verwendet. Diese
+ * würde dann normalerweise \ref SDLW_DrawTexture() aufrufen.
+ * 
+ * @param state Pointer auf entity_t*
+ */
+static void default_draw_gets_called_if_no_callback_defined(void **state) {
+    entity_t *entity = (entity_t*)*state;
+    entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
+    entity->callbacks.onDraw = NULL; // Callback entfernen
+    // SDLW_DrawTexture wird aufgerufen (durch die Standard Zeichnen Funktion)
+    expect_function_call(__wrap_SDLW_DrawTexture);
+    will_return(__wrap_SDLW_DrawTexture, ERR_OK);
     assert_int_equal(EntityHandler_Draw(), ERR_OK);
 }
 
@@ -301,10 +332,24 @@ static void draw_callback_gets_called(void **state) {
 static void error_in_draw_callback_is_cascaded_up(void **state) {
     entity_t *entity = (entity_t*)*state;
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
-    inputEvent_t *inputEvents = (inputEvent_t*)0xDEADBEEF;
     expect_function_call(onDraw);
     expect_value(onDraw, self, entity);
     will_return(onDraw, ERR_FAIL);
+    assert_int_equal(EntityHandler_Draw(), ERR_FAIL);
+}
+
+/**
+ * @brief Fehler in \ref entityCallback_t.onDraw wird von
+ * \ref EntityHandler_Draw() zurückgemeldet.
+ *
+ * @param state Pointer auf entity_t*
+ */
+static void error_in_default_draw_is_cascaded_up(void **state) {
+    entity_t *entity = (entity_t*)*state;
+    entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
+    entity->callbacks.onDraw = NULL; // Callback entfernen
+    expect_function_call(__wrap_SDLW_DrawTexture);
+    will_return(__wrap_SDLW_DrawTexture, ERR_FAIL);
     assert_int_equal(EntityHandler_Draw(), ERR_FAIL);
 }
 
@@ -337,7 +382,9 @@ int main(void) {
         cmocka_unit_test_setup_teardown(update_callback_gets_called_with_input, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
         cmocka_unit_test_setup_teardown(error_in_update_callback_is_cascaded_up, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
         cmocka_unit_test_setup_teardown(draw_callback_gets_called, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(default_draw_gets_called_if_no_callback_defined, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
         cmocka_unit_test_setup_teardown(error_in_draw_callback_is_cascaded_up, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(error_in_default_draw_is_cascaded_up, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
         cmocka_unit_test_setup_teardown(draw_callback_doesnt_get_called_if_state_is_equal_to_created, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
     };
     return cmocka_run_group_tests(entityHandler, NULL, NULL);

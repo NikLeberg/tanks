@@ -25,3 +25,5 @@ endmacro()
 
 add_custom_test(test_sdl test_sdl.c "" "")
 add_custom_test(test_adder "test_adder.c;../src/adder.c" "" "")
+add_custom_test(test_entityHandler "test_entityHandler.c;../src/entityHandler.c;../src/list.c" "" "")
+target_link_options(test_entityHandler PRIVATE "-Wl,--wrap=SDLW_DrawTexture")
