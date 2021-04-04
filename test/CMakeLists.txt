@@ -29,6 +29,10 @@ macro(add_custom_test _TEST_NAME _TEST_SOURCES)
     else()
         target_compile_options(${_TEST_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
     endif()
+    # Erkenne wenn wir im GitLab-CI laufen
+    if(DEFINED ENV{CI})
+        target_compile_definitions(${_TEST_NAME} PRIVATE -DCI_TEST)
+    endif()
 endmacro()
 
 add_custom_test(test_sdl "test_sdl.c")

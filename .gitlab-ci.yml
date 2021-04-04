@@ -29,13 +29,13 @@ test_cmocka:
   script: |
     cd ./build
     export CMOCKA_MESSAGE_OUTPUT=xml
-    export CMOCKA_XML_FILE=cmocka_junit.xml
+    export CMOCKA_XML_FILE=cmocka_junit_%g.xml
     export SDL_VIDEODRIVER=dummy
     ctest --verbose --timeout 10
   artifacts:
     when: always
     reports:
-      junit: ./build/cmocka_junit.xml
+      junit: ./build/cmocka_junit_*.xml
 
 test_cppcheck:
   stage: test
