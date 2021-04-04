@@ -98,3 +98,11 @@ set(UNIT_TESTING OFF) # keine Tests von CMocka selber kompilieren
 set(WITH_EXAMPLES OFF) # keine Beispiele kompilieren
 set(WITH_CMOCKERY_SUPPORT OFF) # Mock-Support deaktivieren
 add_subdirectory(cmocka)
+
+# Mathematik
+include(CheckCSourceCompiles)
+set(LIBM_TEST_SOURCE "#include<math.h>\nfloat f; int main(){sqrt(f);return 0;}")
+    check_c_source_compiles("${LIBM_TEST_SOURCE}" HAVE_MATH)
+if(NOT ${HAVE_MATH})
+    target_link_libraries(${PROJECT_NAME} m) # unter Linux wird libm nicht automatisch verlinkt
+endif()
