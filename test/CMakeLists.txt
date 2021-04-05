@@ -1,6 +1,4 @@
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/lib/cmocka/cmake/Modules")
-
-# Makro um Test-Target mit cmocka und allen SDL Bibliotheken standartmässig zu verlinken
+# Makro um Test-Target mit cmocka und allen Bibliotheken standardmässig zu verlinken
 macro(add_custom_test _TEST_NAME _TEST_SOURCES)
     add_executable(${_TEST_NAME} ${_TEST_SOURCES})
     # Bibliotheken verlinken
@@ -11,6 +9,10 @@ macro(add_custom_test _TEST_NAME _TEST_SOURCES)
         SDL2::Net
         SDL2::TTF
         SDL2::Mixer)
+    # Mathematik verlinken
+    if(NOT ${HAVE_MATH})
+        target_link_libraries(${PROJECT_NAME} m) # unter Linux wird libm nicht automatisch verlinkt
+    endif()
     # Includepfade hinzufügen
     target_include_directories(${_TEST_NAME} PRIVATE
         ${CMAKE_SOURCE_DIR}/include
