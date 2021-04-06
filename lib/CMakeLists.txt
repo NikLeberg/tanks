@@ -49,7 +49,7 @@ sdl_set_path_hint("SDL2"
     "/SDL/windows/vs"
     "/SDL/apple")
 find_package(SDL2 REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2::Main)
+target_link_libraries(main SDL2::Main)
 include_directories(${SDL2_INCLUDE_DIR})
 sdl_install_dlls("SDL2")
 
@@ -60,7 +60,7 @@ sdl_set_path_hint("SDL2_IMAGE"
     "/SDL_image/windows/vs"
     "/SDL_image/apple")
 find_package(SDL2_image REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2::Image)
+target_link_libraries(main SDL2::Image)
 sdl_install_dlls("SDL2_IMAGE")
 
 # SDL2_net
@@ -70,7 +70,7 @@ sdl_set_path_hint("SDL2_NET"
     "/SDL_net/windows/vs"
     "/SDL_net/apple")
 find_package(SDL2_net REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2::Net)
+target_link_libraries(main SDL2::Net)
 sdl_install_dlls("SDL2_NET")
 
 # SDL2_ttf
@@ -80,7 +80,7 @@ sdl_set_path_hint("SDL2_TTF"
     "/SDL_ttf/windows/vs"
     "/SDL_ttf/apple")
 find_package(SDL2_ttf REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2::TTF)
+target_link_libraries(main SDL2::TTF)
 sdl_install_dlls("SDL2_TTF")
 
 # SDL2_mixer
@@ -90,7 +90,7 @@ sdl_set_path_hint("SDL2_MIXER"
     "/SDL_mixer/windows/vs"
     "/SDL_mixer/apple")
 find_package(SDL2_mixer REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2::Mixer)
+target_link_libraries(main SDL2::Mixer)
 sdl_install_dlls("SDL2_MIXER")
 
 # CMocka
@@ -98,11 +98,12 @@ set(UNIT_TESTING OFF) # keine Tests von CMocka selber kompilieren
 set(WITH_EXAMPLES OFF) # keine Beispiele kompilieren
 set(WITH_CMOCKERY_SUPPORT OFF) # Mock-Support deaktivieren
 add_subdirectory(cmocka)
+target_link_libraries(main cmocka)
 
 # Mathematik
 include(CheckCSourceCompiles)
 set(LIBM_TEST_SOURCE "#include<math.h>\nfloat f; int main(){sqrt(f);return 0;}")
     check_c_source_compiles("${LIBM_TEST_SOURCE}" HAVE_MATH)
 if(NOT ${HAVE_MATH})
-    target_link_libraries(${PROJECT_NAME} m) # unter Linux wird libm nicht automatisch verlinkt
+    target_link_libraries(main m) # unter Linux wird libm nicht automatisch verlinkt
 endif()
