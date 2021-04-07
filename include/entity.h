@@ -72,7 +72,8 @@ typedef struct {
 typedef struct {
     entityVector_t position; //!< Position des Zentrums der Entität [m]
     entityVector_t velocity; //!< Geschwindigkeit [m/s]
-    float rotation;          //!< Rotation der Entität um das Zentrum
+    float rotation;          //!< Rotation der Entität
+    SDL_Point pivot;         //!< Zentrum der Rotation
     SDL_Rect aabb;           //!< Kollisionsbox / Axis-Aligned Bounding Box
 } entityPhysics_t;
 
@@ -81,10 +82,9 @@ typedef struct {
  * 
  */
 typedef struct {
-    sprite_t sprite;                 //!< alle Felder ausser textur werden automatisch von \ref EntityHandler_Update() aktualisiert
-    entityVector_t relativePosition; //!< Position relativ zum Mittelpunkt der Entität
-    float relativeRotation;          //!< Rotation um den Mittelpunkt relativ zur Rotation der Entität, positiv = Gegen-Uhrzeigersinn [rad]
     const char *name;                //!< Name des Einzelteils
+    sprite_t *sprite;                //!< das reale Sprite mit Textur und relativen Positionsangaben
+    sprite_t calculatedSprite;       //!< temporäres Sprite mit berechneten Absolutwerten
 } entityPart_t;
 
 struct entity_s;

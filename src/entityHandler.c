@@ -256,8 +256,8 @@ static int validatePart(entityPart_t *part) {
         return ERR_PARAMETER;
     }
     int ret = ERR_OK;
-    if (!part->sprite.destination.w    // Breite muss bekannt sein
-        || !part->sprite.destination.h // Höhe muss bekannt sein
+    if (!part->sprite->destination.w    // Breite muss bekannt sein
+        || !part->sprite->destination.h // Höhe muss bekannt sein
         || !part->name) {              // Muss Namen haben
         ret = ERR_FAIL;
     }
@@ -287,16 +287,14 @@ static int calculatePartsPositions(void *data) {
 static int calculatePartPosition(void *data, void *userData) {
     entityPart_t *entityPart = (entityPart_t *)data;
     entity_t *entity = (entity_t *)userData;
-    // Absolute Position des Sprites
-    entityPart->sprite.position.x = entity->physics.position.x;
-    entityPart->sprite.position.y = entity->physics.position.y;
-    // Relative Position des Sprites
-    entityPart->sprite.destination.x = entityPart->relativePosition.x;
-    entityPart->sprite.destination.y = entityPart->relativePosition.y;
-    // Rotation
-    entityPart->sprite.rotation = entityPart->relativeRotation;
-    entityPart->sprite.rotation += entity->physics.rotation;
-    return ERR_OK;
+    // Absolute Angaben der Entität mit relativen Angaben des Einzelteils bez.
+    // Sprites verrechnen
+    int ret = ERR_OK;
+    ret = Sprite_SetRelativeToPivot(*(entityPart->sprite),
+                                    entity->physics.rotation,
+                                    entity->physics.pivot,
+                                    &entityPart->calculatedSprite);
+    return ret;
 }
 
 static int callOnDraw(void *data) {
@@ -321,5 +319,5 @@ static int defaultDrawEntityPart(void *data, void *userData) {
     entityPart_t *part = (entityPart_t *)data;
     entity_t *entity = (entity_t *)userData;
     (void)entity;
-    return SDLW_DrawTexture(part->sprite);
+    return SDLW_DrawTexture(*(part->sprite));
 }
