@@ -171,8 +171,8 @@ int EntityHandler_Update(inputEvent_t *inputEvents) {
         return ret;
     }
     // Physik aktualisieren
-    //ret = Physics_Update(entityHandler.entityList); noch nicht implementiert
-    //if (ret) return ret;
+    ret = Physics_Update(entityHandler.entityList);
+    if (ret) return ret;
     // Positionen der Einzelteile neu berechnen
     ret = List_Foreach(entityHandler.entityList, calculatePartsPositions);
     return ret;
@@ -290,7 +290,7 @@ static int calculatePartPosition(void *data, void *userData) {
     entity_t *entity = (entity_t *)userData;
     // Aktualisiere Position des Teils mit Position der gesamten Entität.
     entityPart->sprite.position.x = entity->physics.position.x;
-    entityPart->sprite.position.x = entity->physics.position.x;
+    entityPart->sprite.position.y = entity->physics.position.y;
     // Position des Teils gemäss des eigenen Pivots & Rotation und
     // der Rotation der gesamten Entität verschieben.
     int ret = ERR_OK;

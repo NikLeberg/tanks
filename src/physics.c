@@ -33,7 +33,7 @@
  * 
  */
 
-#define PHYSICS_GRAVITY 10.0f //!< Erdbeschleunigung [m/s2]
+#define PHYSICS_GRAVITY 10.0f //!< Erdbeschleunigung [pixel / s2]
 
 
 /*
@@ -51,7 +51,7 @@
 
 int Physics_Update(list_t *entityList) {
     (void) entityList;
-    return ERR_FAIL;
+    return ERR_OK;
 }
 
 
