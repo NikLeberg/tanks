@@ -42,6 +42,7 @@
 
 /**
  * @brief Status der Entität
+ *
  * Werden per \ref EntityHandler_AddEntity() Entitäten hinzugefügt, so werden
  * diese erst im nächsten Update / Draw - Zyklus aktiv geschaltet.
  */
@@ -51,30 +52,50 @@ typedef enum {
 } entityState_t;
 
 /**
- * @brief 2D-Vektor
- * 
- * @warning Keine kartesischen Koordinaten, Ursprung ist oben links!
- * 
- */
-typedef struct {
-    float x; //!< X Komponente
-    float y; //!< Y Komponente
-} entityVector_t;
-
-/**
  * @brief Physikalische Daten einer Entität
  *
  * @note Es herrscht eine die normale Erdeschleunigung nach unten.
  * @warning Nur das physics-Modul darf Werte dieser Struktur verändern. Für
  * Manipulationen stehen diverse Physics_Set*() Funktionen zur verfügung.
- * 
  */
 typedef struct {
-    entityVector_t position; //!< Position des Zentrums der Entität [m]
-    entityVector_t velocity; //!< Geschwindigkeit [m/s]
-    float rotation;          //!< Rotation der Entität
-    SDL_Point pivot;         //!< Zentrum der Rotation
-    SDL_Rect aabb;           //!< Kollisionsbox / Axis-Aligned Bounding Box
+    /**
+     * @brief Position der Entität
+     *
+     * Angaben sind absolut und zeigen auf das Zentrum der Entität
+     * Die Einheit ist [pixel].
+     */
+    SDL_FPoint position;
+
+    /**
+     * @brief Geschwindigkeit der Entität
+     * 
+     * Angaben sind im Koordinatensystem der Welt resp. horizontal und vertikal.
+     * Die Einheit ist [pixel / s].
+     * @note Es herrscht eine Erdbeschleunigung nach unten, Y-Koordinate wird
+     * mit jedem Update aktualisiert.
+     */
+    SDL_FPoint velocity;
+
+    /**
+     * @brief Rotation der Entität
+     * 
+     * Die Rotation erfolgt um das Zentrum der Entität.
+     * Die Einheit ist [°]. Positiv = im Uhrzeigersinn
+     */
+    double rotation;
+
+    /**
+     * @brief Kollisionsbox der Entität
+     * 
+     * Axis-Aligned Bounding Box. Sie wird nicht rotiert und bleibt immer starr
+     * in der Achsenausrichtung der Welt. Anhand dieser Box wird die Entität
+     * physikalisch mit der Welt interagieren. Die x/y-Koordinaten werden
+     * automatisch an \ref position angeglichen.
+     * @note Angaben dürfen 0 sein, in diesem Falle wird eine Box berechnet in
+     * der alle Einzelteile \ref entityPart_t platz haben.
+     */
+    SDL_Rect aabb;
 } entityPhysics_t;
 
 /**
@@ -82,9 +103,9 @@ typedef struct {
  * 
  */
 typedef struct {
-    const char *name;                //!< Name des Einzelteils
-    sprite_t *sprite;                //!< das reale Sprite mit Textur und relativen Positionsangaben
-    sprite_t calculatedSprite;       //!< temporäres Sprite mit berechneten Absolutwerten
+    const char *name;    //!< Name des Einzelteils
+    sprite_t sprite;     //!< das reale Sprite mit Textur und relativen Angaben
+    sprite_t tempSprite; //!< temporäres Sprite mit berechneten Absolutwerten
 } entityPart_t;
 
 struct entity_s;
@@ -156,8 +177,8 @@ typedef struct entity_s {
     /**
      * @brief Physikdaten der Entität
      * 
-     * @warning Ausser für die initialisierung sind alle folgenden Änderungen
-     * nur mittels Physicy-Modul zulässig.
+     * @warning Ausser für die Initialisierung sind alle folgenden Änderungen
+     * nur mittels Physics-Modul zulässig.
      */
     entityPhysics_t physics;
 

@@ -101,6 +101,8 @@ static void one_hundred_entities_can_be_added_and_removed(void **state) {
  * @brief Setup: Entität erstellen und hinzufügen
  * 
  * @param[out] state Pointer auf entity_t
+ * 
+ * @return 0 Setup erfolgreich, -1 Setup fehlgeschlagen
  */
 static int setupOneEntity(void **state) {
     static entity_t entity = {.owner = "Testuser", .name = "Test", .parts = NULL};
@@ -112,6 +114,8 @@ static int setupOneEntity(void **state) {
  * @brief Teardown: Entität entfernen
  * 
  * @param[in] state Pointer auf entity_t*
+ * 
+ * @return 0 Teardown erfolgreich, -1 Teardown fehlgeschlagen
  */
 static int teardownOneEntity(void **state) {
     entity_t *entity = (entity_t *)*state;
@@ -127,7 +131,14 @@ static int teardownOneEntity(void **state) {
  */
 static void an_entitypart_can_be_added_and_removed(void **state) {
     entity_t *entity = (entity_t *)*state;
-    entityPart_t part = {.name = "Test", .sprite.destination.h = 10, .sprite.destination.w = 10};
+    // Erstelle ein gültiges Entitätsteil
+    entityPart_t part = {
+        .name = "Test",
+        .sprite = {
+            .texture = (SDL_Texture *)0xDEADBEEF,
+            .destination = {.h = 10, .w = 10}
+        }
+    };
     assert_int_equal(EntityHandler_AddEntityPart(entity, &part), ERR_OK);
     assert_int_equal(EntityHandler_RemoveEntityPart(entity, &part), ERR_OK);
 }
@@ -139,13 +150,32 @@ static void an_entitypart_can_be_added_and_removed(void **state) {
  */
 static void invalid_entityparts_cant_be_added(void **state) {
     entity_t *entity = (entity_t *)*state;
-    entityPart_t partOk = {.name = "Test", .sprite.destination.h = 10, .sprite.destination.w = 10};
+    // Erstelle ein gültiges Entitätsteil
+    entityPart_t partOk = {
+        .name = "Test",
+        .sprite = {
+            .texture = (SDL_Texture *)0xDEADBEEF,
+            .destination = {.h = 10, .w = 10}
+        }
+    };
     // NULL
     assert_int_not_equal(EntityHandler_AddEntityPart(entity, NULL), ERR_OK);
-    // Entität ohne Namen
+    // Entitätsteil ohne Namen
     entityPart_t partNoName = partOk;
     partNoName.name = NULL;
     assert_int_not_equal(EntityHandler_AddEntityPart(entity, &partNoName), ERR_OK);
+    // Entitätsteil ohne Spritetextur
+    entityPart_t partNoTexture = partOk;
+    partNoTexture.sprite.texture = NULL;
+    assert_int_not_equal(EntityHandler_AddEntityPart(entity, &partNoTexture), ERR_OK);
+    // Entitätsteil ohne Höhenangabe der Textur
+    entityPart_t partNoHeight = partOk;
+    partNoHeight.sprite.destination.h = 0;
+    assert_int_not_equal(EntityHandler_AddEntityPart(entity, &partNoHeight), ERR_OK);
+    // Entitätsteil ohne Breitenangabe der Textur
+    entityPart_t partNoWidth = partOk;
+    partNoWidth.sprite.destination.w = 0;
+    assert_int_not_equal(EntityHandler_AddEntityPart(entity, &partNoWidth), ERR_OK);
 }
 
 /**
@@ -155,7 +185,15 @@ static void invalid_entityparts_cant_be_added(void **state) {
  */
 static void one_hundred_entityparts_can_be_added_and_removed(void **state) {
     entity_t *entity = (entity_t *)*state;
-    entityPart_t partOk = {.name = "Test", .sprite.destination.h = 10, .sprite.destination.w = 10};
+    // Erstelle ein gültiges Entitätsteil
+    entityPart_t partOk = {
+        .name = "Test",
+        .sprite = {
+            .texture = (SDL_Texture *)0xDEADBEEF,
+            .destination = {.h = 10, .w = 10}
+        }
+    };
+    // Erstelle 100 gültige Entitäten
     entityPart_t partArray[100];
     for (int i = 0; i < 100; ++i) {
         partArray[i] = partOk;
@@ -183,8 +221,9 @@ static void one_hundred_entityparts_can_be_added_and_removed(void **state) {
  * @brief Mockup eines onUpdate Callbacks
  * 
  * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
- * @param inputEvents Eingabeevents für die Entität (bsp.: nach links oder nach rechts)
- * @return Fehlercode gemäss \ref will_return() von CMocka
+ * @param inputEvents Eingabeevents für die Entität
+ * 
+ * @return Fehlercode gemäss will_return() von CMocka
  */
 static int onUpdate(entity_t *self, inputEvent_t *inputEvents) {
     check_expected_ptr(self);
@@ -197,7 +236,8 @@ static int onUpdate(entity_t *self, inputEvent_t *inputEvents) {
  * @brief Mockup eines onCollision Callbacks
  * 
  * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
- * @return Fehlercode gemäss \ref will_return() von CMocka
+ * 
+ * @return Fehlercode gemäss will_return() von CMocka
  */
 static int onCollision(entity_t *self) {
     check_expected_ptr(self);
@@ -209,7 +249,8 @@ static int onCollision(entity_t *self) {
  * @brief Mockup eines onDraw Callbacks
  * 
  * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
- * @return Fehlercode gemäss \ref will_return() von CMocka
+ * 
+ * @return Fehlercode gemäss will_return() von CMocka
  */
 static int onDraw(entity_t *self) {
     check_expected_ptr(self);
@@ -217,6 +258,17 @@ static int onDraw(entity_t *self) {
     return mock_type(int);
 }
 
+/**
+ * @brief Mockup des echten \ref SDLW_DrawTexture().
+ * 
+ * Per Linker Flag wird das originale \ref SDLW_DrawTexture() mit dieser
+ * Funktion ersetzt. Somit kann der EntityHandler isoliert vom restlichen System
+ * getestet werden.
+ * 
+ * @param sprite zu zeichnendes Sprite
+ * 
+ * @return Fehlercode gemäss will_return() von CMocka
+ */
 int __wrap_SDLW_DrawTexture(sprite_t sprite) {
     (void)sprite;
     function_called();
@@ -227,20 +279,35 @@ int __wrap_SDLW_DrawTexture(sprite_t sprite) {
  * @brief Setup: Entität und Einzelteil erstellen und hinzufügen
  * 
  * @param[out] state Pointer auf entity_t
+ * 
+ * @return 0 Setup erfolgreich, -1 Setup fehlgeschlagen
  */
 static int setupOneEntityAndOnePart(void **state) {
-    static entity_t entity = {0};
-    entity.owner = "Testuser";
-    entity.name = "Test";
-    entity.callbacks.onUpdate = onUpdate;
-    entity.callbacks.onCollision = onCollision;
-    entity.callbacks.onDraw = onDraw;
-    entity.state = ENTITY_STATE_CREATED;
-    static entityPart_t part = {0};
-    part.name = "Test";
-    part.sprite.destination.h = 10;
-    part.sprite.destination.w = 10;
+    // Erstelle eine gültige Entität
+    static entity_t entity;
+    entity_t entityOk = {
+        .owner = "Testuser",
+        .name = "Test",
+        .state = ENTITY_STATE_CREATED,
+        .parts = NULL,
+        .callbacks = {
+            .onUpdate = onUpdate,
+            .onCollision = onCollision,
+            .onDraw = onDraw
+        }
+    };
+    entity = entityOk;
     *state = (void *)&entity;
+    // Erstelle ein gültiges Entitätsteil
+    static entityPart_t part;
+    entityPart_t partOk = {
+        .name = "Test",
+        .sprite = {
+            .texture = (SDL_Texture *)0xDEADBEEF,
+            .destination = {.h = 10, .w = 10}
+        }
+    };
+    part = partOk;
     return (EntityHandler_AddEntity(&entity) != ERR_OK) || (EntityHandler_AddEntityPart(&entity, &part) != ERR_OK);
 }
 
@@ -248,6 +315,8 @@ static int setupOneEntityAndOnePart(void **state) {
  * @brief Teardown: Entität und Einzelteil entfernen
  * 
  * @param[in] state Pointer auf entity_t*
+ * 
+ * @return 0 Teardown erfolgreich, -1 Teardown fehlgeschlagen
  */
 static int teardownOneEntityAndOnePart(void **state) {
     entity_t *entity = (entity_t *)*state;
@@ -377,17 +446,37 @@ int main(void) {
         cmocka_unit_test(invalid_entities_cant_be_added),
         cmocka_unit_test(one_hundred_entities_can_be_added_and_removed),
 
-        cmocka_unit_test_setup_teardown(an_entitypart_can_be_added_and_removed, setupOneEntity, teardownOneEntity),
-        cmocka_unit_test_setup_teardown(invalid_entityparts_cant_be_added, setupOneEntity, teardownOneEntity),
-        cmocka_unit_test_setup_teardown(one_hundred_entityparts_can_be_added_and_removed, setupOneEntity, teardownOneEntity),
+        cmocka_unit_test_setup_teardown(
+            an_entitypart_can_be_added_and_removed,
+            setupOneEntity, teardownOneEntity),
+        cmocka_unit_test_setup_teardown(
+            invalid_entityparts_cant_be_added,
+            setupOneEntity, teardownOneEntity),
+        cmocka_unit_test_setup_teardown(
+            one_hundred_entityparts_can_be_added_and_removed,
+            setupOneEntity, teardownOneEntity),
 
-        cmocka_unit_test_setup_teardown(update_callback_gets_called_with_input, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
-        cmocka_unit_test_setup_teardown(error_in_update_callback_is_cascaded_up, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
-        cmocka_unit_test_setup_teardown(draw_callback_gets_called, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
-        cmocka_unit_test_setup_teardown(default_draw_gets_called_if_no_callback_defined, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
-        cmocka_unit_test_setup_teardown(error_in_draw_callback_is_cascaded_up, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
-        cmocka_unit_test_setup_teardown(error_in_default_draw_is_cascaded_up, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
-        cmocka_unit_test_setup_teardown(draw_callback_doesnt_get_called_if_state_is_equal_to_created, setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(
+            update_callback_gets_called_with_input,
+            setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(
+            error_in_update_callback_is_cascaded_up,
+            setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(
+            draw_callback_gets_called,
+            setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(
+            default_draw_gets_called_if_no_callback_defined,
+            setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(
+            error_in_draw_callback_is_cascaded_up,
+            setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(
+            error_in_default_draw_is_cascaded_up,
+            setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
+        cmocka_unit_test_setup_teardown(
+            draw_callback_doesnt_get_called_if_state_is_equal_to_created,
+            setupOneEntityAndOnePart, teardownOneEntityAndOnePart),
     };
     return cmocka_run_group_tests(entityHandler, NULL, NULL);
 }
