@@ -94,6 +94,8 @@ static void sdl_can_init_net(void **state) {
  * @brief Starte alle SDL-Systeme
  * 
  * @param state unbenutzt
+ * 
+ * @return immer 0
  */
 static int initSDLSystems(void **state) {
     (void) state;
@@ -109,6 +111,8 @@ static int initSDLSystems(void **state) {
  * @brief Stoppe alle SDL-Systeme
  * 
  * @param state unbenutzt
+ * 
+ * @return immer 0
  */
 static int deinitSDLSystems(void **state) {
     (void) state;
@@ -144,7 +148,9 @@ static void sdl_can_create_window(void **state) {
 /**
  * @brief Erstelle Fenster
  * 
- * @param[out] state Pointer auf SDL_Window
+ * @param[out] state Pointer auf SDL_Window 
+ * 
+ * @return 0 Setup erfolgreich, -1 Setup fehlgeschlagen
  */
 static int createWindow(void **state) {
     SDL_Window *window = SDL_CreateWindow("test",
@@ -160,6 +166,8 @@ static int createWindow(void **state) {
  * @brief Zerstöre Fenster
  * 
  * @param[in] state Pointer auf SDL_Window
+ * 
+ * @return 0 Teardown erfolgreich, -1 Teardown fehlgeschlagen
  */
 static int destroyWindow(void **state) {
     SDL_Event e;
