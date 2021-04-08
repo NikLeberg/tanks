@@ -19,9 +19,43 @@
 #include <cmocka.h>
 
 #include "list.h"
-#include <stdlib.h>
-
 #include "error.h"
+
+
+/*
+ * Mocks
+ * 
+ */
+
+/**
+ * @brief Mock-Ersatz für originales malloc()
+ * 
+ * Per Linker Flag wird das originale malloc() mit dieser Funktion ersetzt.
+ * Hier wird dann das von CMocka gelieferte System zur Prüfung von
+ * Speicherallozierung verwendet. Wird ein Block alloziert welcher später nicht
+ * per free() befreit wird wird dies als Speicherleck gemeldet.
+ * 
+ * @param size Grösse des Speicherblocks
+ * 
+ * @return Pointer auf Speicherblock
+ */
+void *__wrap_malloc(const size_t size) {
+    return test_malloc(size);
+}
+
+/**
+ * @brief Mock-Ersatz für originales free()
+ * 
+ * Per Linker Flag wird das originale free() mit dieser Funktion ersetzt.
+ * Hier wird dann das von CMocka gelieferte System zur Prüfung von
+ * Speicherallozierung verwendet. Wird ein Block mit malloc() alloziert
+ * welcher später nicht hier befreit wird, wird dies als Speicherleck gemeldet.
+ * 
+ * @param ptr Pointer auf Speicherblock
+ */
+void __wrap_free(void *const ptr) {
+    test_free(ptr);
+}
 
 
 /*
@@ -31,9 +65,11 @@
 
 /**
  * @brief Testet das Initialisieren von Listen
+ * 
+ * @param state unbenutzt
  */
 static void init_and_check_initialized_members(void **state) {
-    (void) state;
+    (void)state;
     list_t list;
     assert_int_equal(List_Init(&list), ERR_OK);
     //Listenmember werden richtig initialisiert
@@ -44,9 +80,11 @@ static void init_and_check_initialized_members(void **state) {
 
 /**
  * @brief Testet das Erstellen und Zerstören von listen
+ * 
+ * @param state unbenutzt
  */
 static void create_then_destroy_list(void **state) {
-    (void) state;
+    (void)state;
     list_t *list = NULL;
     assert_int_equal(List_Create(&list), ERR_OK);
     assert_non_null(list); //Liste wurde erstellt
@@ -56,9 +94,11 @@ static void create_then_destroy_list(void **state) {
 
 /**
  * @brief Testet ob die Liste Element hinzufügen und entfernen kann
+ * 
+ * @param state unbenutzt
  */
 static void check_list_add_and_remove(void **state) {
-    (void) state;
+    (void)state;
     list_t list;
     int v1 = 1;
     int v2 = 1;
@@ -91,9 +131,11 @@ static void check_list_add_and_remove(void **state) {
 
 /**
  * @brief Testet ob alle Elemente der Liste entfernt werden kann
+ * 
+ * @param state unbenutzt
  */
 static void check_clear(void **state) {
-    (void) state;
+    (void)state;
     list_t list;
     int v1 = 1;
     List_Init(&list);
@@ -110,9 +152,11 @@ static void check_clear(void **state) {
 
 /**
  * @brief Testet ob die Reihenfolge der hinzugefügten Elemente den Spezifikationen entspricht
+ * 
+ * @param state unbenutzt
  */
 static void check_adding_order(void **state) {
-    (void) state;
+    (void)state;
     list_t list;
     int v1 = 1;
     int v2 = 2;
@@ -135,36 +179,47 @@ static void check_adding_order(void **state) {
     List_Clear(&list);
 }
 
-static int loopCheckNumber; //!< Wert zum überprüfen ob foreach_loop_check mit dem richtigen Element aufgerufen wurde
-static int loopCheckReturn; //!< Returnwert von foreach_loop_check
 /**
- * @brief Überprüft ob das jetztige Element hätte aufgerufen werden sollen.
- * Gibt je nach \ref loopCheckReturn einen Fehlercode zurück
+ * @brief Funktionsaufruf zum simulieren von \ref fnPntrDataCallback.
+ *
+ * Wird für das Suchen und Vergleichen gebraucht.
+ * 
+ * @param data Datenpointer der Liste
+ * 
+ * @return gemäss will_return() von CMocka
  */
-static int foreach_loop_check(void *data) {
-    int *check = (int *)data;
-    assert_int_equal(*check, loopCheckNumber);
-    loopCheckNumber++;
-    return loopCheckReturn;
+static int onCallbackData(void *data) {
+    check_expected_ptr(data);
+    function_called();
+    return mock_type(int);
 }
+
 /**
- * @brief Überprüft ob das jetztige Element hätte aufgerufen werden sollen.
- * Gibt je nach \ref loopCheckReturn einen Fehlercode zurück
+ * @brief Funktionsaufruf zum simulieren von \ref fnPntrDataCallbackArg
+ * 
+ * Wird für das Suchen und Vergleichen gebraucht.
+ * 
+ * @param data Datenpointer der Liste
+ * @param userData übergebene Benutzerdaten
+ * 
+ * @return gemäss will_return() von CMocka
  */
-static int foreach_loop_checkArg(void *data, void *userData) {
-    int *check = (int *)data;
-    int *increment = (int *)userData;
-    assert_int_equal(*check, (*increment));
-    (*increment) += 1;
-    return loopCheckReturn;
+static int onCallbackDataArg(void *data, void *userData) {
+    check_expected_ptr(data);
+    check_expected_ptr(userData);
+    function_called();
+    return mock_type(int);
 }
 
 /**
  * @brief Testet ob die Schleife alle Elemente in der richtigen Reihenfolge aufruft.
+ * 
  * Zudem wird getestet ob die Schleife bei einem Fehler abbricht.
+ * 
+ * @param state unbenutzt
  */
 static void check_foreach_loop(void **state) {
-    (void) state;
+    (void)state;
     list_t list;
     int v1 = 1;
     int v2 = 2;
@@ -178,53 +233,72 @@ static void check_foreach_loop(void **state) {
     List_Add(&list, &v1);
 
     //Fehlerfreien Schleifendurchlauf
-    loopCheckNumber = 1;
-    loopCheckReturn = 0;
-    assert_int_equal(List_Foreach(&list, foreach_loop_check), ERR_OK);
-    assert_int_equal(loopCheckNumber, 4); // Alle Elemente wurden aufgerufen
-    arg = 1;
-    assert_int_equal(List_ForeachArg(&list, foreach_loop_checkArg, &arg), ERR_OK);
-    assert_int_equal(loopCheckNumber, 4); // Alle Elemente wurden aufgerufen
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, ERR_OK);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v2);
+        will_return(onCallbackData, ERR_OK);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v3);
+        will_return(onCallbackData, ERR_OK);
+        assert_int_equal(List_Foreach(&list, onCallbackData), ERR_OK);
 
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v1);
+        expect_value(onCallbackDataArg, userData, &arg);
+        will_return(onCallbackDataArg, ERR_OK);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v2);
+        expect_value(onCallbackDataArg, userData, &arg);
+        will_return(onCallbackDataArg, ERR_OK);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v3);
+        expect_value(onCallbackDataArg, userData, &arg);
+        will_return(onCallbackDataArg, ERR_OK);
+        assert_int_equal(List_ForeachArg(&list, onCallbackDataArg, &arg), ERR_OK);
+    }
     //Schleifendurchlauf mit Fehler ERR_FAIL
-    loopCheckReturn = ERR_FAIL;
-    loopCheckNumber = 1;
-    assert_int_equal(List_Foreach(&list, foreach_loop_check), ERR_FAIL);
-    assert_int_equal(loopCheckNumber, 2); // Nur das erste Element wurde aufgerufen
-    arg = 1;
-    assert_int_equal(List_ForeachArg(&list, foreach_loop_checkArg, &arg), ERR_FAIL);
-    assert_int_equal(loopCheckNumber, 2); // Nur das erste Element wurde aufgerufen
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, ERR_OK);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v2);
+        will_return(onCallbackData, ERR_FAIL);
+        assert_int_equal(List_Foreach(&list, onCallbackData), ERR_FAIL);
+
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v1);
+        expect_value(onCallbackDataArg, userData, &arg);
+        will_return(onCallbackDataArg, ERR_OK);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v2);
+        expect_value(onCallbackDataArg, userData, &arg);
+        will_return(onCallbackDataArg, ERR_FAIL);
+        assert_int_equal(List_ForeachArg(&list, onCallbackDataArg, &arg), ERR_FAIL);
+    }
 
     List_Clear(&list);
 }
 
 static int searchNumber; //!< Das gesuchte Element für check_search()
-/**
- * @brief Die Funktion zum Vergleichen des gesuchten Elements für check_search()
- */
-static int search_compare(void *data) {
-    int *intData = (int *)data;
-    return (*intData) == searchNumber;
-}
-/**
- * @brief Die Funktion zum Vergleichen des gesuchten Elements für check_search() mit Argument
- */
-static int search_compareArg(void *data, void *userData) {
-    int *intData = (int *)data;
-    int *cmp = (int *)userData;
-    return (*intData) == (*cmp);
-}
+
 /**
  * @brief Testet ob die Listensuche das richtige Element ausgibt
+ * 
+ * @param state unbenutzt
  */
 static void check_search(void **state) {
-    (void) state;
+    (void)state;
     list_t list;
     int v1 = 1;
     int v2 = 2;
     int v3 = 3;
 
     int *searchResult;
+    searchNumber = 1;
 
     List_Init(&list);
     List_Add(&list, &v3);
@@ -232,48 +306,111 @@ static void check_search(void **state) {
     List_Add(&list, &v1);
 
     //Suche nach einem nicht existierenden Element
-    searchNumber = 0;
-    assert_int_equal(List_Search(&list, search_compare, (void **)&searchResult), ERR_OK);
-    assert_null(searchResult);
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, 0);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v2);
+        will_return(onCallbackData, 0);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v3);
+        will_return(onCallbackData, 0);
+        assert_int_equal(List_Search(&list, onCallbackData, (void **)&searchResult), ERR_OK);
+        assert_null(searchResult);
 
-    //Suche nach dem ersten Element
-    searchNumber = 1;
-    assert_int_equal(List_Search(&list, search_compare, (void **)&searchResult), ERR_OK);
-    assert_ptr_equal(searchResult, &v1);
-    assert_int_equal(List_SearchArg(&list, search_compareArg, &searchNumber, (void **)&searchResult), ERR_OK);
-    assert_ptr_equal(searchResult, &v1);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v1);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 0);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v2);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 0);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v3);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 0);
+        assert_int_equal(List_SearchArg(&list, onCallbackDataArg, &searchNumber, (void **)&searchResult), ERR_OK);
+        assert_null(searchResult);
+    }
+    // Suche nach dem dritten Element
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, 0);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v2);
+        will_return(onCallbackData, 0);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v3);
+        will_return(onCallbackData, 1);
+        assert_int_equal(List_Search(&list, onCallbackData, (void **)&searchResult), ERR_OK);
+        assert_ptr_equal(searchResult, &v3);
 
-    //Suche nach dem zweiten Element
-    searchNumber = 2;
-    assert_int_equal(List_Search(&list, search_compare, (void **)&searchResult), ERR_OK);
-    assert_ptr_equal(searchResult, &v2);
-    assert_int_equal(List_SearchArg(&list, search_compareArg, &searchNumber, (void **)&searchResult), ERR_OK);
-    assert_ptr_equal(searchResult, &v2);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v1);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 0);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v2);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 0);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v3);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 1);
+        assert_int_equal(List_SearchArg(&list, onCallbackDataArg, &searchNumber, (void **)&searchResult), ERR_OK);
+        assert_ptr_equal(searchResult, &v3);
+    }
+    // Suche nach dem zweiten Element
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, 0);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v2);
+        will_return(onCallbackData, 1);
+        assert_int_equal(List_Search(&list, onCallbackData, (void **)&searchResult), ERR_OK);
+        assert_ptr_equal(searchResult, &v2);
 
-    //Suche nach dem letzten Element
-    searchNumber = 3;
-    assert_int_equal(List_Search(&list, search_compare, (void **)&searchResult), ERR_OK);
-    assert_ptr_equal(searchResult, &v3);
-    assert_int_equal(List_SearchArg(&list, search_compareArg, &searchNumber, (void **)&searchResult), ERR_OK);
-    assert_ptr_equal(searchResult, &v3);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v1);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 0);
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v2);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 1);
+        assert_int_equal(List_SearchArg(&list, onCallbackDataArg, &searchNumber, (void **)&searchResult), ERR_OK);
+        assert_ptr_equal(searchResult, &v2);
+    }
+    // Suche nach dem ersten Element
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, 1);
+        assert_int_equal(List_Search(&list, onCallbackData, (void **)&searchResult), ERR_OK);
+        assert_ptr_equal(searchResult, &v1);
+
+        expect_function_call(onCallbackDataArg);
+        expect_value(onCallbackDataArg, data, &v1);
+        expect_value(onCallbackDataArg, userData, &searchNumber);
+        will_return(onCallbackDataArg, 1);
+        assert_int_equal(List_SearchArg(&list, onCallbackDataArg, &searchNumber, (void **)&searchResult), ERR_OK);
+        assert_ptr_equal(searchResult, &v1);
+    }
+
+    List_Clear(&list);
 }
 
-static int freeCheckNumber; //!< Wert um zu überprüfen ob dataAutoFree() mit dem Richtigen Element aufgerufen wurde
-static int freeCheckReturn; //!< Rückgabewert von dataAutoFree(), Überprüfung ob das clear richtig abgebrochen wurde
-/**
- * @brief Überprüft ob von check_dataAutoFree() das richtige Element aufgerufen wurde
- */
-static int dataAutoFree(void *data) {
-    int *intData = (int *)data;
-    assert_int_equal(*intData, freeCheckNumber);
-    freeCheckNumber++;
-    return freeCheckReturn;
-}
 /**
  * @brief Testet ob das \ref list_t.dataAutoFree richtig aufgerufen wird.
+ * 
+ * @param state unbenutzt
  */
 static void check_dataAutoFree(void **state) {
-    (void) state;
+    (void)state;
     list_t list;
     int v1 = 1;
     int v2 = 2;
@@ -283,39 +420,54 @@ static void check_dataAutoFree(void **state) {
     List_Add(&list, &v3);
     List_Add(&list, &v2);
     List_Add(&list, &v1);
-
-    list.dataAutoFree = dataAutoFree;
-    freeCheckNumber = 1;
-    freeCheckReturn = ERR_OK;
-    assert_int_equal(List_Clear(&list), ERR_OK);
-    assert_int_equal(freeCheckNumber, 4); // Von allen Elementen wurde dataAutoFree aufgerufen
+    list.dataAutoFree = onCallbackData;
+    // Clear hat funktioniert
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, ERR_OK);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v2);
+        will_return(onCallbackData, ERR_OK);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v3);
+        will_return(onCallbackData, ERR_OK);
+        assert_int_equal(List_Clear(&list), ERR_OK);
+    }
 
     List_Init(&list);
     List_Add(&list, &v3);
     List_Add(&list, &v2);
     List_Add(&list, &v1);
+    list.dataAutoFree = onCallbackData;
+    // Clear hat Fehler
+    {
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v1);
+        will_return(onCallbackData, ERR_OK);
+        expect_function_call(onCallbackData);
+        expect_value(onCallbackData, data, &v2);
+        will_return(onCallbackData, ERR_FAIL);
+        assert_int_equal(List_Clear(&list), ERR_FAIL);
+    }
 
-    list.dataAutoFree = dataAutoFree;
-    freeCheckNumber = 1;
-    freeCheckReturn = ERR_FAIL;
-    assert_int_equal(List_Clear(&list), ERR_FAIL);
-    assert_int_equal(freeCheckNumber, 2); // Clear wurde nach dem ersten Element abgebrochen
-
-    freeCheckReturn = 0;
     list.dataAutoFree = NULL;
     List_Clear(&list);
 }
 
 /**
  * @brief Überprüft ob alle Nullabfragen vorhanden sind
+ * 
+ * @param state unbenutzt
  */
 static void check_null_catch(void **state) {
-    (void) state;
+    (void)state;
     int v1 = 0;
     int *v2 = &v1;
     int *v3 = NULL;
     list_t list;
     List_Init(&list);
+    // Grundfunktionen
     assert_int_equal(List_Init(NULL), ERR_NULLPARAMETER);
     assert_int_equal(List_Add(NULL, &v1), ERR_NULLPARAMETER);
     assert_int_equal(List_Remove(NULL, &v1), ERR_NULLPARAMETER);
@@ -323,17 +475,18 @@ static void check_null_catch(void **state) {
     assert_int_equal(List_Create(NULL), ERR_NULLPARAMETER);
     assert_int_equal(List_Destroy(NULL), ERR_NULLPARAMETER);
     assert_int_equal(List_Destroy((list_t **)&v3), ERR_NULLPARAMETER);
-    assert_int_equal(List_Foreach(NULL, dataAutoFree), ERR_NULLPARAMETER);
+    // Einfache Hilfsfunktionen
+    assert_int_equal(List_Foreach(NULL, onCallbackData), ERR_NULLPARAMETER);
     assert_int_equal(List_Foreach(&list, NULL), ERR_NULLPARAMETER);
-    assert_int_equal(List_Search(NULL, dataAutoFree, (void **)&v2), ERR_NULLPARAMETER);
+    assert_int_equal(List_Search(NULL, onCallbackData, (void **)&v2), ERR_NULLPARAMETER);
     assert_int_equal(List_Search(&list, NULL, (void **)&v2), ERR_NULLPARAMETER);
-    assert_int_equal(List_Search(&list, dataAutoFree, NULL), ERR_NULLPARAMETER);
-
-    assert_int_equal(List_ForeachArg(NULL, search_compareArg, NULL), ERR_NULLPARAMETER);
+    assert_int_equal(List_Search(&list, onCallbackData, NULL), ERR_NULLPARAMETER);
+    // Hilfsfunktionen mit Benutzerdaten
+    assert_int_equal(List_ForeachArg(NULL, onCallbackDataArg, NULL), ERR_NULLPARAMETER);
     assert_int_equal(List_ForeachArg(&list, NULL, NULL), ERR_NULLPARAMETER);
-    assert_int_equal(List_SearchArg(NULL, search_compareArg, NULL, (void **)&v2), ERR_NULLPARAMETER);
+    assert_int_equal(List_SearchArg(NULL, onCallbackDataArg, NULL, (void **)&v2), ERR_NULLPARAMETER);
     assert_int_equal(List_SearchArg(&list, NULL, NULL, (void **)&v2), ERR_NULLPARAMETER);
-    assert_int_equal(List_SearchArg(&list, search_compareArg, NULL, NULL), ERR_NULLPARAMETER);
+    assert_int_equal(List_SearchArg(&list, onCallbackDataArg, NULL, NULL), ERR_NULLPARAMETER);
 }
 
 /**

@@ -142,18 +142,18 @@ int List_Foreach(list_t *list, fnPntrDataCallback callback);
 int List_ForeachArg(list_t *list, fnPntrDataCallbackArg callback, void *userData);
 
 /**
- * @brief Sucht das erste Element das bei \p searchFn 1 zurückgibt.
+ * @brief Sucht das erste Element das bei \p searchCmpFn 1 zurückgibt.
  * Das gefundene Element wird in \p **data gespeichert.
  * 
- * @note \p searchFn sollte nur 0 oder 1 ausgeben.
+ * @note \p searchCmpFn sollte nur 0 oder 1 ausgeben.
  *
  * @param[in] list Die Liste die bearbeitet wird
- * @param[in] searchFn Suchfunktion die für jedes Element aufgerufen wird
+ * @param[in] searchCmpFn Suchfunktion die für jedes Element aufgerufen wird
  * @param[out] data Der Ort wo das gesuchte Element ausgegeben wird. NULL = Nichts gefunden
  *
  * @return 0 oder Errorcode
  */
-int List_Search(list_t *list, fnPntrDataCallback searchFn, void **data);
+int List_Search(list_t *list, fnPntrDataCallback searchCmpFn, void **data);
 
 /**
  * @brief Sucht das erste Element das bei \p searchCmpFn 1 zurückgibt.
