@@ -103,7 +103,15 @@ target_link_libraries(main cmocka)
 # Mathematik
 include(CheckCSourceCompiles)
 set(LIBM_TEST_SOURCE "#include<math.h>\nfloat f; int main(){sqrt(f);return 0;}")
-    check_c_source_compiles("${LIBM_TEST_SOURCE}" HAVE_MATH)
-if(NOT ${HAVE_MATH})
-    target_link_libraries(main m) # unter Linux wird libm nicht automatisch verlinkt
+check_c_source_compiles("${LIBM_TEST_SOURCE}" HAVE_MATH)
+if(NOT HAVE_MATH)
+    set(CMAKE_REQUIRED_LIBRARIES m)
+    check_c_source_compiles("${LIBM_TEST_SOURCE}" HAVE_LIBM_MATH)
+    unset(CMAKE_REQUIRED_LIBRARIES)
+    if(HAVE_LIBM_MATH)
+        # unter Linux wird libm nicht automatisch verlinkt
+        target_link_libraries(main m)
+    else()
+        message(FATAL_ERROR "Unable to use C math library functions")
+    endif()
 endif()

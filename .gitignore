@@ -5,6 +5,7 @@ build
 # VS Studio Dateien
 .vs
 out
+CMakeSettings.json
 
 # QtCreator
 CMakeLists.txt.user
