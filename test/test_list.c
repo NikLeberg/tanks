@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file test_list.c
  * @author Stoll Simon (stols4@bfh.ch)
  * @brief Tests für list-Modul
@@ -20,42 +20,6 @@
 
 #include "list.h"
 #include "error.h"
-
-
-/*
- * Mocks
- * 
- */
-
-/**
- * @brief Mock-Ersatz für originales malloc()
- * 
- * Per Linker Flag wird das originale malloc() mit dieser Funktion ersetzt.
- * Hier wird dann das von CMocka gelieferte System zur Prüfung von
- * Speicherallozierung verwendet. Wird ein Block alloziert welcher später nicht
- * per free() befreit wird wird dies als Speicherleck gemeldet.
- * 
- * @param size Grösse des Speicherblocks
- * 
- * @return Pointer auf Speicherblock
- */
-void *__wrap_malloc(const size_t size) {
-    return test_malloc(size);
-}
-
-/**
- * @brief Mock-Ersatz für originales free()
- * 
- * Per Linker Flag wird das originale free() mit dieser Funktion ersetzt.
- * Hier wird dann das von CMocka gelieferte System zur Prüfung von
- * Speicherallozierung verwendet. Wird ein Block mit malloc() alloziert
- * welcher später nicht hier befreit wird, wird dies als Speicherleck gemeldet.
- * 
- * @param ptr Pointer auf Speicherblock
- */
-void __wrap_free(void *const ptr) {
-    test_free(ptr);
-}
 
 
 /*
