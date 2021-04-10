@@ -50,8 +50,8 @@
  * dies erlaubt ist (keine Kollision mit anderen Entitäten oder der Welt).
  * Wird eine Kollision entdeckt, so wird der onCollosion-Callback beider Entitäten aufgerufen.
  * 
- * @param[in] entities Liste aller Entitäten
+ * @param[in] entityList Liste aller Entitäten
  * 
  * @return ERR_OK, ERR_PARAMETER oder ERR_FAIL
  */
-int Physics_Update(list_t *entities);
+int Physics_Update(list_t *entityList);

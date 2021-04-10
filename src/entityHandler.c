@@ -201,9 +201,8 @@ int EntityHandler_RemoveAllEntities() {
     if (!entityHandler.entityList || !entityHandler.entityList->listHead) {
         return ERR_OK;
     }
-    entity_t *entity;
     do {
-        entity = entityHandler.entityList->listHead->data;
+        entity_t *entity = entityHandler.entityList->listHead->data;
         EntityHandler_RemoveAllEntityParts(entity);
         List_Remove(entityHandler.entityList, entity);
     } while (entityHandler.entityList->listHead);
