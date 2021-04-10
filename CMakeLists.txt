@@ -1,6 +1,3 @@
-# Abgeändert von einem Basis Projekt von:
-# https://gitlab.com/aminosbh/sdl2-image-sample/-/tree/master/cmake/sdl2
-
 cmake_minimum_required(VERSION 3.16)
 
 # Projektname und Sprache
@@ -16,16 +13,21 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# Alle *.c Dateien im src Ordner als Quellcode hinzufügen
+# Alle *.c Dateien im src Ordner ausser main.c als Bibliothek hinzufügen
 file(GLOB SOURCES "src/**.c")
-add_executable(${PROJECT_NAME} ${SOURCES})
+list(FILTER SOURCES EXCLUDE REGEX ".*main.c$")
+add_library(main STATIC ${SOURCES})
 
 # Alle Dateien im Include Ordner verfügbar machen
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(main PUBLIC include)
 
 # Compiler Warnungen aktivieren
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
+if(MSVC)
+    target_compile_options(main PUBLIC /W4 /WX)
+    target_compile_definitions(main PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+else()
+    target_compile_options(main PUBLIC -Wall -Wextra -pedantic -Werror)
+endif()
 
 # Bibliotheken laden
 add_subdirectory(lib)
@@ -36,3 +38,7 @@ add_subdirectory(test)
 
 # Assets in Buildordner kopieren
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+
+# EXE des Projekts erstellen
+add_executable(${PROJECT_NAME} "src/main.c")
+target_link_libraries(${PROJECT_NAME} main)
