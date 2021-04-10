@@ -259,23 +259,6 @@ static int onDraw(entity_t *self) {
 }
 
 /**
- * @brief Mockup des echten \ref SDLW_DrawTexture().
- * 
- * Per Linker Flag wird das originale \ref SDLW_DrawTexture() mit dieser
- * Funktion ersetzt. Somit kann der EntityHandler isoliert vom restlichen System
- * getestet werden.
- * 
- * @param sprite zu zeichnendes Sprite
- * 
- * @return Fehlercode gemäss will_return() von CMocka
- */
-int __wrap_SDLW_DrawTexture(sprite_t sprite) {
-    (void)sprite;
-    function_called();
-    return mock_type(int);
-}
-
-/**
  * @brief Setup: Entität und Einzelteil erstellen und hinzufügen
  * 
  * @param[out] state Pointer auf entity_t
@@ -388,8 +371,8 @@ static void default_draw_gets_called_if_no_callback_defined(void **state) {
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
     entity->callbacks.onDraw = NULL;     // Callback entfernen
     // SDLW_DrawTexture wird aufgerufen (durch die Standard Zeichnen Funktion)
-    expect_function_call(__wrap_SDLW_DrawTexture);
-    will_return(__wrap_SDLW_DrawTexture, ERR_OK);
+    expect_function_call(SDLW_DrawTexture);
+    will_return(SDLW_DrawTexture, ERR_OK);
     assert_int_equal(EntityHandler_Draw(), ERR_OK);
 }
 
@@ -418,8 +401,8 @@ static void error_in_default_draw_is_cascaded_up(void **state) {
     entity_t *entity = (entity_t *)*state;
     entity->state = ENTITY_STATE_ACTIVE; // Entität aktiv schalten
     entity->callbacks.onDraw = NULL;     // Callback entfernen
-    expect_function_call(__wrap_SDLW_DrawTexture);
-    will_return(__wrap_SDLW_DrawTexture, ERR_FAIL);
+    expect_function_call(SDLW_DrawTexture);
+    will_return(SDLW_DrawTexture, ERR_FAIL);
     assert_int_equal(EntityHandler_Draw(), ERR_FAIL);
 }
 

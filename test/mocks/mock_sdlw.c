@@ -27,22 +27,17 @@
  */
 
 /**
- * @brief Mock-Ersatz für originales SDL_QueryTexture().
- * Ermöglicht das Testen ohne Laufzeitabhängigkeit von SDL.
+ * @brief Mockup des echten \ref SDLW_DrawTexture().
  * 
- * @param texture unbenutzt
- * @param format unbenutzt
- * @param access unbenutzt
- * @param w wird immer auf 100 gesetzt
- * @param h wird immer auf 100 gesetzt
+ * Ersetze das originale \ref SDLW_DrawTexture() mit dieser Funktion.
+ * Somit kann isoliert getestet werden.
  * 
- * @return immer ERR_OK
+ * @param sprite zu zeichnendes Sprite
+ * 
+ * @return Fehlercode gemäss will_return() von CMocka
  */
-int SDL_QueryTexture(void *texture, unsigned int *format, int *access, int *w, int *h) {
-    (*w) = 100;
-    (*h) = 100;
-    (void)access;
-    (void)format;
-    (void)texture;
-    return 0;
+int SDLW_DrawTexture(int sprite) {
+    (void)sprite;
+    function_called();
+    return mock_type(int);
 }
