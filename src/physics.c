@@ -48,6 +48,8 @@
 
 static int updateEntity(void *data, void *userData);
 static void clearNearToZero(entityPhysics_t *physics);
+static int checkForAllCollisions(entity_t *entity, list_t *entityList);
+static int checkForEntityCollision(void *data, void *userData);
 
 /*
  * Implementation Öffentlicher Funktionen
