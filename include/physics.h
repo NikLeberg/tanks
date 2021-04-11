@@ -17,6 +17,7 @@
  * 
  */
 
+#include "list.h"
 #include "entity.h"
 
 
