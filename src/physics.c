@@ -35,10 +35,10 @@
  * 
  */
 
-#define DELTA_TIME (1000.0f / 60.0f) //!< Updateintervall
-#define GRAVITY 10.0f                //!< Erdbeschleunigung [pixel / s2]
-#define NEAR_ZERO 0.01f              //!< Werte die kleiner sind zählen als 0
-#define BOUNCE_BACK_FACTOR 0.5f      //!< Wie stark der Rückstoss einer Kollisionsüberlappung gewichtet ist
+#define DELTA_TIME (1.0f / 60.0f) //!< Updateintervall
+#define GRAVITY 10.0f             //!< Erdbeschleunigung [pixel / s2]
+#define NEAR_ZERO 0.01f           //!< Werte die kleiner sind zählen als 0
+#define BOUNCE_BACK_FACTOR 0.5f   //!< Wie stark der Rückstoss einer Kollisionsüberlappung gewichtet ist
 
 
 /*
