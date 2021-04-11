@@ -26,40 +26,8 @@
  * 
  */
 
-/**
- * @brief Flags möglicher Kollision
- * 
- */
-typedef enum {
-    PHYSICS_COLLISION_WORLD = 0,     //!< Kollision mit der Welt
-    PHYSICS_COLLISION_BORDER_LEFT,   //!< Kollision mit linkem Spielrand
-    PHYSICS_COLLISION_BORDER_RIGHT,  //!< Kollision mit rechtem Spielrand
-    PHYSICS_COLLISION_BORDER_TOP,    //!< Kollision mit oberem Spielrand
-    PHYSICS_COLLISION_BORDER_BOTTOM, //!< Kollision mit unterem Spielrand
-    PHYSICS_COLLISION_ENTITY         //!< Kollision mit einer Entität
-} physicsCollisionFlags_t;
+/* ... */
 
-/**
- * @brief Informationen einer Kollision
- * 
- */
-typedef struct {
-    /**
-     * @brief Kollisionsflags
-     * 
-     * Flag mit gesetzten Bits für einzelne Kollisionen gemäss
-     * \ref physicsCollisionFlags_t welche stattgefunden haben.
-     */
-    int flags;
-
-    /**
-     * @brief Vektor der Kollisionsnormale
-     * 
-     * Die Kollisionsnormale ist der kürzeste Vektor entlang der die Entität
-     * verschoben werden müsste damit keine Kollision entsteht.
-     */
-    SDL_FPoint normale;
-} physicsCollision_t;
 
 /*
  * Variablendeklarationen
@@ -88,3 +56,27 @@ typedef struct {
  * @return ERR_OK, ERR_PARAMETER oder ERR_FAIL
  */
 int Physics_Update(list_t *entityList);
+
+/**
+ * @brief Setze die Position
+ * 
+ * @param entity Entität deren Position gesetzt werden soll
+ * @param x x-Koordinate
+ * @param y y-Koordinate (nicht kartesisch!, 0 = oben)
+ * 
+ * @return ERR_OK oder ERR_PARAMETER
+ */
+int Physics_SetPosition(entity_t *entity, float x, float y);
+
+/**
+ * @brief Setze die Geschwindigkeit
+ * 
+ * @param entity Entität deren Geschwindigkeit gesetzt werden soll
+ * @param x Horizonatale Geschwindigkeit
+ * @param y Vertikale Geschwindigkeit
+ * 
+ * @return 
+ */
+int Physics_SetVelocity(entity_t *entity, float x, float y);
+int Physics_SetVelocityPolar(entity_t *entity, float velocity, double angle);
+int Physics_SetRotation(entity_t *entity, double rotation);

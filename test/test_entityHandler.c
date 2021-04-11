@@ -236,11 +236,13 @@ static int onUpdate(entity_t *self, inputEvent_t *inputEvents) {
  * @brief Mockup eines onCollision Callbacks
  * 
  * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
+ * @param collision Pointer auf Informationen zur aufgetretenen Kollision
  * 
  * @return Fehlercode gemäss will_return() von CMocka
  */
-static int onCollision(entity_t *self) {
+static int onCollision(entity_t *self, entityCollision_t *collision) {
     check_expected_ptr(self);
+    check_expected_ptr(collision);
     function_called();
     return mock_type(int);
 }

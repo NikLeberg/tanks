@@ -16,6 +16,7 @@
  */
 
 #include <stdbool.h>
+#include <math.h>
 
 #include "error.h"
 #include "list.h"
@@ -100,18 +101,6 @@ int Physics_SetRotation(entity_t *entity, double rotation) {
  * 
  */
 
-// static entity_t *entityListToArray(list_t *entityList) {
-//     if (!entityList->elementCount) {
-//         return NULL;
-//     }
-//     entity_t *entityArray = NULL;
-//     entityArray = (entity_t *)calloc(entityList->elementCount, sizeof(entity_t *));
-//     if (!entityArray) {
-//         return NULL;
-//     }
-//     //for (int i = 0; i < entityList->elementCount)
-// }
-
 static int updateEntity(void *data, void *userData) {
     entity_t *entity = (entity_t *)data;
     list_t *entityList = (list_t *)userData;
@@ -149,14 +138,14 @@ static void clearNearToZero(entityPhysics_t *physics) {
 
 static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
     int ret = ERR_OK;
-    physicsCollision_t worldCollision;
-    ret = World_CheckCollision(entity->physics.aabb, &worldCollision);
+    entityCollision_t worldCollision = {0};
+    // ret = World_CheckCollision(entity->physics.aabb, &worldCollision); world-Modul noch nicht fertig
     if (ret) {
         return ret;
     } else if (worldCollision.flags) {
         // Callback der Entität aufrufen, Kollision mit der Welt
         if (entity->callbacks.onCollision) {
-            entity->callbacks.onCollision(entity, worldCollision);
+            entity->callbacks.onCollision(entity, &worldCollision);
         }
     }
     ret = List_ForeachArg(entityList, checkForEntityCollision, entity);
@@ -182,7 +171,7 @@ static int checkForEntityCollision(void *data, void *userData) {
     // Kollisionsnormale ermitteln: suche die Kürzere Seite der Überlappung und
     // ermittle die Vorzeichen des Vektors. Als Vektorlänge wird die Breite bez.
     // Höhe der Überlappung genommen und mit einem Faktor gewichtet.
-    physicsCollision_t entityCollision = {.flags = 0x1 < PHYSICS_COLLISION_ENTITY};
+    entityCollision_t entityCollision = {.flags = 0x1 < ENTITY_COLLISION_ENTITY};
     if (intersection.w > intersection.h) {
         // Breiter als Hoch = Vektor auf y-Achse
         entityCollision.normale.y = intersection.h * BOUNCE_BACK_FACTOR;
@@ -198,7 +187,7 @@ static int checkForEntityCollision(void *data, void *userData) {
     }
     // Callback der Entität aufrufen, Kollision mit anderer Entität
     if (sourceEntity->callbacks.onCollision) {
-        sourceEntity->callbacks.onCollision(sourceEntity, entityCollision);
+        sourceEntity->callbacks.onCollision(sourceEntity, &entityCollision);
     }
     return ERR_OK;
 }
