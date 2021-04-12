@@ -143,7 +143,7 @@ typedef struct {
      * @note Nur gültig wenn in \ref entityCollision_t.flags
      * ENTITY_COLLISION_ENTITY aktiviert ist.
      */
-    struct entity_s *partner;
+    const struct entity_s* const partner;
 } entityCollision_t;
 
 /**
@@ -184,14 +184,21 @@ typedef struct {
 
     /**
      * @brief Kollision mit der Welt oder anderen Entitäten
-     *
+     * 
+     * Informiert die Entität über eine stattgefundene Kollision. Die Flags in
+     * \ref entityCollision_t.flags geben an welche Kollision genau erfolgt ist.
+     * Die Entität darf auf die Informationen physikalisch reagieren, muss dann
+     * aber die Flags, auf die sie reagiert hat, 0 setzen. Nach dem Callback
+     * reagiert das physik-Modul auf die noch gesetzten Flags.
      * @note Kollidiert eine Entität A mit einer Entität B, so werden beide
      * informiert, denn die Physik kann nicht ermitteln wer der Auslöser der
      * Kollision war. Der \p onCollision Callback wird für A mit \p self = A und
      * \ref entityCollision_t.partner = B aufgerufen und für B wird
      * \p onCollision mit \p self = B und \ref entityCollision_t.partner = A.
-     * @note Ist dieser Callback NULL, so wird die Kollision ignoriert.
-
+     * @note Ist dieser Callback NULL, so wird die Kollision gänzlich ignoriert.
+     * Dies bedeutet aber, dass das physik-Modul auch nicht reagiert und die
+     * Entität wird durch die Welt fallen.
+     * 
      * @param self Die Entität dessen Callback gerade aufgerufen wird
      * @param collision Struktur mit Informationen über die Kollision
      * 
@@ -204,7 +211,7 @@ typedef struct {
      *
      * Jeder Zyklus wird die Entität hiermit aufgefordert sich selbst zu
      * zeichnen.
-     * @note Ist dieser Callback NULL, so wird die standart Zeichnen Funktion
+     * @note Ist dieser Callback NULL, so wird die standard Zeichnen Funktion
      * des EntityHandlers verwendet.
 
      * @param self Die Entität dessen Callback gerade aufgerufen wird

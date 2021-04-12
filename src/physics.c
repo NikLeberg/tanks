@@ -36,11 +36,43 @@
  * 
  */
 
-#define DELTA_TIME (1.0f / 60.0f) //!< Updateintervall
-#define GRAVITY 10.0f             //!< Erdbeschleunigung [pixel / s2]
-#define NEAR_ZERO 0.01f           //!< Werte die kleiner sind zählen als 0
-#define BOUNCE_BACK_FACTOR 0.5f   //!< Wie stark der Rückstoss einer Kollisionsüberlappung gewichtet ist
+#define DELTA_TIME (1.0 / 60.0)   //!< Updateintervall [s]
+#define GRAVITY 10.0              //!< Erdbeschleunigung [pixel / s2]
+#define NEAR_ZERO 0.01            //!< Werte die kleiner sind zählen als 0
 
+/**
+ * @brief Rückstossfaktor einer Kollision in X-Achse mit der Welt
+ * 
+ * Skaliert die Kollisionsnormale in X-Richtung, empirisch ermittelt.
+ * Generell sollte der Rückstoss in X-Richtung klein genug sein, dass eine
+ * seitliche Touchierung die Entität nicht zu stark zurückbeschleunigt wird.
+ * Aber gross genug, dass schnell bewegende Entitäten nicht seitwärts in die
+ * Welt bewegen können.
+ */
+#define WORLD_BOUNCE_X_FACTOR 0.5
+
+/**
+ * @brief Rückstossfaktor einer Kollision in Y-Achse mit der Welt
+ * 
+ * Skaliert die Kollisionsnormale in Y-Richtung, empirisch ermittelt.
+ * Generell sollte der Rückstoss in Y-Richtung gross genug sein um das Versinken
+ * der Entität in den Boden zu verhindern. Aber nicht zu gross, damit keine zu
+ * grossen Steigungen entlang bewegt werden kann.
+ */
+#define WORLD_BOUNCE_Y_FACTOR 0.5
+
+/**
+ * @brief Rückstossfaktor einer Kollision zweier Entitäten
+ * 
+ * Skaliert die Kollisionsnormale in beide Achsen, empirisch ermittelt.
+ * Soll gross genug sein so dass Entitäten nicht ineinander oder durcheinander
+ * bewegen können.
+ */
+#define ENTITY_BOUNCE_FACTOR 0.5
+
+/**
+ * @todo Definieren dass callbacks die flags auf 0 setzen dessen Auswirkungen sie bereits "gehandlet" haben. Rest übernimmt die physik
+ */
 
 /*
  * Private Funktionsprototypen
@@ -51,6 +83,7 @@ static int updateEntity(void *data, void *userData);
 static void clearNearToZero(entityPhysics_t *physics);
 static int checkForAllCollisions(entity_t *entity, list_t *entityList);
 static int checkForEntityCollision(void *data, void *userData);
+static int handleCollision(entity_t *entity, entityCollision_t *collision);
 
 /*
  * Implementation Öffentlicher Funktionen
@@ -119,33 +152,39 @@ static int updateEntity(void *data, void *userData) {
 }
 
 static void clearNearToZero(entityPhysics_t *physics) {
-    if (abs(physics->velocity.x) <= NEAR_ZERO) {
-        physics->velocity.x = 0.0f;
+    if (fabs(physics->velocity.x) <= NEAR_ZERO || isnan(physics->velocity.x)) {
+        physics->velocity.x = 0.0;
     }
-    if (abs(physics->velocity.y) <= NEAR_ZERO) {
-        physics->velocity.y = 0.0f;
+    if (fabs(physics->velocity.y) <= NEAR_ZERO || isnan(physics->velocity.y)) {
+        physics->velocity.y = 0.0;
     }
-    if (abs(physics->position.x) <= NEAR_ZERO) {
-        physics->velocity.x = 0.0f;
+    if (fabs(physics->position.x) <= NEAR_ZERO || isnan(physics->position.x)) {
+        physics->velocity.x = 0.0;
     }
-    if (abs(physics->position.y) <= NEAR_ZERO) {
-        physics->velocity.y = 0.0f;
+    if (fabs(physics->position.y) <= NEAR_ZERO || isnan(physics->position.y)) {
+        physics->velocity.y = 0.0;
     }
-    if (abs(physics->rotation) <= NEAR_ZERO) {
-        physics->rotation = 0.0f;
+    if (fabs(physics->rotation) <= NEAR_ZERO || isnan(physics->rotation)) {
+        physics->rotation = 0.0;
     }
 }
 
 static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
     int ret = ERR_OK;
-    entityCollision_t worldCollision = {0};
+    entityCollision_t worldCollision = {.partner = NULL};
     // ret = World_CheckCollision(entity->physics.aabb, &worldCollision); world-Modul noch nicht fertig
     if (ret) {
+        // Fehler bei der Kollisionerkennung
         return ret;
     } else if (worldCollision.flags) {
-        // Callback der Entität aufrufen, Kollision mit der Welt
+        // Kollision mit der Welt
+        // Skaliere Kollisionsnormale gemäss Rückstossfaktoren
+        worldCollision.normale.x *= WORLD_BOUNCE_X_FACTOR;
+        worldCollision.normale.y *= WORLD_BOUNCE_Y_FACTOR;
         if (entity->callbacks.onCollision) {
+            // Callback der Entität aufrufen
             entity->callbacks.onCollision(entity, &worldCollision);
+            handleCollision(entity, &worldCollision);
         }
     }
     ret = List_ForeachArg(entityList, checkForEntityCollision, entity);
@@ -168,26 +207,57 @@ static int checkForEntityCollision(void *data, void *userData) {
     if (!collision) {
         return ERR_OK;
     }
+    entityCollision_t entityCollision = {
+        .flags = 0x1 < ENTITY_COLLISION_ENTITY,
+        .partner = targetEntity
+    };
     // Kollisionsnormale ermitteln: suche die Kürzere Seite der Überlappung und
     // ermittle die Vorzeichen des Vektors. Als Vektorlänge wird die Breite bez.
     // Höhe der Überlappung genommen und mit einem Faktor gewichtet.
-    entityCollision_t entityCollision = {.flags = 0x1 < ENTITY_COLLISION_ENTITY};
     if (intersection.w > intersection.h) {
         // Breiter als Hoch = Vektor auf y-Achse
-        entityCollision.normale.y = intersection.h * BOUNCE_BACK_FACTOR;
+        entityCollision.normale.y = intersection.h * ENTITY_BOUNCE_FACTOR;
         if (sourceEntity->physics.aabb.y < intersection.y) {
-            entityCollision.normale.y *= -1.0f;
+            entityCollision.normale.y *= -1.0;
         }
     } else {
         // Höher als Breit = Vektor auf x-Achse
-        entityCollision.normale.x = intersection.w * BOUNCE_BACK_FACTOR;
+        entityCollision.normale.x = intersection.w * ENTITY_BOUNCE_FACTOR;
         if (sourceEntity->physics.aabb.x < intersection.x) {
-            entityCollision.normale.x *= -1.0f;
+            entityCollision.normale.x *= -1.0;
         }
     }
     // Callback der Entität aufrufen, Kollision mit anderer Entität
     if (sourceEntity->callbacks.onCollision) {
         sourceEntity->callbacks.onCollision(sourceEntity, &entityCollision);
+        handleCollision(sourceEntity, &entityCollision);
+    }
+    return ERR_OK;
+}
+
+
+static int handleCollision(entity_t *entity, entityCollision_t *collision) {
+    if (!entity || !collision) {
+        return ERR_PARAMETER;
+    }
+    // Kollision mit dem linken oder rechten Bildrand
+    if (collision->flags & (0x1 < ENTITY_COLLISION_BORDER_LEFT)
+     || collision->flags & (0x1 < ENTITY_COLLISION_BORDER_RIGHT)) {
+        // horizontale Geschwindigkeit 0 setzen
+        entity->physics.velocity.x = 0.0;
+    }
+    // Kollision mit dem oberen oder unteren Bildrand
+    if (collision->flags & (0x1 < ENTITY_COLLISION_BORDER_TOP)
+     || collision->flags & (0x1 < ENTITY_COLLISION_BORDER_BOTTOM)) {
+        // vertikale Geschwindigkeit 0 setzen
+        entity->physics.velocity.y = 0.0;
+    }
+    // Kollision mit einer anderen Entität oder der Welt
+    if (collision->flags & (0x1 < ENTITY_COLLISION_ENTITY)
+     || collision->flags & (0x1 < ENTITY_COLLISION_WORLD)) {
+        // entlang der Normale die Geschwidigkeit erhöhen
+        entity->physics.position.x += collision->normale.x * DELTA_TIME;
+        entity->physics.position.y += collision->normale.y * DELTA_TIME;
     }
     return ERR_OK;
 }
