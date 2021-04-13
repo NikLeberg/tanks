@@ -208,7 +208,7 @@ static int checkForEntityCollision(void *data, void *userData) {
         return ERR_OK;
     }
     entityCollision_t entityCollision = {
-        .flags = 0x1 < ENTITY_COLLISION_ENTITY,
+        .flags = ENTITY_COLLISION_ENTITY,
         .partner = targetEntity
     };
     // Kollisionsnormale ermitteln: suche die Kürzere Seite der Überlappung und
@@ -241,20 +241,20 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
         return ERR_PARAMETER;
     }
     // Kollision mit dem linken oder rechten Bildrand
-    if (collision->flags & (0x1 < ENTITY_COLLISION_BORDER_LEFT)
-     || collision->flags & (0x1 < ENTITY_COLLISION_BORDER_RIGHT)) {
+    if (collision->flags & ENTITY_COLLISION_BORDER_LEFT
+     || collision->flags & ENTITY_COLLISION_BORDER_RIGHT) {
         // horizontale Geschwindigkeit 0 setzen
         entity->physics.velocity.x = 0.0;
     }
     // Kollision mit dem oberen oder unteren Bildrand
-    if (collision->flags & (0x1 < ENTITY_COLLISION_BORDER_TOP)
-     || collision->flags & (0x1 < ENTITY_COLLISION_BORDER_BOTTOM)) {
+    if (collision->flags & ENTITY_COLLISION_BORDER_TOP
+     || collision->flags & ENTITY_COLLISION_BORDER_BOTTOM) {
         // vertikale Geschwindigkeit 0 setzen
         entity->physics.velocity.y = 0.0;
     }
     // Kollision mit einer anderen Entität oder der Welt
-    if (collision->flags & (0x1 < ENTITY_COLLISION_ENTITY)
-     || collision->flags & (0x1 < ENTITY_COLLISION_WORLD)) {
+    if (collision->flags & ENTITY_COLLISION_ENTITY
+     || collision->flags & ENTITY_COLLISION_WORLD) {
         // entlang der Normale die Geschwidigkeit erhöhen
         entity->physics.position.x += collision->normale.x * DELTA_TIME;
         entity->physics.position.y += collision->normale.y * DELTA_TIME;

@@ -105,12 +105,12 @@ typedef struct {
  * 
  */
 typedef enum {
-    ENTITY_COLLISION_WORLD = 0,     //!< Kollision mit der Welt
-    ENTITY_COLLISION_BORDER_LEFT,   //!< Kollision mit linkem Spielrand
-    ENTITY_COLLISION_BORDER_RIGHT,  //!< Kollision mit rechtem Spielrand
-    ENTITY_COLLISION_BORDER_TOP,    //!< Kollision mit oberem Spielrand
-    ENTITY_COLLISION_BORDER_BOTTOM, //!< Kollision mit unterem Spielrand
-    ENTITY_COLLISION_ENTITY         //!< Kollision mit einer Entität
+    ENTITY_COLLISION_WORLD = 1,          //!< Kollision mit der Welt
+    ENTITY_COLLISION_BORDER_LEFT = 2,    //!< Kollision mit linkem Spielrand
+    ENTITY_COLLISION_BORDER_RIGHT = 4,   //!< Kollision mit rechtem Spielrand
+    ENTITY_COLLISION_BORDER_TOP = 8,     //!< Kollision mit oberem Spielrand
+    ENTITY_COLLISION_BORDER_BOTTOM = 16, //!< Kollision mit unterem Spielrand
+    ENTITY_COLLISION_ENTITY = 32         //!< Kollision mit einer Entität
 } entityCollisionFlags_t;
 
 /**
@@ -143,7 +143,7 @@ typedef struct {
      * @note Nur gültig wenn in \ref entityCollision_t.flags
      * ENTITY_COLLISION_ENTITY aktiviert ist.
      */
-    const struct entity_s* const partner;
+    const struct entity_s *const partner;
 } entityCollision_t;
 
 /**
