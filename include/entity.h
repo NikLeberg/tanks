@@ -134,7 +134,7 @@ typedef struct {
      * Die Kollisionsnormale ist der kürzeste Vektor entlang der die Entität
      * verschoben werden müsste damit keine Kollision entsteht.
      */
-    SDL_FPoint normale;
+    SDL_FPoint normal;
 
     /**
      * @brief Kollisionspartner
