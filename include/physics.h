@@ -75,8 +75,27 @@ int Physics_SetPosition(entity_t *entity, float x, float y);
  * @param x Horizonatale Geschwindigkeit
  * @param y Vertikale Geschwindigkeit
  * 
- * @return 
+ * @return ERR_OK oder ERR_PARAMETER
  */
 int Physics_SetVelocity(entity_t *entity, float x, float y);
+
+/**
+ * @brief Setze die Geschwindigkeit in Polarform
+ * 
+ * @param entity Entität deren Geschwindigkeit gesetzt werden soll
+ * @param velocity Betrag der Geschwindigkeit
+ * @param angle Winkel zur Horizontalen, positiv = Uhrzeigersinn
+ * 
+ * @return ERR_OK oder ERR_PARAMETER
+ */
 int Physics_SetVelocityPolar(entity_t *entity, float velocity, double angle);
+
+/**
+ * @brief Setze die Rotation
+ * 
+ * @param entity Entität deren Rotation gesetzt werden soll
+ * @param rotation Winkel zur Horizontalen, positiv = Uhrzeigersinn
+ * 
+ * @return ERR_OK oder ERR_PARAMETER
+ */
 int Physics_SetRotation(entity_t *entity, double rotation);

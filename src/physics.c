@@ -70,9 +70,6 @@
  */
 #define ENTITY_BOUNCE_FACTOR 0.5
 
-/**
- * @todo Definieren dass callbacks die flags auf 0 setzen dessen Auswirkungen sie bereits "gehandlet" haben. Rest übernimmt die physik
- */
 
 /*
  * Private Funktionsprototypen
@@ -116,8 +113,9 @@ int Physics_SetVelocity(entity_t *entity, float x, float y) {
 }
 
 int Physics_SetVelocityPolar(entity_t *entity, float velocity, double angle) {
-    return Physics_SetVelocity(entity, velocity * sin(-angle),
-                               -(velocity * cos(-angle)));
+    double angleRad = angle * (M_PI / 180.0);
+    return Physics_SetVelocity(entity, velocity * cos(-angleRad),
+                               -(velocity * sin(-angleRad)));
 }
 
 int Physics_SetRotation(entity_t *entity, double rotation) {
@@ -179,8 +177,8 @@ static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
     } else if (worldCollision.flags) {
         // Kollision mit der Welt
         // Skaliere Kollisionsnormale gemäss Rückstossfaktoren
-        worldCollision.normale.x *= WORLD_BOUNCE_X_FACTOR;
-        worldCollision.normale.y *= WORLD_BOUNCE_Y_FACTOR;
+        worldCollision.normal.x *= WORLD_BOUNCE_X_FACTOR;
+        worldCollision.normal.y *= WORLD_BOUNCE_Y_FACTOR;
         if (entity->callbacks.onCollision) {
             // Callback der Entität aufrufen
             entity->callbacks.onCollision(entity, &worldCollision);
@@ -216,15 +214,15 @@ static int checkForEntityCollision(void *data, void *userData) {
     // Höhe der Überlappung genommen und mit einem Faktor gewichtet.
     if (intersection.w > intersection.h) {
         // Breiter als Hoch = Vektor auf y-Achse
-        entityCollision.normale.y = intersection.h * ENTITY_BOUNCE_FACTOR;
+        entityCollision.normal.y = intersection.h * ENTITY_BOUNCE_FACTOR;
         if (sourceEntity->physics.aabb.y < intersection.y) {
-            entityCollision.normale.y *= -1.0;
+            entityCollision.normal.y *= -1.0;
         }
     } else {
         // Höher als Breit = Vektor auf x-Achse
-        entityCollision.normale.x = intersection.w * ENTITY_BOUNCE_FACTOR;
+        entityCollision.normal.x = intersection.w * ENTITY_BOUNCE_FACTOR;
         if (sourceEntity->physics.aabb.x < intersection.x) {
-            entityCollision.normale.x *= -1.0;
+            entityCollision.normal.x *= -1.0;
         }
     }
     // Callback der Entität aufrufen, Kollision mit anderer Entität
@@ -256,8 +254,8 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
     if (collision->flags & ENTITY_COLLISION_ENTITY
      || collision->flags & ENTITY_COLLISION_WORLD) {
         // entlang der Normale die Geschwidigkeit erhöhen
-        entity->physics.position.x += collision->normale.x * DELTA_TIME;
-        entity->physics.position.y += collision->normale.y * DELTA_TIME;
+        entity->physics.position.x += collision->normal.x * DELTA_TIME;
+        entity->physics.position.y += collision->normal.y * DELTA_TIME;
     }
     return ERR_OK;
 }
