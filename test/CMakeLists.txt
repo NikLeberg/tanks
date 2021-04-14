@@ -46,3 +46,5 @@ add_custom_test(test_sprite "test_sprite.c;mocks/mock_heap.c;mocks/mock_sdl.c")
 add_custom_test(test_sdlw_visual "test_sdlw_visual.c")
 
 add_custom_test(test_entityHandler "test_entityHandler.c;mocks/mock_sdlw.c")
+
+add_custom_test(test_physics "test_physics.c")
