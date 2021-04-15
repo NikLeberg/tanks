@@ -76,10 +76,73 @@
  * 
  */
 
+/**
+ * @brief Berechne Physikschritt für eine Entität.
+ *
+ * Wird durch List_ForeachArg() für jede Entität der Liste aufgerufen und
+ * berechnet einen Physikschritt.
+ * 
+ * @param data opaker Pointer auf eine Entität
+ * @param userData opaker Pointer auf Entitätsliste
+ *
+ * @return ERR_OK oder ERR_FAIL
+ */
 static int updateEntity(void *data, void *userData);
+
+/**
+ * @brief Bereinige Physikdaten.
+ * 
+ * Da sehr kleine Beschleunigungen mühsam berechnet werden müssen, aber keinen
+ * nennenswerten einfluss auf die Position haben, werden diese auf 0 gesetzt.
+ * 
+ * @param[in,out] physics Physikdaten welche berenigt werden sollen
+ */
 static void clearNearToZero(entityPhysics_t *physics);
+
+/**
+ * @brief Überprüfe auf Kollision einer Entität mit allen anderen und der Welt.
+ * 
+ * Überprüft zuerst auf eine Kollision mit der Welt und danach iteriert es über
+ * die Liste an Entitäten und prüft abermals auf Kollisionen. Die Kollision mit
+ * der Welt wird hier dem Callback mitgeteilt.
+ * 
+ * @note Komplexität ist O(n^2)
+ * 
+ * @param entity zu prüfende Entität
+ * @param entityList Liste aller Entitäten
+ * 
+ * @return ERR_OK oder ERR_FAIL
+ */
 static int checkForAllCollisions(entity_t *entity, list_t *entityList);
+
+/**
+ * @brief Überprüfe auf Kollision zwischen zwei Entitäten.
+ *
+ * Wird durch List_ForeachArg() aufgerufen und prüft mittels SDL auf Kollision.
+ * Falls eine existiert so wird die Kollisionsnormale gesetzt und der Callback
+ * der Entität aufgerufen.
+ * 
+ * @param data opaker Pointer auf eine Entität für die momentan geprüft wird
+ * @param userData opaker Pointer auf Entität gegen die geprüft wird
+ *
+ * @return ERR_OK oder ERR_FAIL
+ */
 static int checkForEntityCollision(void *data, void *userData);
+
+/**
+ * @brief Reagiere mit Standardaktion auf Kollision.
+ * 
+ * Reagiere sehr rudimentär auf Kollisionen auf welche der Callback 
+ * \ref entityCallbacks_t.onCollision der Entität noch nicht reagiert hat (er
+ * hat die Flags nicht zurückgesetzt). Für Kollisionen mit Normale wird entlang
+ * der Normale die Geschwindigkeit erhöht. Die restlichen Kollisionen setzen die
+ * Geschwindigkeit zurück auf 0.
+ * 
+ * @param entity Entität die an der Kollision beteiligt ist
+ * @param collision Infos der Kollision
+ * 
+ * @return ERR_OK
+ */
 static int handleCollision(entity_t *entity, entityCollision_t *collision);
 
 /*
