@@ -157,10 +157,10 @@ static void clearNearToZero(entityPhysics_t *physics) {
         physics->velocity.y = 0.0;
     }
     if (fabs(physics->position.x) <= NEAR_ZERO || isnan(physics->position.x)) {
-        physics->velocity.x = 0.0;
+        physics->position.x = 0.0;
     }
     if (fabs(physics->position.y) <= NEAR_ZERO || isnan(physics->position.y)) {
-        physics->velocity.y = 0.0;
+        physics->position.y = 0.0;
     }
     if (fabs(physics->rotation) <= NEAR_ZERO || isnan(physics->rotation)) {
         physics->rotation = 0.0;
@@ -254,8 +254,8 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
     if (collision->flags & ENTITY_COLLISION_ENTITY
      || collision->flags & ENTITY_COLLISION_WORLD) {
         // entlang der Normale die Geschwidigkeit erhöhen
-        entity->physics.position.x += collision->normal.x * DELTA_TIME;
-        entity->physics.position.y += collision->normal.y * DELTA_TIME;
+        entity->physics.velocity.x += collision->normal.x * DELTA_TIME;
+        entity->physics.velocity.y += collision->normal.y * DELTA_TIME;
     }
     return ERR_OK;
 }

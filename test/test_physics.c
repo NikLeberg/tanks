@@ -189,7 +189,14 @@ static void physics_can_set_rotation_of_entity(void **state) {
 static int onCollision(entity_t *self, entityCollision_t *collision) {
     function_called();
     check_expected_ptr(self);
-    // zu löschende Flags für bereits reagierte Kollisionen
+    // Wenn eine Kollision mit anderen Entitäten stattfindet sollte immer eine
+    // Kollisionsnormale existieren.
+    if (collision->flags & ENTITY_COLLISION_ENTITY) {
+        float normalSum = collision->normal.x + collision->normal.y;
+        assert_float_not_equal(normalSum, 0.0f, EPSILON);
+    }
+    // Zu löschende Flags für bereits reagierte Kollisionen auf die die Physik
+    // nicht mehr reagieren soll.
     collision->flags &= ~mock_type(int);
     return mock_type(int);
 }
@@ -199,8 +206,8 @@ static int onCollision(entity_t *self, entityCollision_t *collision) {
  * 
  */
 typedef struct {
-    entity_t entity0; //!< Erste Entität mit allen Werten = 0
-    entity_t entity1; //!< Zweite Entität mit allen Werten = 0
+    entity_t entity0; //!< Erste Entität mit allen Werten = 0, aber w & h = 10
+    entity_t entity1; //!< Zweite Entität mit allen Werten = 0, aber w & h = 10
     list_t *entityList; //!< Liste der Entitäten
 } testState_t;
 
@@ -270,18 +277,17 @@ static void physics_applies_gravity_to_entity(void **state) {
 static void physics_on_collision_callback_is_called_for_identical_aabbs(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Überlappen sich vollständig
-    SDL_FPoint position = {.x = 0.0f, .y = 0.0f};
-    testState->entity0.physics.position = position;
-    testState->entity1.physics.position = position;
+    Physics_SetPosition(&testState->entity0, 0.0f, 0.0f);
+    Physics_SetPosition(&testState->entity1, 0.0f, 0.0f);
     // Callback der zweiten Entität wird aufgerufen (da diese in der Liste zuerst ist)
     expect_function_call(onCollision);
     expect_value(onCollision, self, &testState->entity1);
-    will_return(onCollision, 0); // noch keine Flags zum zurücksetzen
+    will_return(onCollision, 0); // keine Flags zurücksetzen
     will_return(onCollision, ERR_OK); // Callback hat keinen Fehler
     // Callback der ersten Entität wird aufgerufen (da diese in der Liste zuletzt ist)
     expect_function_call(onCollision);
     expect_value(onCollision, self, &testState->entity0);
-    will_return(onCollision, 0); // noch keine Flags zum zurücksetzen
+    will_return(onCollision, 0); // keine Flags zurücksetzen
     will_return(onCollision, ERR_OK); // Callback hat keinen Fehler
     // Update durchführen
     assert_int_equal(Physics_Update(testState->entityList), ERR_OK);
@@ -295,19 +301,17 @@ static void physics_on_collision_callback_is_called_for_identical_aabbs(void **s
 static void physics_on_collision_callback_is_called_for_touching_aabbs(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Überlappen sich rechts mit 1 Pixel
-    SDL_FPoint position0 = {.x = 0.0f, .y = 0.0f};
-    testState->entity0.physics.position = position0;
-    SDL_FPoint position1 = {.x = 9.0f, .y = 0.0f};
-    testState->entity1.physics.position = position1;
+    Physics_SetPosition(&testState->entity0, 0.0f, 0.0f);
+    Physics_SetPosition(&testState->entity1, 9.0f, 0.0f);
     // Callback der zweiten Entität wird aufgerufen (da diese in der Liste zuerst ist)
     expect_function_call(onCollision);
     expect_value(onCollision, self, &testState->entity1);
-    will_return(onCollision, 0); // noch keine Flags zum zurücksetzen
+    will_return(onCollision, 0); // keine Flags zurücksetzen
     will_return(onCollision, ERR_OK); // Callback hat keinen Fehler
     // Callback der ersten Entität wird aufgerufen (da diese in der Liste zuletzt ist)
     expect_function_call(onCollision);
     expect_value(onCollision, self, &testState->entity0);
-    will_return(onCollision, 0); // noch keine Flags zum zurücksetzen
+    will_return(onCollision, 0); // keine Flags zurücksetzen
     will_return(onCollision, ERR_OK); // Callback hat keinen Fehler
     // Update durchführen
     assert_int_equal(Physics_Update(testState->entityList), ERR_OK);
@@ -321,14 +325,43 @@ static void physics_on_collision_callback_is_called_for_touching_aabbs(void **st
 static void physics_on_collision_callback_is_not_called_for_side_by_side_aabbs(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Seite an Seite aber ohne Kollision, ohne Pixel dazwischen
-    SDL_FPoint position0 = {.x = 0.0f, .y = 0.0f};
-    testState->entity0.physics.position = position0;
-    SDL_FPoint position1 = {.x = 11.0f, .y = 0.0f};
-    testState->entity1.physics.position = position1;
+    Physics_SetPosition(&testState->entity0, 0.0f, 0.0f);
+    Physics_SetPosition(&testState->entity1, 11.0f, 0.0f);
     // Callback der zweiten Entität wird nicht aufgerufen
     // Callback der ersten Entität wird nicht aufgerufen
     // Update durchführen
     assert_int_equal(Physics_Update(testState->entityList), ERR_OK);
+}
+
+/**
+ * @brief onCollision Callback kann Flags der Kollision löschen.
+ * Löscht der Callback Flags, so sollte die Physik nicht mehr ihre eigene
+ * standard Reaktion ausführen.
+ * 
+ * @param state Pointer auf testState_t*
+ */
+static void physics_on_collision_callback_can_clear_flags(void **state) {
+    testState_t *testState = (testState_t *)*state;
+    // Horizontale Geschwindigkeit setzen
+    float horizontalVelocity = 1.0f;
+    Physics_SetVelocity(&testState->entity0, horizontalVelocity, 0.0f);
+    Physics_SetVelocity(&testState->entity1, horizontalVelocity, 0.0f);
+    // Callback der zweiten Entität wird aufgerufen (da diese in der Liste zuerst ist)
+    expect_function_call(onCollision);
+    expect_value(onCollision, self, &testState->entity1);
+    will_return(onCollision, ENTITY_COLLISION_ENTITY); // "handle" die Kollision
+    will_return(onCollision, ERR_OK); // Callback hat keinen Fehler
+    // Callback der ersten Entität wird aufgerufen (da diese in der Liste zuletzt ist)
+    expect_function_call(onCollision);
+    expect_value(onCollision, self, &testState->entity0);
+    will_return(onCollision, 0); // keine Flags zurücksetzen
+    will_return(onCollision, ERR_OK); // Callback hat keinen Fehler
+    // Update durchführen
+    assert_int_equal(Physics_Update(testState->entityList), ERR_OK);
+    // Für die erste Entität wurde die Standardaktion durchgeführt
+    assert_float_not_equal(testState->entity0.physics.velocity.x, horizontalVelocity, EPSILON);
+    // Für die zweite Entität wurde nicht Standardmässig reagiert
+    assert_float_equal(testState->entity1.physics.velocity.x, horizontalVelocity, EPSILON);
 }
 
 /**
@@ -362,6 +395,9 @@ int main(void) {
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
             physics_on_collision_callback_is_not_called_for_side_by_side_aabbs,
+            setupTestState, teardownTestState),
+        cmocka_unit_test_setup_teardown(
+            physics_on_collision_callback_can_clear_flags,
             setupTestState, teardownTestState),
     };
     return cmocka_run_group_tests(physics, NULL, NULL);
