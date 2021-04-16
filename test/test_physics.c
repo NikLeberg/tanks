@@ -24,6 +24,7 @@
 
 #include "error.h"
 #include "physics.h"
+#include "sdlWrapper.h"
 
 
 /*
@@ -365,6 +366,114 @@ static void physics_on_collision_callback_can_clear_flags(void **state) {
 }
 
 /**
+ * @brief Simuliere zwei fallende Rechecke.
+ * Das rechte bewegt sich zusätzlich nach links. Es muss eine Kollision
+ * stattfinden die die beiden voneinander weg bewegt. Am Ende sollte das rechte
+ * Rechteck immernoch rechts sein und sich nicht durch das linke hindurch bewegt
+ * haben.
+ * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
+ * \ref GRAVITY oder der Rückstossfaktor \ref ENTITY_BOUNCE_FACTOR falsch
+ * eingestellt.
+ * @note In der GitLab-Pipeline wird lediglich simuliert, aber nichts angezeigt.
+ * 
+ * @param state Pointer auf testState_t*
+ */
+static void physics_simulation_of_sideway_touch_has_collision_and_does_not_phase_trough(void **state) {
+    testState_t *testState = (testState_t *)*state;
+    // Startzustand setzen, zwei Rechtecke am oberen Rand
+    Physics_SetPosition(&testState->entity0, (800 / 2) - 30, 0);
+    Physics_SetPosition(&testState->entity1, (800 / 2) + 30, 0);
+    // rechtes Rechteck bewegt sich nach links
+    Physics_SetVelocity(&testState->entity1, -20.0f, 0.0f);
+    // Der Kollisionscallback soll mindestens 1 mal aufgerufen werden
+    expect_function_call_any(onCollision);
+    // Die Funktionsargumente nicht prüfen
+    expect_not_value_count(onCollision, self, 0, -1);
+    // alle Mockwerte sollen 0 sein
+    will_return_always(onCollision, 0);
+    // In der GitLab-Pipeline wird nur auf die Kollision geprüft, nicht aber die
+    // visuelle Ausgabe.
+#ifndef CI_TEST
+    SDLW_Init(800, 600);
+#endif
+    // 5 Sekunden lang simulieren
+    for (int i = 0; i < 60 * 5; ++i) {
+        Physics_Update(testState->entityList);
+#ifndef CI_TEST
+        SDL_Color black = {.r = 255, .g = 255, .b = 255};
+        SDLW_Clear(black);
+        SDL_Color red = {.r = 255, .g = 0, .b = 0};
+        SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
+        SDL_Color green = {.r = 0, .g = 255, .b = 0};
+        SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
+        SDL_Delay(1000 / 60);
+        SDLW_Render();
+#endif
+    }
+    // Das rechte Rechteck ist nicht durch das linke hindurch gegangen
+    assert_not_in_range(testState->entity1.physics.aabb.x, 0, testState->entity0.physics.aabb.x);
+#ifndef CI_TEST
+    SDLW_Quit();
+#endif
+}
+
+/**
+ * @brief Simuliere ein Rechteck welches auf ein anderes Fällt.
+ * Das untere Rechteck verhält sich als "Boden" und bewegt sich nicht.
+ * Entsprechend sollte das fallende nach einer Kollision mit ihm hochhüpfen.
+ * Aber es sollte nur nach oben und nich zur seite hüpfen.
+ * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
+ * \ref GRAVITY oder der Rückstossfaktor \ref ENTITY_BOUNCE_FACTOR falsch
+ * eingestellt.
+ * @note In der GitLab-Pipeline wird lediglich simuliert, aber nichts angezeigt.
+ * 
+ * @param state Pointer auf testState_t*
+ */
+static void physics_simulation_of_fallig_entity_does_bounce_after_collision_and_does_not_phase_trough(void **state) {
+    testState_t *testState = (testState_t *)*state;
+    // Startzustand setzen, oberes Rechteck ist oben in der Mitte
+    Physics_SetPosition(&testState->entity0, (800 / 2), 50);
+    // unteres Rechteck ist sehr breit
+    testState->entity1.physics.aabb.w = 600;
+    testState->entity1.physics.aabb.h = 10;
+    // Der Kollisionscallback soll mindestens 1 mal aufgerufen werden
+    expect_function_call_any(onCollision);
+    // Die Funktionsargumente nicht prüfen
+    expect_not_value_count(onCollision, self, 0, -1);
+    // alle Mockwerte sollen 0 sein
+    will_return_always(onCollision, 0);
+    // In der GitLab-Pipeline wird nur auf die Kollision geprüft, nicht aber die
+    // visuelle Ausgabe.
+#ifndef CI_TEST
+    SDLW_Init(800, 600);
+#endif
+    // 5 Sekunden lang simulieren
+    for (int i = 0; i < 60 * 5; ++i) {
+        // Position und Geschwindigkeit des unteren Rechtecks fixieren
+        Physics_SetPosition(&testState->entity1, 100, 100);
+        Physics_SetVelocity(&testState->entity1, 0.0f, 0.0f);
+        Physics_Update(testState->entityList);
+#ifndef CI_TEST
+        SDL_Color black = {.r = 255, .g = 255, .b = 255};
+        SDLW_Clear(black);
+        SDL_Color red = {.r = 255, .g = 0, .b = 0};
+        SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
+        SDL_Color green = {.r = 0, .g = 255, .b = 0};
+        SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
+        SDL_Delay(1000 / 60);
+        SDLW_Render();
+#endif
+    }
+    // Das fallende Rechteck ist nach oben, aber nicht zur Seite bewegt worden.
+    assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
+    // Es ist nicht durch das untere Rechteck gefallen
+    assert_in_range(testState->entity0.physics.aabb.y, 0, 100);
+#ifndef CI_TEST
+    SDLW_Quit();
+#endif
+}
+
+/**
  * @brief Testprogramm
  * 
  * @return int Anzahl fehlgeschlagener Tests
@@ -398,6 +507,13 @@ int main(void) {
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
             physics_on_collision_callback_can_clear_flags,
+            setupTestState, teardownTestState),
+
+        cmocka_unit_test_setup_teardown(
+            physics_simulation_of_sideway_touch_has_collision_and_does_not_phase_trough,
+            setupTestState, teardownTestState),
+        cmocka_unit_test_setup_teardown(
+            physics_simulation_of_fallig_entity_does_bounce_after_collision_and_does_not_phase_trough,
             setupTestState, teardownTestState),
     };
     return cmocka_run_group_tests(physics, NULL, NULL);

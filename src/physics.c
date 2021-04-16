@@ -37,7 +37,7 @@
  */
 
 #define DELTA_TIME (1.0 / 60.0)   //!< Updateintervall [s]
-#define GRAVITY 10.0              //!< Erdbeschleunigung [pixel / s2]
+#define GRAVITY 40.0              //!< Erdbeschleunigung [pixel / s2]
 #define NEAR_ZERO 0.01            //!< Werte die kleiner sind zählen als 0
 
 /**
@@ -68,7 +68,7 @@
  * Soll gross genug sein so dass Entitäten nicht ineinander oder durcheinander
  * bewegen können.
  */
-#define ENTITY_BOUNCE_FACTOR 0.5
+#define ENTITY_BOUNCE_FACTOR 200.0
 
 
 /*
