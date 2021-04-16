@@ -22,6 +22,7 @@
 
 #include <math.h>
 
+#define SDL_MAIN_HANDLED
 #include "error.h"
 #include "physics.h"
 #include "sdlWrapper.h"

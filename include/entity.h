@@ -30,7 +30,9 @@
  * 
  */
 
-#include "sdlWrapper.h"
+#include <SDL.h>
+
+#include "sprite.h"
 #include "scene.h"
 #include "list.h"
 
