@@ -233,19 +233,6 @@ static int onUpdate(entity_t *self, inputEvent_t *inputEvents) {
 }
 
 /**
- * @brief Mockup eines onCollision Callbacks
- * 
- * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
- * 
- * @return Fehlercode gemäss will_return() von CMocka
- */
-static int onCollision(entity_t *self) {
-    check_expected_ptr(self);
-    function_called();
-    return mock_type(int);
-}
-
-/**
  * @brief Mockup eines onDraw Callbacks
  * 
  * @param self Pointer auf die Entität dessen Callback gerade aufgerufen wird
@@ -275,7 +262,6 @@ static int setupOneEntityAndOnePart(void **state) {
         .parts = NULL,
         .callbacks = {
             .onUpdate = onUpdate,
-            .onCollision = onCollision,
             .onDraw = onDraw
         }
     };
