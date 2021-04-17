@@ -224,7 +224,7 @@ typedef struct {
 } entityCallbacks_t;
 
 /**
- * @brief Einzelteile einer Entität
+ * @brief Datenstruktur einer Entität
  * 
  */
 typedef struct entity_s {
