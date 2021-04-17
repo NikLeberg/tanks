@@ -22,10 +22,9 @@
 
 #include <math.h>
 
-#define SDL_MAIN_HANDLED
+#include "sdlWrapper.h"
 #include "error.h"
 #include "physics.h"
-#include "sdlWrapper.h"
 
 
 /*
@@ -33,10 +32,18 @@
  * 
  */
 
+/**
+ * @brief Das echte \ref World_CheckCollision().
+ * 
+ * @param[in] aabb Die AABB-Kollisionsbox
+ * @param[out] collision Die Kollisionsdaten
+ * 
+ * @return gemäss Implementation \ref world.c
+ */
 extern int __real_World_CheckCollision(SDL_Rect aabb, entityCollision_t *collision);
 
 /**
- * @brief Mock-Ersatz für originales World_CheckCollision().
+ * @brief Mock-Ersatz für originales \ref World_CheckCollision().
  * 
  * Einige Tests sollten unabhängig von einer geladenen Welt funktionieren.
  * Andere testen die Integration mit der Welt. Daher ist es notwendig diese
