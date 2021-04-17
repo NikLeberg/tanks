@@ -40,9 +40,11 @@ add_custom_test(test_list "test_list.c;mocks/mock_heap.c")
 
 # Automatischer SDLW Test. Es werden alle Funktionen von SDL gemockt, die mit Texturen oder Audio zu tun haben
 add_custom_test(test_sdlw_auto "test_sdlw_auto.c;mocks/mock_heap.c;mocks/mock_sdl.c")
+add_custom_test(test_sprite "test_sprite.c;mocks/mock_heap.c;mocks/mock_sdlw.c")
+add_custom_test(test_sdlw_visual "test_sdlw_visual.c;mocks/mock_heap.c")
 
-add_custom_test(test_sprite "test_sprite.c;mocks/mock_heap.c;mocks/mock_sdl.c")
-
-add_custom_test(test_sdlw_visual "test_sdlw_visual.c")
+# Automatischer World Test. Es werden alle Funktionen von SDL gemockt, die mit Texturen oder Audio zu tun haben
+add_custom_test(test_world_auto "test_world_auto.c;mocks/mock_heap.c;mocks/mock_sdl.c")
+add_custom_test(test_world_visual "test_world_visual.c;mocks/mock_heap.c")
 
 add_custom_test(test_entityHandler "test_entityHandler.c;mocks/mock_sdlw.c")

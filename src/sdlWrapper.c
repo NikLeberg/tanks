@@ -28,6 +28,7 @@
 #include "sdlWrapper.h"
 #include "error.h"
 #include "sprite.h"
+#include "world.h"
 
 
 /*
@@ -250,7 +251,13 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
     while (fgets(config, 255, file)) { // Lesen der Konfigurationszeilen
         line++;
 
-        if (!(sscanf(config, "%31s %31s", key, type) == 2)) { // Zu wenig Argumente in der Konfigurationszeile
+        int count = sscanf(config, "%31s %31s", key, type);
+        if (count == 0)
+            continue;
+        if (!strcmp(key, "#")) // Kommentar
+            continue;
+
+        if(count < 2){ // Zu wenig Argumente in der Konfigurationszeile
             printf("Konfigurationszeile %d ungueltig! [%s]\n", line, resourceConfigLocation);
             fclose(file);
             return ERR_FAIL;
@@ -267,10 +274,6 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
 
         // Lesen und überprüfen der verschiedenen Ressourcentypen
         int errorCode = ERR_FAIL;
-        if (!strcmp(key, "#")) { // Kommentar
-            free(resource);
-            continue;
-        }
         if (!strcmp(type, "texture")) // Textur
             errorCode = SDLW_LoadTexture(config, resource);
         else if (!strcmp(type, "font")) // Font
@@ -279,6 +282,8 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
             errorCode = SDLW_LoadSound(config, resource);
         else if (!strcmp(type, "sprite"))
             errorCode = Sprite_Load(config, resource);
+        else if (!strcmp(type, "world"))
+            errorCode = World_LoadConfig(config, resource);
         else if (!strcmp(type, "config")) { // Weitere Konfigurationsdatei
             free(resource);
             errorCode = SDLW_LoadResources(key);
@@ -479,6 +484,12 @@ int SDLW_PlaySoundEffect(char *chunk) {
     return ERR_OK;
 }
 
+SDL_Renderer* SDLW_GetRenderer() {
+    if (!initialized)
+        return NULL;
+    return renderer;
+}
+
 
 /*
  * Implementation privater Funktionen
@@ -539,7 +550,7 @@ static int SDLW_LoadTexture(char *config, sdlwResource_t *resource) {
             resource->type = RESOURCETYPE_TEXTURE_BM_MASK;
             // Schneidet dort aus, wo src_alpha > 0 ist. Farbe bleibt unverändert.
             blendMode = SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD,
-                                                   SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD);
+                                                   SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
         }
         SDL_SetTextureBlendMode(resource->resource.texture, blendMode);
     }
@@ -625,6 +636,8 @@ static int FreeSDLWResource(sdlwResource_t *resource) {
         Mix_FreeChunk(resource->resource.soundEffect);
     } else if (resource->type & RESOURCETYPE_SPRITE) { // Zerstöre Sprite
         free(resource->resource.sprite);
+    } else if (resource->type & RESOURCETYPE_WORLD) { // Zerstöre Welt
+        free(resource->resource.world);
     }
     free(resource); // Ressourcenunion zerstören
     return ERR_OK;

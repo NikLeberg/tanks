@@ -19,6 +19,7 @@
 
 #include "scene.h"
 #include "entity.h"
+#include "sdlWrapper.h"
 
 
 /*

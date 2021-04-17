@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file sprite.h
  * @author Stoll Simon (stols4@bfh.ch)
  * @brief Funktionen für das Handling von sprites.

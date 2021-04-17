@@ -30,7 +30,9 @@
  * 
  */
 
-#include "sdlWrapper.h"
+#include <SDL.h>
+
+#include "sprite.h"
 #include "scene.h"
 #include "list.h"
 
@@ -39,6 +41,8 @@
  * Typdeklarationen
  * 
  */
+
+struct entity_s; // Vorwärtsdeklaration einer Entitätsstruktur
 
 /**
  * @brief Status der Entität
@@ -99,6 +103,52 @@ typedef struct {
 } entityPhysics_t;
 
 /**
+ * @brief Flags möglicher Kollisionen einer Entität
+ * 
+ */
+typedef enum {
+    ENTITY_COLLISION_WORLD = 1,          //!< Kollision mit der Welt
+    ENTITY_COLLISION_BORDER_LEFT = 2,    //!< Kollision mit linkem Spielrand
+    ENTITY_COLLISION_BORDER_RIGHT = 4,   //!< Kollision mit rechtem Spielrand
+    ENTITY_COLLISION_BORDER_TOP = 8,     //!< Kollision mit oberem Spielrand
+    ENTITY_COLLISION_BORDER_BOTTOM = 16, //!< Kollision mit unterem Spielrand
+    ENTITY_COLLISION_ENTITY = 32         //!< Kollision mit einer Entität
+} entityCollisionFlags_t;
+
+/**
+ * @brief Informationen einer Kollision
+ * 
+ * Eine Struktur mit den folgenden Informationen wird einer Entität bei einer
+ * Kollision übergeben.
+ */
+typedef struct {
+    /**
+     * @brief Kollisionsflags
+     * 
+     * Flag mit gesetzten Bits für einzelne Kollisionen gemäss
+     * \ref entityCollisionFlags_t welche stattgefunden haben.
+     */
+    int flags;
+
+    /**
+     * @brief Vektor der Kollisionsnormale
+     * 
+     * Die Kollisionsnormale ist der kürzeste Vektor entlang der die Entität
+     * verschoben werden müsste damit keine Kollision entsteht.
+     */
+    SDL_FPoint normal;
+
+    /**
+     * @brief Kollisionspartner
+     * 
+     * Die Entität die an der Kollision mitbeteiligt ist.
+     * @note Nur gültig wenn in \ref entityCollision_t.flags
+     * ENTITY_COLLISION_ENTITY aktiviert ist.
+     */
+    const struct entity_s *const partner;
+} entityCollision_t;
+
+/**
  * @brief Einzelteile einer Entität
  * 
  */
@@ -107,8 +157,6 @@ typedef struct {
     sprite_t sprite;     //!< das reale Sprite mit Textur und relativen Angaben
     sprite_t tempSprite; //!< temporäres Sprite mit berechneten Absolutwerten
 } entityPart_t;
-
-struct entity_s;
 
 /**
  * @brief Callbacks für interaktive Entitäten
@@ -139,20 +187,33 @@ typedef struct {
     /**
      * @brief Kollision mit der Welt oder anderen Entitäten
      * 
-     * @note Ist dieser Callback NULL, so wird die Kollision ignoriert.
-
+     * Informiert die Entität über eine stattgefundene Kollision. Die Flags in
+     * \ref entityCollision_t.flags geben an welche Kollision genau erfolgt ist.
+     * Die Entität darf auf die Informationen physikalisch reagieren, muss dann
+     * aber die Flags, auf die sie reagiert hat, 0 setzen. Nach dem Callback
+     * reagiert das physik-Modul auf die noch gesetzten Flags.
+     * @note Kollidiert eine Entität A mit einer Entität B, so werden beide
+     * informiert, denn die Physik kann nicht ermitteln wer der Auslöser der
+     * Kollision war. Der \p onCollision Callback wird für A mit \p self = A und
+     * \ref entityCollision_t.partner = B aufgerufen und für B wird
+     * \p onCollision mit \p self = B und \ref entityCollision_t.partner = A.
+     * @note Ist dieser Callback NULL, so wird die Kollision gänzlich ignoriert.
+     * Dies bedeutet aber, dass das physik-Modul auch nicht reagiert und die
+     * Entität wird durch die Welt fallen.
+     * 
      * @param self Die Entität dessen Callback gerade aufgerufen wird
+     * @param collision Struktur mit Informationen über die Kollision
      * 
      * @return Fehlercode gemäss \ref error.h
      */
-    int (*onCollision)(struct entity_s *self);
+    int (*onCollision)(struct entity_s *self, entityCollision_t *collision);
 
     /**
      * @brief Zeichnen
      *
      * Jeder Zyklus wird die Entität hiermit aufgefordert sich selbst zu
      * zeichnen.
-     * @note Ist dieser Callback NULL, so wird die standart Zeichnen Funktion
+     * @note Ist dieser Callback NULL, so wird die standard Zeichnen Funktion
      * des EntityHandlers verwendet.
 
      * @param self Die Entität dessen Callback gerade aufgerufen wird
@@ -163,7 +224,7 @@ typedef struct {
 } entityCallbacks_t;
 
 /**
- * @brief Datenstruktur einer Entität
+ * @brief Einzelteile einer Entität
  * 
  */
 typedef struct entity_s {

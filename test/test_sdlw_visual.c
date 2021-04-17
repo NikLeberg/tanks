@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file test_sdlw_visual.c
  * @author Stoll Simon (stols4@bfh.ch)
  * @brief Visuelle Tests für sdlWrapper-Modul

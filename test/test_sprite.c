@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file test_sprite.c
  * @author Stoll Simon (stols4@bfh.ch)
  * @brief Tests für sprite-Modul

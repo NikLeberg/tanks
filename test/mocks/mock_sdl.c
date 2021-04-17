@@ -318,3 +318,89 @@ int SDL_QueryTexture(void *texture, int *format, int *access, int *w, int *h) {
     (void)texture;
     return 0;
 }
+
+/**
+ * @brief Mock-Ersatz für originales SDL_SetRenderTarget().
+ * 
+ * @param renderer unbenutzt
+ * @param texture unbenutzt
+ * 
+ * @return immer 0
+ */
+int SDL_SetRenderTarget(void *renderer, void *texture) {
+    (void)renderer;
+    (void)texture;
+    return 0;
+}
+
+/**
+ * @brief Mock-Ersatz für originales SDL_RenderReadPixels().
+ * 
+ * Erstellt eine Test Welt.
+ * 
+ * @param renderer unbenutzt
+ * @param rect unbenutzt
+ * @param format unbenutzt
+ * @param pixels Speicherort der Welt
+ * @param pitch unbenutzt
+ * 
+ * @return 0 oder 1 wenn pixels ungültig
+ */
+int SDL_RenderReadPixels(void *renderer, const void *rect, int format, void *pixels, int pitch) {
+    (void)renderer;
+    (void)rect;
+    (void)format;
+    (void)pitch;
+    if (!pixels)
+        return 1;
+    /* Erstellt ein Künstliches Bild in der Form
+     __
+     ##\
+     ###\
+     ####\__
+    */
+    for (int y = 0; y < 576; y++) {
+        for (int x = 0; x < 1024; x++) {
+            ((char *)pixels)[(x + y * 1024) * 4] = (y + 100) > x;
+        }
+    }
+    return 0;
+}
+
+/**
+ * @brief Mock-Ersatz für originales SDL_CreateTexture().
+ * 
+ * @param renderer unbenutzt
+ * @param format unbenutzt
+ * @param access unbenutzt
+ * @param w unbenutzt
+ * @param h unbenutzt
+ * 
+ * @return immer 1
+ */
+void *SDL_CreateTexture(void *renderer, int format, int access, int w, int h) {
+    (void)renderer;
+    (void)format;
+    (void)access;
+    (void)w;
+    (void)h;
+    return (void *)1;
+}
+
+/**
+ * @brief Mock-Ersatz für originales SDL_RenderCopy()
+ * 
+ * @param renderer unbenutzt
+ * @param texture unbenutzt
+ * @param srcrect unbenutzt
+ * @param dstrect unbenutzt
+ * 
+ * @return immer 0
+ */
+int SDL_RenderCopy(void *renderer, void *texture, const void *srcrect, const void *dstrect) {
+    (void)renderer;
+    (void)texture;
+    (void)srcrect;
+    (void)dstrect;
+    return 0;
+}
