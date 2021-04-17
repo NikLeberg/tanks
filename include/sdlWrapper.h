@@ -22,7 +22,7 @@
 #include <SDL_ttf.h>
 
 #include "sprite.h"
-
+#include "world.h"
 
 /*
  * Typdeklarationen
@@ -43,6 +43,7 @@ typedef enum {
     RESOURCETYPE_SOUND_MUSIC = 32,                                                                     //!< Hintergrundmusik
     RESOURCETYPE_FONT = 64,                                                                            //!< Font
     RESOURCETYPE_SPRITE = 128,                                                                         //!< Sprite, mit oder ohne animationsdaten
+    RESOURCETYPE_WORLD = 256,                                                                          //!< Welt
     RESOURCETYPE_TEXTURE_BM = RESOURCETYPE_TEXTURE_BM_STAMP | RESOURCETYPE_TEXTURE_BM_MASK,            //!< Eine Maske oder Stempel
     RESOURCETYPE_TEXTURE = RESOURCETYPE_TEXTURE_BM | RESOURCETYPE_TEXTURE_N | RESOURCETYPE_TEXTURE_RT, //!< Eine Textur
     RESOURCETYPE_ANY = 2147483647,                                                                     //!< Alle flags sind gesetzt
@@ -59,6 +60,7 @@ typedef union {
     Mix_Chunk *soundEffect; //!< Speicher für Soundeffekte
     Mix_Music *bgMusic;     //!< Speicher für Hintergrundmusik
     sprite_t *sprite;       //!< Speicher für Sprite
+    worldConfig_t *world;   //!< Speicher für Welt
 } sdlwResourceUnion_t;
 
 /**
@@ -207,3 +209,10 @@ int SDLW_PlayMusic(char *musicid);
  * @return 0 oder Errorcode
  */
 int SDLW_PlaySoundEffect(char *chunk);
+
+/**
+ * @brief Gibt den aktiven Renderer zurück.
+ * 
+ * @return Aktiver Renderer oder NULL wenn nicht initialisiert
+ */
+SDL_Renderer *SDLW_GetRenderer();
