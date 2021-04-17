@@ -37,9 +37,9 @@
  * 
  */
 
-#define DELTA_TIME (1.0 / 60.0)   //!< Updateintervall [s]
-#define GRAVITY 40.0              //!< Erdbeschleunigung [pixel / s2]
-#define NEAR_ZERO 0.01            //!< Werte die kleiner sind zählen als 0
+#define DELTA_TIME (1.0f / 60.0f) //!< Updateintervall [s]
+#define GRAVITY 40.0f             //!< Erdbeschleunigung [pixel / s2]
+#define NEAR_ZERO 0.1f            //!< Werte die kleiner sind zählen als 0
 
 /**
  * @brief Rückstossfaktor einer Kollision in X-Achse mit der Welt
@@ -50,7 +50,7 @@
  * Aber gross genug, dass schnell bewegende Entitäten nicht seitwärts in die
  * Welt bewegen können.
  */
-#define WORLD_BOUNCE_X_FACTOR 0.5
+#define WORLD_SCALE_X_FACTOR 25.0f
 
 /**
  * @brief Rückstossfaktor einer Kollision in Y-Achse mit der Welt
@@ -60,7 +60,7 @@
  * der Entität in den Boden zu verhindern. Aber nicht zu gross, damit keine zu
  * grossen Steigungen entlang bewegt werden kann.
  */
-#define WORLD_BOUNCE_Y_FACTOR 0.5
+#define WORLD_SCALE_Y_FACTOR 25.0f
 
 /**
  * @brief Rückstossfaktor einer Kollision zweier Entitäten
@@ -69,7 +69,7 @@
  * Soll gross genug sein so dass Entitäten nicht ineinander oder durcheinander
  * bewegen können.
  */
-#define ENTITY_BOUNCE_FACTOR 200.0
+#define ENTITY_SCALE_FACTOR 100.0f
 
 
 /*
@@ -210,24 +210,25 @@ static int updateEntity(void *data, void *userData) {
     entity->physics.aabb.x = entity->physics.position.x;
     entity->physics.aabb.y = entity->physics.position.y;
     // Auf Kollision mit anderen Entitäten prüfen
-    return checkForAllCollisions(entity, entityList);
+    int ret = checkForAllCollisions(entity, entityList);
+    return ret;
 }
 
 static void clearNearToZero(entityPhysics_t *physics) {
     if (fabs(physics->velocity.x) <= NEAR_ZERO || isnan(physics->velocity.x)) {
-        physics->velocity.x = 0.0;
+        physics->velocity.x = 0.0f;
     }
     if (fabs(physics->velocity.y) <= NEAR_ZERO || isnan(physics->velocity.y)) {
-        physics->velocity.y = 0.0;
+        physics->velocity.y = 0.0f;
     }
     if (fabs(physics->position.x) <= NEAR_ZERO || isnan(physics->position.x)) {
-        physics->position.x = 0.0;
+        physics->position.x = 0.0f;
     }
     if (fabs(physics->position.y) <= NEAR_ZERO || isnan(physics->position.y)) {
-        physics->position.y = 0.0;
+        physics->position.y = 0.0f;
     }
     if (fabs(physics->rotation) <= NEAR_ZERO || isnan(physics->rotation)) {
-        physics->rotation = 0.0;
+        physics->rotation = 0.0f;
     }
 }
 
@@ -241,8 +242,8 @@ static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
     } else if (worldCollision.flags) {
         // Kollision mit der Welt
         // Skaliere Kollisionsnormale gemäss Rückstossfaktoren
-        worldCollision.normal.x *= WORLD_BOUNCE_X_FACTOR;
-        worldCollision.normal.y *= WORLD_BOUNCE_Y_FACTOR;
+        worldCollision.normal.x *= WORLD_SCALE_X_FACTOR;
+        worldCollision.normal.y *= WORLD_SCALE_Y_FACTOR;
         if (entity->callbacks.onCollision) {
             // Callback der Entität aufrufen
             entity->callbacks.onCollision(entity, &worldCollision);
@@ -278,15 +279,15 @@ static int checkForEntityCollision(void *data, void *userData) {
     // Höhe der Überlappung genommen und mit einem Faktor gewichtet.
     if (intersection.w > intersection.h) {
         // Breiter als Hoch = Vektor auf y-Achse
-        entityCollision.normal.y = intersection.h * ENTITY_BOUNCE_FACTOR;
+        entityCollision.normal.y = intersection.h * ENTITY_SCALE_FACTOR;
         if (sourceEntity->physics.aabb.y < intersection.y) {
-            entityCollision.normal.y *= -1.0;
+            entityCollision.normal.y *= -1.0f;
         }
     } else {
         // Höher als Breit = Vektor auf x-Achse
-        entityCollision.normal.x = intersection.w * ENTITY_BOUNCE_FACTOR;
+        entityCollision.normal.x = intersection.w * ENTITY_SCALE_FACTOR;
         if (sourceEntity->physics.aabb.x < intersection.x) {
-            entityCollision.normal.x *= -1.0;
+            entityCollision.normal.x *= -1.0f;
         }
     }
     // Callback der Entität aufrufen, Kollision mit anderer Entität
@@ -305,21 +306,42 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
     // Kollision mit dem linken oder rechten Bildrand
     if (collision->flags & ENTITY_COLLISION_BORDER_LEFT
      || collision->flags & ENTITY_COLLISION_BORDER_RIGHT) {
-        // horizontale Geschwindigkeit 0 setzen
-        entity->physics.velocity.x = 0.0;
+        // horizontale Bewegung rückgängig machen
+        entity->physics.position.x -= entity->physics.velocity.x * DELTA_TIME;
+        // und Geschwindigkeit 0 setzen
+        entity->physics.velocity.x = 0.0f;
     }
     // Kollision mit dem oberen oder unteren Bildrand
     if (collision->flags & ENTITY_COLLISION_BORDER_TOP
      || collision->flags & ENTITY_COLLISION_BORDER_BOTTOM) {
-        // vertikale Geschwindigkeit 0 setzen
-        entity->physics.velocity.y = 0.0;
+        // vertikale Bewegung rückgängig machen
+        entity->physics.position.y -= entity->physics.velocity.y * DELTA_TIME;
+        // und Geschwindigkeit 0 setzen
+        entity->physics.velocity.y = 0.0f;
     }
-    // Kollision mit einer anderen Entität oder der Welt
+    // Kollision mit einer anderen Entität oder mit der Welt
     if (collision->flags & ENTITY_COLLISION_ENTITY
      || collision->flags & ENTITY_COLLISION_WORLD) {
-        // entlang der Normale die Geschwidigkeit erhöhen
-        entity->physics.velocity.x += collision->normal.x * DELTA_TIME;
-        entity->physics.velocity.y += collision->normal.y * DELTA_TIME;
+        // Korrigiere die Geschwindigkeit der Entität anhand der gegebenen
+        // Kollisionsnormalen.
+        // Beachte die horizontale Komponente nur wenn die Entität sich auch
+        // horizontal bewegt
+        if (collision->normal.x != 0.0f && entity->physics.velocity.x != 0.0f) {
+            // Verhindere Überkorrektur, die horizontale Korrektur darf maximal
+            // ein Stopp erzwingen aber kein Rückschlag.
+            float correction = collision->normal.x * DELTA_TIME;
+            if (entity->physics.velocity.x < -correction) {
+                entity->physics.velocity.x = 0.0f;
+            } else {
+                entity->physics.velocity.x += correction;
+            }
+        }
+        // Beachte die vertikale Komponente nur wenn die Entität sich auch
+        // vertikal bewegt
+        if (collision->normal.y != 0.0f && entity->physics.velocity.y != 0.0f) {
+            entity->physics.velocity.y = -GRAVITY * DELTA_TIME;
+            entity->physics.velocity.y += collision->normal.y * DELTA_TIME;
+        }
     }
     return ERR_OK;
 }
