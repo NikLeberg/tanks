@@ -29,6 +29,37 @@
 
 
 /*
+ * Mocks
+ * 
+ */
+
+extern int __real_World_CheckCollision(SDL_Rect aabb, entityCollision_t *collision);
+
+/**
+ * @brief Mock-Ersatz für originales World_CheckCollision().
+ * 
+ * Einige Tests sollten unabhängig von einer geladenen Welt funktionieren.
+ * Andere testen die Integration mit der Welt. Daher ist es notwendig diese
+ * Funktion nicht als eigenständige Mock-Datei wie z.B. \ref mock_sdlw.c zu
+ * ersetzen. Denn damit könnte die originale Funktion nicht aufgerufen werden.
+ * @note Wird die echte Funktion benötigt, sollte per will_return eine 1 gesetzt
+ * werden.
+ * 
+ * @param[in] aabb Die AABB-Kollisionsbox
+ * @param[out] collision Die Kollisionsdaten
+ *
+ * @return immer 0 falls gemockt, sonst den Fehlercode von der echten Funktion
+ */
+int __wrap_World_CheckCollision(SDL_Rect aabb, entityCollision_t *collision) {
+    if(mock_type(int)) {
+        return __real_World_CheckCollision(aabb, collision);
+    } else {
+        return ERR_OK;
+    }
+}
+
+
+/*
  * Tests
  * 
  */
@@ -261,6 +292,8 @@ static void physics_applies_gravity_to_entity(void **state) {
     // Positionen so setzen, dass keine Kollisionen auftreten
     testState->entity0.physics.position = (SDL_FPoint){.x = 0.0f, .y = 0.0f};
     testState->entity1.physics.position = (SDL_FPoint){.x = 10.0f, .y = 0.0f};
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
     // Nach mindestens 10 Iterationen wurde y angepasst
     assert_float_equal(testState->entity0.physics.position.y, 0.0f, EPSILON);
     assert_float_equal(testState->entity1.physics.position.y, 0.0f, EPSILON);
@@ -281,6 +314,8 @@ static void physics_on_collision_callback_is_called_for_identical_aabbs(void **s
     // Überlappen sich vollständig
     Physics_SetPosition(&testState->entity0, 0.0f, 0.0f);
     Physics_SetPosition(&testState->entity1, 0.0f, 0.0f);
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
     // Callback der zweiten Entität wird aufgerufen (da diese in der Liste zuerst ist)
     expect_function_call(onCollision);
     expect_value(onCollision, self, &testState->entity1);
@@ -305,6 +340,8 @@ static void physics_on_collision_callback_is_called_for_touching_aabbs(void **st
     // Überlappen sich rechts mit 1 Pixel
     Physics_SetPosition(&testState->entity0, 0.0f, 0.0f);
     Physics_SetPosition(&testState->entity1, 9.0f, 0.0f);
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
     // Callback der zweiten Entität wird aufgerufen (da diese in der Liste zuerst ist)
     expect_function_call(onCollision);
     expect_value(onCollision, self, &testState->entity1);
@@ -329,6 +366,8 @@ static void physics_on_collision_callback_is_not_called_for_side_by_side_aabbs(v
     // Seite an Seite aber ohne Kollision, ohne Pixel dazwischen
     Physics_SetPosition(&testState->entity0, 0.0f, 0.0f);
     Physics_SetPosition(&testState->entity1, 11.0f, 0.0f);
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
     // Callback der zweiten Entität wird nicht aufgerufen
     // Callback der ersten Entität wird nicht aufgerufen
     // Update durchführen
@@ -348,6 +387,8 @@ static void physics_on_collision_callback_can_clear_flags(void **state) {
     float horizontalVelocity = 1.0f;
     Physics_SetVelocity(&testState->entity0, horizontalVelocity, 0.0f);
     Physics_SetVelocity(&testState->entity1, horizontalVelocity, 0.0f);
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
     // Callback der zweiten Entität wird aufgerufen (da diese in der Liste zuerst ist)
     expect_function_call(onCollision);
     expect_value(onCollision, self, &testState->entity1);
@@ -386,6 +427,8 @@ static void physics_simulation_of_sideway_touch_has_collision_and_does_not_phase
     Physics_SetPosition(&testState->entity1, (800 / 2) + 30, 0);
     // rechtes Rechteck bewegt sich nach links
     Physics_SetVelocity(&testState->entity1, -20.0f, 0.0f);
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
     // Der Kollisionscallback soll mindestens 1 mal aufgerufen werden
     expect_function_call_any(onCollision);
     // Die Funktionsargumente nicht prüfen
@@ -437,6 +480,8 @@ static void physics_simulation_of_fallig_entity_does_bounce_after_collision_and_
     // unteres Rechteck ist sehr breit
     testState->entity1.physics.aabb.w = 600;
     testState->entity1.physics.aabb.h = 10;
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
     // Der Kollisionscallback soll mindestens 1 mal aufgerufen werden
     expect_function_call_any(onCollision);
     // Die Funktionsargumente nicht prüfen

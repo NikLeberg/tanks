@@ -21,6 +21,7 @@
 #include "error.h"
 #include "list.h"
 #include "physics.h"
+#include "world.h"
 
 
 /*
@@ -233,7 +234,7 @@ static void clearNearToZero(entityPhysics_t *physics) {
 static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
     int ret = ERR_OK;
     entityCollision_t worldCollision = {.partner = NULL};
-    // ret = World_CheckCollision(entity->physics.aabb, &worldCollision); world-Modul noch nicht fertig
+    ret = World_CheckCollision(entity->physics.aabb, &worldCollision);
     if (ret) {
         // Fehler bei der Kollisionerkennung
         return ret;
