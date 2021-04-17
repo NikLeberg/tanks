@@ -125,7 +125,7 @@ int SDLW_Init(int windowWidth, int windowHeight) {
     }
 
     // Initialisierung der verschiedenen SDL Bibliotheken
-    if (SDL_Init(SDL_INIT_EVERYTHING)) { // Initialisierung SDL
+    if (SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_SENSOR)) { // ohne Sensor-System
         SDLW_Quit();
         printf("SDL Error beim initialisieren! [%s] SDLW_Init()\n", SDL_GetError());
         return ERR_FAIL;
