@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file test_sdlw_auto.c
  * @author Stoll Simon (stols4@bfh.ch)
  * @brief Automatische Tests für sdlWrapper-Modul
