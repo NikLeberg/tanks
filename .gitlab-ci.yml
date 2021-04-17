@@ -40,10 +40,10 @@ test_cmocka:
 test_cppcheck:
   stage: test
   script: |
-    cppcheck --project=./build/compile_commands.json --enable=all --inconclusive \
-      --suppress=unusedFunction --suppress=missingIncludeSystem --suppress=unmatchedSuppression --inline-suppr
     cppcheck --project=./build/compile_commands.json --enable=all --inconclusive --suppress=unusedFunction \
-      --suppress=missingIncludeSystem --suppress=unmatchedSuppression --inline-suppr --xml-version=2 2> cppcheck_result.xml
+      --suppress=missingInclude --suppress=unmatchedSuppression --inline-suppr
+    cppcheck --project=./build/compile_commands.json --enable=all --inconclusive --suppress=unusedFunction \
+      --suppress=missingInclude --suppress=unmatchedSuppression --inline-suppr --xml-version=2 2> cppcheck_result.xml
     cppcheck_junit cppcheck_result.xml cppcheck_junit.xml
   artifacts:
     when: always
