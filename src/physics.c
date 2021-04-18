@@ -50,7 +50,7 @@
  * Aber gross genug, dass schnell bewegende Entitäten nicht seitwärts in die
  * Welt bewegen können.
  */
-#define WORLD_SCALE_X_FACTOR 25.0f
+#define WORLD_SCALE_X_FACTOR 100.0f
 
 /**
  * @brief Rückstossfaktor einer Kollision in Y-Achse mit der Welt
@@ -60,7 +60,7 @@
  * der Entität in den Boden zu verhindern. Aber nicht zu gross, damit keine zu
  * grossen Steigungen entlang bewegt werden kann.
  */
-#define WORLD_SCALE_Y_FACTOR 25.0f
+#define WORLD_SCALE_Y_FACTOR 20.0f
 
 /**
  * @brief Rückstossfaktor einer Kollision zweier Entitäten
@@ -69,7 +69,7 @@
  * Soll gross genug sein so dass Entitäten nicht ineinander oder durcheinander
  * bewegen können.
  */
-#define ENTITY_SCALE_FACTOR 100.0f
+#define ENTITY_SCALE_FACTOR 20.0f
 
 
 /*
@@ -325,10 +325,12 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
         // Korrigiere die Geschwindigkeit der Entität anhand der gegebenen
         // Kollisionsnormalen.
         // Beachte die horizontale Komponente nur wenn die Entität sich auch
-        // horizontal bewegt
+        // horizontal bewegt. Verhindert verrutschen auf schräger Welt.
         if (collision->normal.x != 0.0f && entity->physics.velocity.x != 0.0f) {
             // Verhindere Überkorrektur, die horizontale Korrektur darf maximal
-            // ein Stopp erzwingen aber kein Rückschlag.
+            // ein Stopp erzwingen aber kein Rückstoss resp Vorzeichenwechsel.
+            // Verhindert, dass bei einer Hangaufwärtsbewegung die Entität den
+            // Hang hinunter geworfen wird.
             float correction = collision->normal.x * DELTA_TIME;
             if (entity->physics.velocity.x < -correction) {
                 entity->physics.velocity.x = 0.0f;
@@ -336,11 +338,12 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
                 entity->physics.velocity.x += correction;
             }
         }
-        // Beachte die vertikale Komponente nur wenn die Entität sich auch
-        // vertikal bewegt
-        if (collision->normal.y != 0.0f && entity->physics.velocity.y != 0.0f) {
-            entity->physics.velocity.y = -GRAVITY * DELTA_TIME;
-            entity->physics.velocity.y += collision->normal.y * DELTA_TIME;
+        // vertikale Komponente
+        if (collision->normal.y != 0.0f) {
+            // Kompensiere zusätzlich noch die Gravitation. Hilft den Entitäten
+            // nicht zu sehr zu zittern.
+            float correction = (collision->normal.y - GRAVITY) * DELTA_TIME;
+            entity->physics.velocity.y = correction;
         }
     }
     return ERR_OK;

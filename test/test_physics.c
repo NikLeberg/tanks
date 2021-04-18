@@ -458,7 +458,6 @@ static void physics_simulation_of_sideway_touch_has_collision_and_does_not_fall_
         SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
         SDL_Color green = {.r = 0, .g = 255, .b = 0};
         SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
-        SDL_Delay(1000 / 60);
         SDLW_Render();
 #endif
     }
@@ -514,7 +513,6 @@ static void physics_simulation_of_resting_entity_does_not_bounce_after_collision
         SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
         SDL_Color green = {.r = 0, .g = 255, .b = 0};
         SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
-        SDL_Delay(1000 / 60);
         SDLW_Render();
 #endif
     }
@@ -528,7 +526,7 @@ static void physics_simulation_of_resting_entity_does_not_bounce_after_collision
 }
 
 /**
- * @brief Simuliere ein Rechteck welches auf ein anderes Fällt.
+ * @brief Simuliere ein Rechteck welches auf ein anderes fällt.
  * Das untere Rechteck verhält sich als "Boden" und bewegt sich nicht. Bei der
  * Kollision darf das fallende Rechteck nicht durch den "Boden" fallen.
  * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
@@ -572,14 +570,125 @@ static void physics_simulation_of_fallig_entity_does_not_bounce_after_collision_
         SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
         SDL_Color green = {.r = 0, .g = 255, .b = 0};
         SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
-        SDL_Delay(1000 / 60);
         SDLW_Render();
 #endif
     }
     // Das fallende Rechteck ist höchstens nach oben, aber nicht zur Seite bewegt worden.
     assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
     // Es ist nicht durch das untere Rechteck gefallen
-    assert_in_range(testState->entity0.physics.aabb.y, 0, 100);
+    assert_in_range(testState->entity0.physics.aabb.y, 0, testState->entity1.physics.aabb.y);
+#ifndef CI_TEST
+    SDLW_Quit();
+#endif
+}
+
+/**
+ * @brief Simuliere ein Rechteck welches auf eines fällt das nach unten bewegt.
+ * Das untere Rechteck verhält sich als "Boden" und bewegt sich nach unten. Bei
+ * der Kollision darf das fallende Rechteck nicht durch den "Boden" fallen.
+ * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
+ * \ref GRAVITY oder der Rückstossfaktor \ref ENTITY_SCALE_FACTOR falsch
+ * eingestellt.
+ * @note In der GitLab-Pipeline wird lediglich simuliert, aber nichts angezeigt.
+ * 
+ * @param state Pointer auf testState_t*
+ */
+static void physics_simulation_of_fallig_and_falling_entities_does_not_fall_trough(void **state) {
+    testState_t *testState = (testState_t *)*state;
+    // Startzustand setzen, oberes Rechteck ist oben in der Mitte
+    Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
+    // unteres Rechteck ist sehr breit
+    Physics_SetPosition(&testState->entity1, 100.0f, 100.0f);
+    testState->entity1.physics.aabb.w = 600;
+    testState->entity1.physics.aabb.h = 10;
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
+    // Der Kollisionscallback soll mindestens 1 mal aufgerufen werden
+    expect_function_call_any(onCollision);
+    // Die Funktionsargumente nicht prüfen
+    expect_not_value_count(onCollision, self, 0, -1);
+    // alle Mockwerte sollen 0 sein
+    will_return_always(onCollision, 0);
+    // In der GitLab-Pipeline wird nur auf die Kollision geprüft, nicht aber die
+    // visuelle Ausgabe.
+#ifndef CI_TEST
+    SDLW_Init(800, 600);
+#endif
+    // 5 Sekunden lang simulieren
+    for (int i = 0; i < 60 * 5; ++i) {
+        // Geschwindigkeit des unteren Rechtecks fixieren
+        Physics_SetVelocity(&testState->entity1, 0.0f, 20.0f);
+        Physics_Update(testState->entityList);
+#ifndef CI_TEST
+        // Stelle die AABBs visuell dar
+        SDL_Color black = {.r = 255, .g = 255, .b = 255};
+        SDLW_Clear(black);
+        SDL_Color red = {.r = 255, .g = 0, .b = 0};
+        SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
+        SDL_Color green = {.r = 0, .g = 255, .b = 0};
+        SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
+        SDLW_Render();
+#endif
+    }
+    // Das fallende Rechteck ist höchstens nach oben, aber nicht zur Seite bewegt worden.
+    assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
+    // Es ist nicht durch das untere Rechteck gefallen
+    assert_in_range(testState->entity0.physics.aabb.y, 0, testState->entity1.physics.aabb.y);
+#ifndef CI_TEST
+    SDLW_Quit();
+#endif
+}
+
+/**
+ * @brief Simuliere ein Rechteck welches auf eines fällt das nach oben bewegt.
+ * Das untere Rechteck verhält sich als "Boden" und bewegt sich nach oben. Bei
+ * der Kollision darf das fallende Rechteck nicht durch den "Boden" fallen.
+ * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
+ * \ref GRAVITY oder der Rückstossfaktor \ref ENTITY_SCALE_FACTOR falsch
+ * eingestellt.
+ * @note In der GitLab-Pipeline wird lediglich simuliert, aber nichts angezeigt.
+ * 
+ * @param state Pointer auf testState_t*
+ */
+static void physics_simulation_of_fallig_and_rising_entities_does_not_fall_trough(void **state) {
+    testState_t *testState = (testState_t *)*state;
+    // Startzustand setzen, oberes Rechteck ist oben in der Mitte
+    Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
+    // unteres Rechteck ist sehr breit
+    Physics_SetPosition(&testState->entity1, 100.0f, 100.0f);
+    testState->entity1.physics.aabb.w = 600;
+    testState->entity1.physics.aabb.h = 10;
+    // keine Kollisionen mit der Welt abfragen
+    will_return_always(__wrap_World_CheckCollision, 0);
+    // Der Kollisionscallback soll mindestens 1 mal aufgerufen werden
+    expect_function_call_any(onCollision);
+    // Die Funktionsargumente nicht prüfen
+    expect_not_value_count(onCollision, self, 0, -1);
+    // alle Mockwerte sollen 0 sein
+    will_return_always(onCollision, 0);
+    // In der GitLab-Pipeline wird nur auf die Kollision geprüft, nicht aber die
+    // visuelle Ausgabe.
+#ifndef CI_TEST
+    SDLW_Init(800, 600);
+#endif
+    // 5 Sekunden lang simulieren
+    for (int i = 0; i < 60 * 5; ++i) {
+        // Geschwindigkeit des unteren Rechtecks fixieren
+        Physics_SetVelocity(&testState->entity1, 0.0f, -30.0f);
+        Physics_Update(testState->entityList);
+#ifndef CI_TEST
+        // Stelle die AABBs visuell dar
+        SDL_Color black = {.r = 255, .g = 255, .b = 255};
+        SDLW_Clear(black);
+        SDL_Color red = {.r = 255, .g = 0, .b = 0};
+        SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
+        SDL_Color green = {.r = 0, .g = 255, .b = 0};
+        SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
+        SDLW_Render();
+#endif
+    }
+    // Das fallende Rechteck ist höchstens nach oben, aber nicht zur Seite bewegt worden.
+    assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
 #ifndef CI_TEST
     SDLW_Quit();
 #endif
@@ -599,7 +708,8 @@ static int setupTestStateAndWorld(void **state) {
     // Gültige Entitäten erstellen
     entity_t entityOk = {
         .callbacks.onCollision = onCollision,
-        .physics.aabb = {.w = 10, .h = 10}};
+        .physics.aabb = {.w = 10, .h = 10}
+    };
     testState.entity0 = entityOk;
     testState.entity1 = entityOk;
     // Entitäten der Liste hinzufügen
@@ -692,7 +802,6 @@ static void physics_simulation_of_resting_entity_ontop_of_world_stays_resting_an
             SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
             SDL_Color green = {.r = 0, .g = 255, .b = 0};
             SDLW_DrawFilledRect(testState->entity1.physics.aabb, green);
-            SDL_Delay(1000 / 60);
             SDLW_Render();
         }
         // Das Rechteck ist nicht zur Seite bewegt worden.
@@ -741,17 +850,16 @@ static void physics_simulation_of_moving_entity_ontop_of_world_does_not_fall_tro
         // per Pfeiltasten kann bewegt werden
         SDL_Event e;
         SDL_PollEvent(&e);
-        float speedChange = 0.0;
+        float *x = &testState->entity0.physics.velocity.x;
         if (e.type == SDL_KEYDOWN) {
+            // Geschwindigkeit gemäss Pfeiltasten verändern
             if (e.key.keysym.sym == SDLK_LEFT) {
-                speedChange = -10.0;
+                if (*x > -50.0f) *x -= 10.0f;
             } else if (e.key.keysym.sym == SDLK_RIGHT) {
-                speedChange = 10.0;
+                if (*x < 50.0f) *x += 10.0f;
             }
         }
-        // Geschwindigkeit gemäss Pfeiltasten verändern
-        testState->entity0.physics.velocity.x += speedChange;
-        testState->entity0.physics.velocity.x *= 0.99; // dämpfen
+        *x *= 0.99; // dämpfen
         // Physik berechnen
         Physics_Update(testState->entityList);
         // Stelle die AABBs und die Welt visuell dar
@@ -761,7 +869,6 @@ static void physics_simulation_of_moving_entity_ontop_of_world_does_not_fall_tro
         World_DrawForeground();
         SDL_Color red = {.r = 255, .g = 0, .b = 0};
         SDLW_DrawFilledRect(testState->entity0.physics.aabb, red);
-        SDL_Delay(1000 / 60);
         SDLW_Render();
     }
 }
@@ -811,6 +918,12 @@ int main(void) {
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
             physics_simulation_of_fallig_entity_does_not_bounce_after_collision_and_does_not_fall_trough,
+            setupTestState, teardownTestState),
+        cmocka_unit_test_setup_teardown(
+            physics_simulation_of_fallig_and_falling_entities_does_not_fall_trough,
+            setupTestState, teardownTestState),
+        cmocka_unit_test_setup_teardown(
+            physics_simulation_of_fallig_and_rising_entities_does_not_fall_trough,
             setupTestState, teardownTestState),
 
         cmocka_unit_test_setup_teardown(
