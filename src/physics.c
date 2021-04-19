@@ -154,8 +154,12 @@ int Physics_SetPosition(entity_t *entity, float x, float y) {
     if (!entity) {
         return ERR_PARAMETER;
     }
-    entity->physics.position.x = x;
-    entity->physics.position.y = y;
+    if (!isnan(x)) {
+        entity->physics.position.x = x;
+    }
+    if (!isnan(y)) {
+        entity->physics.position.y = y;
+    }
     return ERR_OK;
 }
 
@@ -163,8 +167,12 @@ int Physics_SetVelocity(entity_t *entity, float x, float y) {
     if (!entity) {
         return ERR_PARAMETER;
     }
-    entity->physics.velocity.x = x;
-    entity->physics.velocity.y = y;
+    if (!isnan(x)) {
+        entity->physics.velocity.x = x;
+    }
+    if (!isnan(y)) {
+        entity->physics.velocity.y = y;
+    }
     return ERR_OK;
 }
 
