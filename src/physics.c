@@ -42,25 +42,17 @@
 #define NEAR_ZERO 0.1f            //!< Werte die kleiner sind zählen als 0
 
 /**
- * @brief Rückstossfaktor einer Kollision in X-Achse mit der Welt
+ * @brief Rückstossfaktor einer Kollision mit der Welt
  * 
- * Skaliert die Kollisionsnormale in X-Richtung, empirisch ermittelt.
- * Generell sollte der Rückstoss in X-Richtung klein genug sein, dass eine
+ * Skaliert die Kollisionsnormale der Welt, empirisch ermittelt.
+ * Generell sollte der Rückstoss in für die X-Achse klein genug sein, dass eine
  * seitliche Touchierung die Entität nicht zu stark zurückbeschleunigt wird.
  * Aber gross genug, dass schnell bewegende Entitäten nicht seitwärts in die
- * Welt bewegen können.
- */
-#define WORLD_SCALE_X_FACTOR 100.0f
-
-/**
- * @brief Rückstossfaktor einer Kollision in Y-Achse mit der Welt
- * 
- * Skaliert die Kollisionsnormale in Y-Richtung, empirisch ermittelt.
- * Generell sollte der Rückstoss in Y-Richtung gross genug sein um das Versinken
- * der Entität in den Boden zu verhindern. Aber nicht zu gross, damit keine zu
+ * Welt bewegen können. Aber in Y-Richtung gross genug sein um das Versinken der
+ * Entität in den Boden zu verhindern. Aber nicht zu gross, damit keine zu
  * grossen Steigungen entlang bewegt werden kann.
  */
-#define WORLD_SCALE_Y_FACTOR 20.0f
+#define WORLD_SCALE_FACTOR 200.0f
 
 /**
  * @brief Rückstossfaktor einer Kollision zweier Entitäten
@@ -69,7 +61,7 @@
  * Soll gross genug sein so dass Entitäten nicht ineinander oder durcheinander
  * bewegen können.
  */
-#define ENTITY_SCALE_FACTOR 20.0f
+#define ENTITY_SCALE_FACTOR 200.0f
 
 
 /*
@@ -240,10 +232,14 @@ static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
         // Fehler bei der Kollisionerkennung
         return ret;
     } else if (worldCollision.flags) {
-        // Kollision mit der Welt
-        // Skaliere Kollisionsnormale gemäss Rückstossfaktoren
-        worldCollision.normal.x *= WORLD_SCALE_X_FACTOR;
-        worldCollision.normal.y *= WORLD_SCALE_Y_FACTOR;
+        // Kollision mit der Welt erfolgt
+        // Skaliere Kollisionsnormale gemäss Rückstossfaktor normalisiere ebenso
+        // mitels der Grösse der AABB. Die Welt gibt keine echte Normale sondern
+        // eine art "volumetrische" Normale zurück, also in welcher Richtung wie
+        // viel Volumen ist. Grössere Entitäten besitzen grösseres Volumen und
+        // würden ohne Korrektur eine zu grosse Normale erfahren.
+        worldCollision.normal.x *= (WORLD_SCALE_FACTOR / entity->physics.aabb.w);
+        worldCollision.normal.y *= (WORLD_SCALE_FACTOR / entity->physics.aabb.h);
         if (entity->callbacks.onCollision) {
             // Callback der Entität aufrufen
             entity->callbacks.onCollision(entity, &worldCollision);
