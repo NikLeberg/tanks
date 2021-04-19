@@ -51,3 +51,5 @@ add_custom_test(test_entityHandler "test_entityHandler.c;mocks/mock_sdlw.c;mocks
 
 add_custom_test(test_physics "test_physics.c")
 target_link_options(test_physics PRIVATE "-Wl,--wrap=World_CheckCollision")
+
+add_custom_test(test_tank "test_tank.c")
