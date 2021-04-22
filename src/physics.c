@@ -52,7 +52,7 @@
  * Entität in den Boden zu verhindern. Aber nicht zu gross, damit keine zu
  * grossen Steigungen entlang bewegt werden kann.
  */
-#define WORLD_SCALE_FACTOR 200.0f
+#define WORLD_SCALE_FACTOR 300.0f
 
 /**
  * @brief Rückstossfaktor einer Kollision zweier Entitäten
@@ -211,6 +211,9 @@ static int updateEntity(void *data, void *userData) {
     entity->physics.aabb.y = entity->physics.position.y;
     // Auf Kollision mit anderen Entitäten prüfen
     int ret = checkForAllCollisions(entity, entityList);
+    // Position erneut auf AABB übertragen, wurde ev. von Kollision verändert
+    entity->physics.aabb.x = entity->physics.position.x;
+    entity->physics.aabb.y = entity->physics.position.y;
     return ret;
 }
 
@@ -323,32 +326,41 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
         // und Geschwindigkeit 0 setzen
         entity->physics.velocity.y = 0.0f;
     }
-    // Kollision mit einer anderen Entität oder mit der Welt
-    if (collision->flags & ENTITY_COLLISION_ENTITY
-     || collision->flags & ENTITY_COLLISION_WORLD) {
+    // Kollision mit einer anderen Entität
+    if (collision->flags & ENTITY_COLLISION_ENTITY) {
         // Korrigiere die Geschwindigkeit der Entität anhand der gegebenen
         // Kollisionsnormalen.
-        // Beachte die horizontale Komponente nur wenn die Entität sich auch
-        // horizontal bewegt. Verhindert verrutschen auf schräger Welt.
-        if (collision->normal.x != 0.0f && entity->physics.velocity.x != 0.0f) {
-            // Verhindere Überkorrektur, die horizontale Korrektur darf maximal
-            // ein Stopp erzwingen aber kein Rückstoss resp Vorzeichenwechsel.
-            // Verhindert, dass bei einer Hangaufwärtsbewegung die Entität den
-            // Hang hinunter geworfen wird.
-            float correction = collision->normal.x * DELTA_TIME;
-            if (entity->physics.velocity.x < -correction) {
-                entity->physics.velocity.x = 0.0f;
-            } else {
-                entity->physics.velocity.x += correction;
+        entity->physics.velocity.x += collision->normal.x * DELTA_TIME;
+        entity->physics.velocity.y += collision->normal.y * DELTA_TIME;
+    }
+    // Kollision mit der Welt
+    if (collision->flags & ENTITY_COLLISION_WORLD) {
+        bool freed = false;
+        // Versuche nach oben hin zu befreien. Die maximale Höhe die befreit
+        // werden kann ist durch die Geschwindigkeit gegeben. So können
+        // schneller bewegende Entitäten eine grössere Steigung zurücklegen.
+        float dX = entity->physics.velocity.x * DELTA_TIME;
+        float dY = entity->physics.velocity.y * DELTA_TIME;
+        float maxHeight = dX > dY ? dX : dY;
+        maxHeight += 2; // 2 Pixel Spielraum
+        for (int i = 1; i <= maxHeight; ++i) {
+            SDL_Rect aabb = entity->physics.aabb;
+            aabb.y -= i;
+            entityCollision_t worldCollision = {.partner = NULL};
+            World_CheckCollision(aabb, &worldCollision);
+            if (!(worldCollision.flags & ENTITY_COLLISION_WORLD)) {
+                // Befreiungshöhe gefunden, Position entsprechend setzen
+                freed = true;
+                entity->physics.position.y -= i;
+                entity->physics.velocity.y = 0.0f;
+                break;
             }
         }
-        // vertikale Komponente
-        if (collision->normal.y != 0.0f) {
-            // Kompensiere zusätzlich noch die Gravitation. Hilft den Entitäten
-            // nicht zu sehr zu zittern.
-            float correction = (collision->normal.y - GRAVITY) * DELTA_TIME;
-            entity->physics.velocity.y = correction;
+        // Ansonsten gemäss Normale die Geschwindigkeit erhöhen
+        if (!freed) {
+            entity->physics.velocity.x += collision->normal.x * DELTA_TIME;
+            entity->physics.velocity.y += collision->normal.y * DELTA_TIME;
         }
-    }
+     }
     return ERR_OK;
 }
