@@ -301,7 +301,7 @@ static void physics_applies_gravity_to_entity(void **state) {
     testState->entity1.physics.position = (SDL_FPoint){.x = 10.0f, .y = 0.0f};
     // keine Kollisionen mit der Welt abfragen
     will_return_always(__wrap_World_CheckCollision, 0);
-    // Nach mindestens 10 Iterationen wurde y angepasst
+    // Nach mindestens 10 Iterationen wurde Entität in y Richtung verschoben
     assert_float_equal(testState->entity0.physics.position.y, 0.0f, EPSILON);
     assert_float_equal(testState->entity1.physics.position.y, 0.0f, EPSILON);
     for (int i = 0; i < 10; ++i) {
@@ -416,10 +416,10 @@ static void physics_on_collision_callback_can_clear_flags(void **state) {
 
 /**
  * @brief Simuliere zwei fallende Rechecke.
- * Das rechte bewegt sich zusätzlich nach links. Es muss eine Kollision
- * stattfinden die die beiden voneinander weg bewegt. Am Ende sollte das rechte
- * Rechteck immernoch rechts sein und sich nicht durch das linke hindurch bewegt
- * haben.
+ * Das rechte bewegt sich zusätzlich nach links auf das andere Rechteck zu. Es
+ * muss eine Kollision stattfinden die die beiden voneinander weg bewegt. Am
+ * Ende sollte das rechte Rechteck immernoch rechts sein und sich nicht durch
+ * das linke hindurch bewegt haben.
  * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
  * \ref GRAVITY oder der Rückstossfaktor \ref ENTITY_SCALE_FACTOR falsch
  * eingestellt.
@@ -427,7 +427,7 @@ static void physics_on_collision_callback_can_clear_flags(void **state) {
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_simulation_of_sideway_touch_has_collision_and_does_not_fall_trough(void **state) {
+static void physics_two_falling_entities_that_are_aproaching_do_not_cross(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Startzustand setzen, zwei Rechtecke am oberen Rand
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f) - 30.0f, 0.0f);
@@ -469,7 +469,7 @@ static void physics_simulation_of_sideway_touch_has_collision_and_does_not_fall_
 }
 
 /**
- * @brief Simuliere ein Rechteck welches auf einem anderen liegt.
+ * @brief Simuliere ein Rechteck welches auf einem anderen ruht.
  * Das untere Rechteck verhält sich als "Boden" und bewegt sich nicht. Das obere
  * Rechteck sollte nicht zittern oder hochhüpfen.
  * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
@@ -479,7 +479,7 @@ static void physics_simulation_of_sideway_touch_has_collision_and_does_not_fall_
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_simulation_of_resting_entity_does_not_bounce_after_collision_and_does_not_fall_trough(void **state) {
+static void physics_resting_entity_ontop_of_another_entity_does_not_fall_through(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Startzustand setzen, oberes Rechteck direkt über dem unteren
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 100.0f - 10.0f);
@@ -536,7 +536,7 @@ static void physics_simulation_of_resting_entity_does_not_bounce_after_collision
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_simulation_of_fallig_entity_does_not_bounce_after_collision_and_does_not_fall_trough(void **state) {
+static void physics_falling_entity_stops_on_collision_with_another_entity_does_not_fall_through(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Startzustand setzen, oberes Rechteck ist oben in der Mitte
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
@@ -593,7 +593,7 @@ static void physics_simulation_of_fallig_entity_does_not_bounce_after_collision_
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_simulation_of_fallig_and_falling_entities_does_not_fall_trough(void **state) {
+static void physics_falling_entity_that_collides_with_another_falling_entity_does_not_fall_through(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Startzustand setzen, oberes Rechteck ist oben in der Mitte
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
@@ -650,7 +650,7 @@ static void physics_simulation_of_fallig_and_falling_entities_does_not_fall_trou
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_simulation_of_fallig_and_rising_entities_does_not_fall_trough(void **state) {
+static void physics_falling_entity_that_collides_with_another_rising_entity_does_not_fall_through(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Startzustand setzen, oberes Rechteck ist oben in der Mitte
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
@@ -767,7 +767,7 @@ static int teardownTestStateAndWorld(void **state) {
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_simulation_of_resting_entity_ontop_of_world_stays_resting_and_does_not_fall_trough(void **state) {
+static void physics_resting_entity_ontop_of_the_world_does_not_fall_through(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Läuft nicht im CI da die Welt von SDL abhängig ist.
 #ifdef CI_TEST
@@ -824,7 +824,7 @@ static void physics_simulation_of_resting_entity_ontop_of_world_stays_resting_an
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_simulation_of_moving_entity_ontop_of_world_does_not_fall_trough(void **state) {
+static void physics_manually_moving_entity_ontop_of_the_world_does_not_fall_through(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Läuft nicht im CI da die Welt von SDL abhängig ist.
 #ifdef CI_TEST
@@ -911,26 +911,26 @@ int main(void) {
             setupTestState, teardownTestState),
 
         cmocka_unit_test_setup_teardown(
-            physics_simulation_of_sideway_touch_has_collision_and_does_not_fall_trough,
+            physics_two_falling_entities_that_are_aproaching_do_not_cross,
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
-            physics_simulation_of_resting_entity_does_not_bounce_after_collision_and_does_not_fall_trough,
+            physics_resting_entity_ontop_of_another_entity_does_not_fall_through,
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
-            physics_simulation_of_fallig_entity_does_not_bounce_after_collision_and_does_not_fall_trough,
+            physics_falling_entity_stops_on_collision_with_another_entity_does_not_fall_through,
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
-            physics_simulation_of_fallig_and_falling_entities_does_not_fall_trough,
+            physics_falling_entity_that_collides_with_another_falling_entity_does_not_fall_through,
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
-            physics_simulation_of_fallig_and_rising_entities_does_not_fall_trough,
+            physics_falling_entity_that_collides_with_another_rising_entity_does_not_fall_through,
             setupTestState, teardownTestState),
 
         cmocka_unit_test_setup_teardown(
-            physics_simulation_of_resting_entity_ontop_of_world_stays_resting_and_does_not_fall_trough,
+            physics_resting_entity_ontop_of_the_world_does_not_fall_through,
             setupTestStateAndWorld, teardownTestStateAndWorld),
         cmocka_unit_test_setup_teardown(
-            physics_simulation_of_moving_entity_ontop_of_world_does_not_fall_trough,
+            physics_manually_moving_entity_ontop_of_the_world_does_not_fall_through,
             setupTestStateAndWorld, teardownTestStateAndWorld),
     };
     return cmocka_run_group_tests(physics, NULL, NULL);
