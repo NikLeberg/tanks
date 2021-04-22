@@ -45,7 +45,18 @@ static void tank_in_world(void **state) {
     Tank_Create("Nik", start);
     // 5 Sekunden lang simulieren
     for (int i = 0; i < 60 * 120; ++i) {
-        EntityHandler_Update(NULL);
+        inputEvent_t input = {0};
+        SDL_Event e = {0};
+        SDL_PollEvent(&e);
+        if (e.type == SDL_KEYDOWN) {
+            // Geschwindigkeit gemäss Pfeiltasten verändern
+            if (e.key.keysym.sym == SDLK_LEFT) {
+                input.dummy = -1;
+            } else if (e.key.keysym.sym == SDLK_RIGHT) {
+                input.dummy = 1;
+            }
+        }
+        EntityHandler_Update(&input);
         // Stelle die AABBs visuell dar
         SDL_Color black = {.r = 255, .g = 255, .b = 255};
         SDLW_Clear(black);
