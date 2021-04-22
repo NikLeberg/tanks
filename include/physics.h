@@ -60,6 +60,9 @@ int Physics_Update(list_t *entityList);
 /**
  * @brief Setze die Position
  * 
+ * @note Parameter \p x oder \p y dürfen NAN sein. In diesem Fall wird nur der
+ * andere Parameter übernommen. Ermöglicht das setzen von nur einer Komponente.
+ * 
  * @param entity Entität deren Position gesetzt werden soll
  * @param x x-Koordinate
  * @param y y-Koordinate (nicht kartesisch!, 0 = oben)
@@ -70,6 +73,9 @@ int Physics_SetPosition(entity_t *entity, float x, float y);
 
 /**
  * @brief Setze die Geschwindigkeit
+ * 
+ * @note Parameter \p x oder \p y dürfen NAN sein. In diesem Fall wird nur der
+ * andere Parameter übernommen. Ermöglicht das setzen von nur einer Komponente.
  * 
  * @param entity Entität deren Geschwindigkeit gesetzt werden soll
  * @param x Horizonatale Geschwindigkeit
