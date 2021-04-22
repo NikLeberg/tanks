@@ -123,7 +123,7 @@ static void physics_can_set_position_of_entity(void **state) {
     assert_float_equal(entity->physics.position.x, 123456.7f, EPSILON);
     assert_float_equal(entity->physics.position.y, -7.654321f, EPSILON);
     // Unendlich und NaN sind erlaubt
-    assert_int_equal(Physics_SetPosition(entity, 1.0f / 0.0f, 0.0f / 0.0f), ERR_OK);
+    assert_int_equal(Physics_SetPosition(entity, INFINITY, NAN), ERR_OK);
 }
 
 /**
@@ -148,7 +148,7 @@ static void physics_can_set_velocity_of_entity(void **state) {
     assert_float_equal(entity->physics.velocity.x, 123456.7f, EPSILON);
     assert_float_equal(entity->physics.velocity.y, -7.654321f, EPSILON);
     // Unendlich und NaN sind erlaubt
-    assert_int_equal(Physics_SetVelocity(entity, 1.0f / 0.0f, 0.0f / 0.0f), ERR_OK);
+    assert_int_equal(Physics_SetVelocity(entity, INFINITY, NAN), ERR_OK);
 }
 
 /**
@@ -185,7 +185,7 @@ static void physics_can_set_velocity_in_polar_of_entity(void **state) {
     assert_float_equal(entity->physics.velocity.x, 1.0f / sqrt(2.0), EPSILON);
     assert_float_equal(entity->physics.velocity.y, 1.0f / sqrt(2.0), EPSILON);
     // Unendlich und NaN sind erlaubt
-    assert_int_equal(Physics_SetVelocityPolar(entity, 1.0f / 0.0f, 0.0 / 0.0), ERR_OK);
+    assert_int_equal(Physics_SetVelocityPolar(entity, INFINITY, NAN), ERR_OK);
 }
 
 /**
@@ -213,9 +213,9 @@ static void physics_can_set_rotation_of_entity(void **state) {
     assert_int_equal(Physics_SetRotation(entity, -7.654321), ERR_OK);
     assert_float_equal(entity->physics.rotation, -7.654321, EPSILON);
     // Unendlich ist erlaubt
-    assert_int_equal(Physics_SetRotation(entity, 1.0 / 0.0), ERR_OK);
+    assert_int_equal(Physics_SetRotation(entity, INFINITY), ERR_OK);
     // NaN ist erlaubt
-    assert_int_equal(Physics_SetRotation(entity, 0.0 / 0.0), ERR_OK);
+    assert_int_equal(Physics_SetRotation(entity, NAN), ERR_OK);
 }
 
 /**
@@ -727,7 +727,7 @@ static int setupTestStateAndWorld(void **state) {
     ret |= World_Load("world");
 #endif
     // Erfolgreich wenn Entitätsliste erstellt und Welt geladen
-    if (testState.entityList && ret == ERR_OK) {
+    if (testState.entityList && ret == ERR_OK) { // cppcheck-suppress knownConditionTrueFalse
         return 0;
     }
     return 1;
@@ -751,7 +751,7 @@ static int teardownTestStateAndWorld(void **state) {
     SDLW_Quit();
 #endif
     // Erfolgreich wenn Entitätsliste gelöscht und Welt entladen
-    if (!testState->entityList && ret == ERR_OK) {
+    if (!testState->entityList && ret == ERR_OK) { // cppcheck-suppress knownConditionTrueFalse
         return 0;
     }
     return 1;
@@ -761,8 +761,7 @@ static int teardownTestStateAndWorld(void **state) {
  * @brief Simuliere Rechtecke welche auf der Welt liegen.
  * Die Rechtecke sollten nicht zittern oder hochhüpfen.
  * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
- * \ref GRAVITY oder die Rückstossfaktoren \ref WORLD_SCALE_X_FACTOR und
- * \ref WORLD_SCALE_Y_FACTOR falsch eingestellt.
+ * \ref GRAVITY oder der Rückstossfaktor \ref WORLD_SCALE_FACTOR.
  * @note In der GitLab-Pipeline wird der Test übersprungen.
  * 
  * @param state Pointer auf testState_t*
@@ -818,8 +817,7 @@ static void physics_resting_entity_ontop_of_the_world_does_not_fall_through(void
  * Des Rechteck sollte nicht zittern oder hüpfen und nicht in die Welt hinein.
  * Per Pfeiltasten Links / Rechts kann manuell bewegt werden.
  * @note Schlägt dieser Test fehl, dann ist entweder die Gravitationskonstante
- * \ref GRAVITY oder die Rückstossfaktoren \ref WORLD_SCALE_X_FACTOR und
- * \ref WORLD_SCALE_Y_FACTOR falsch eingestellt.
+ * \ref GRAVITY oder der Rückstossfaktor \ref WORLD_SCALE_FACTOR.
  * @note In der GitLab-Pipeline wird der Test übersprungen.
  * 
  * @param state Pointer auf testState_t*
