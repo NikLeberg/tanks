@@ -109,6 +109,7 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
             loadedSprite->destination.h = destH;
         loadedSprite->pivot.x = pivotX;
         loadedSprite->pivot.y = pivotY;
+        spriteResource->resource.sprite = loadedSprite;
         return ERR_OK;
     }
 
