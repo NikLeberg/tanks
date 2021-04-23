@@ -82,11 +82,10 @@
  * berechnet einen Physikschritt.
  * 
  * @param data opaker Pointer auf eine Entität
- * @param userData opaker Pointer auf Entitätsliste
  *
  * @return ERR_OK oder ERR_FAIL
  */
-static int updateEntity(void *data, void *userData);
+static int updateEntity(void *data);
 
 /**
  * @brief Bereinige Physikdaten.
@@ -107,12 +106,12 @@ static void clearNearToZero(entityPhysics_t *physics);
  * 
  * @note Komplexität ist O(n^2)
  * 
- * @param entity zu prüfende Entität
- * @param entityList Liste aller Entitäten
+ * @param data opaker Pointer auf eine Entität
+ * @param userData opaker Pointer auf Entitätsliste
  * 
  * @return ERR_OK oder ERR_FAIL
  */
-static int checkForAllCollisions(entity_t *entity, list_t *entityList);
+static int checkForAllCollisions(void *data, void *userData);
 
 /**
  * @brief Überprüfe auf Kollision zwischen zwei Entitäten.
@@ -152,7 +151,9 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision);
 int Physics_Update(list_t *entityList) {
     int ret = ERR_OK;
     // Alle Entitäten aktualisieren
-    ret = List_ForeachArg(entityList, updateEntity, entityList);
+    ret = List_Foreach(entityList, updateEntity);
+    // Alle Kollision der Entitäten prüfen
+    ret |= List_ForeachArg(entityList, checkForAllCollisions, entityList);
     return ret;
 }
 
@@ -244,9 +245,8 @@ int Physics_SetRelativeRotation(entity_t *entity, double rotation) {
  * 
  */
 
-static int updateEntity(void *data, void *userData) {
+static int updateEntity(void *data) {
     entity_t *entity = (entity_t *)data;
-    list_t *entityList = (list_t *)userData;
     // Werte die nahezu 0 sind auf 0 setzen
     clearNearToZero(&entity->physics);
     // Erdbeschleunigung anwenden
@@ -263,12 +263,7 @@ static int updateEntity(void *data, void *userData) {
     // Position auf AABB übertragen
     entity->physics.aabb.x = entity->physics.position.x - entity->physics.aabb.w / 2;
     entity->physics.aabb.y = entity->physics.position.y - entity->physics.aabb.h / 2;
-    // Auf Kollision mit anderen Entitäten prüfen
-    int ret = checkForAllCollisions(entity, entityList);
-    // Position erneut auf AABB übertragen, wurde ev. von Kollision verändert
-    entity->physics.aabb.x = entity->physics.position.x - entity->physics.aabb.w / 2;
-    entity->physics.aabb.y = entity->physics.position.y - entity->physics.aabb.h / 2;
-    return ret;
+    return ERR_OK;
 }
 
 static void clearNearToZero(entityPhysics_t *physics) {
@@ -289,7 +284,9 @@ static void clearNearToZero(entityPhysics_t *physics) {
     }
 }
 
-static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
+static int checkForAllCollisions(void *data, void *userData) {
+    entity_t *entity = (entity_t *)data;
+    list_t *entityList = (list_t *)userData;
     int ret = ERR_OK;
     entityCollision_t worldCollision = {.partner = NULL};
     ret = World_CheckCollision(entity->physics.aabb, &worldCollision);
@@ -312,6 +309,9 @@ static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
         }
     }
     ret = List_ForeachArg(entityList, checkForEntityCollision, entity);
+    // Position erneut auf AABB übertragen, wurde ev. von Kollision verändert
+    entity->physics.aabb.x = entity->physics.position.x - entity->physics.aabb.w / 2;
+    entity->physics.aabb.y = entity->physics.position.y - entity->physics.aabb.h / 2;
     return ret;
 }
 
