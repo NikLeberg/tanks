@@ -261,13 +261,13 @@ static int updateEntity(void *data, void *userData) {
     entity->physics.position.x += entity->physics.velocity.x * DELTA_TIME;
     entity->physics.position.y += entity->physics.velocity.y * DELTA_TIME;
     // Position auf AABB übertragen
-    entity->physics.aabb.x = entity->physics.position.x;
-    entity->physics.aabb.y = entity->physics.position.y;
+    entity->physics.aabb.x = entity->physics.position.x - entity->physics.aabb.w / 2;
+    entity->physics.aabb.y = entity->physics.position.y - entity->physics.aabb.h / 2;
     // Auf Kollision mit anderen Entitäten prüfen
     int ret = checkForAllCollisions(entity, entityList);
     // Position erneut auf AABB übertragen, wurde ev. von Kollision verändert
-    entity->physics.aabb.x = entity->physics.position.x;
-    entity->physics.aabb.y = entity->physics.position.y;
+    entity->physics.aabb.x = entity->physics.position.x - entity->physics.aabb.w / 2;
+    entity->physics.aabb.y = entity->physics.position.y - entity->physics.aabb.h / 2;
     return ret;
 }
 
