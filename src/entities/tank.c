@@ -22,6 +22,7 @@
 #include "physics.h"
 #include "entityHandler.h"
 #include "world.h"
+#include "entities/shell.h"
 
 
 /*
@@ -183,6 +184,11 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     Physics_SetVelocity(self, *vx * 0.95f, NAN);
     // rotiere den gesamten Panzer basierend auf der Position auf der Welt
     rotateToWorld(self);
+    // Falls Leertaste -> Schuss feuern
+    if (inputEvents->dummy == 4) {
+        double angle = self->physics.rotation + tube->sprite.rotation;
+        Shell_Create(self->owner, self->physics.position.x, self->physics.position.y - 50.0f, 100.0f, angle);
+    }
     return ERR_OK;
 }
 
@@ -205,8 +211,8 @@ static int rotateToWorld(entity_t *tank) {
     World_CheckCollision(testBox, &collision);
     if (collision.flags & ENTITY_COLLISION_WORLD) {
         double angle = atan2(-collision.normal.y, collision.normal.x);
-        angle = angle / M_PI * 180.0f;
-        angle -= 90.0f;
+        angle = angle / M_PI * 180.0;
+        angle -= 90.0;
         //double angle = atan(collision.normal.y / collision.normal.x);
         Physics_SetRotation(tank, -angle);
     }
