@@ -89,133 +89,168 @@ static int setupOneEntity(void **state) {
 }
 
 /**
- * @brief Teardown: Entität entfernen
- * 
- * @param[in] state Pointer auf entity_t*
- * 
- * @return 0 Teardown erfolgreich, -1 Teardown fehlgeschlagen
- */
-static int teardownOneEntity(void **state) {
-    entity_t *entity = (entity_t *)*state;
-    (void)entity;
-    return 0;
-}
-
-/**
- * @brief Setter der Position funtioniert.
+ * @brief Setter der Position funtionieren.
  * 
  * @param state Pointer auf entity_t
  */
 static void physics_can_set_position_of_entity(void **state) {
     entity_t *entity = (entity_t *)*state;
-    // NULL
+    // Entität ist NULL -> Parameterfehler
     assert_int_equal(Physics_SetPosition(NULL, 0.0f, 0.0f), ERR_PARAMETER);
-    // 0.0f, 0.0f
-    assert_int_equal(Physics_SetPosition(entity, 0.0f, 0.0f), ERR_OK);
-    assert_float_equal(entity->physics.position.x, 0.0f, EPSILON);
-    assert_float_equal(entity->physics.position.y, 0.0f, EPSILON);
-    // -1.0f, -1.0f
-    assert_int_equal(Physics_SetPosition(entity, -1.0f, -1.0f), ERR_OK);
-    assert_float_equal(entity->physics.position.x, -1.0f, EPSILON);
-    assert_float_equal(entity->physics.position.y, -1.0f, EPSILON);
-    // 123456.7f, -7.654321f
-    assert_int_equal(Physics_SetPosition(entity, 123456.7f, -7.654321f), ERR_OK);
-    assert_float_equal(entity->physics.position.x, 123456.7f, EPSILON);
-    assert_float_equal(entity->physics.position.y, -7.654321f, EPSILON);
-    // Unendlich und NaN sind erlaubt
-    assert_int_equal(Physics_SetPosition(entity, INFINITY, NAN), ERR_OK);
+    assert_int_equal(Physics_SetRelativePosition(NULL, 0.0f, 0.0f), ERR_PARAMETER);
+    // Teste verschiedene Zahlenpaare
+    struct {
+        int relative; // 0 = nutze SetPosition, 1 = nutze SetRelativePosition
+        SDL_FPoint given; // welcher Wert der Funktion übergeben wird
+        SDL_FPoint expected; // welcher Wert die Position nun haben sollte
+    } testPoints[] = {
+        {.relative = 0, .given = {0.0f, 0.0f}, .expected = {0.0f, 0.0f}},
+        {.relative = 0, .given = {-1.0f, -1.0f}, .expected = {-1.0f, -1.0f}},
+        {.relative = 0, .given = {1234.5f, -7.6543}, .expected = {1234.5f, -7.6543}},
+        {.relative = 0, .given = {INFINITY, -INFINITY}, .expected = {INFINITY, -INFINITY}},
+        {.relative = 0, .given = {NAN, 3.4f}, .expected = {INFINITY, 3.4f}},
+        {.relative = 0, .given = {1.2f, NAN}, .expected = {1.2f, 3.4f}},
+        {.relative = 1, .given = {-1.2f, -3.4f}, .expected = {0.0f, 0.0f}},
+        {.relative = 1, .given = {1.0f, 1.0f}, .expected = {1.0f, 1.0f}},
+        {.relative = 1, .given = {1.0f, 1.0f}, .expected = {2.0f, 2.0f}},
+        {.relative = 1, .given = {NAN, -10.0f}, .expected = {2.0f, -8.0f}},
+        {.relative = 1, .given = {-11.0f, NAN}, .expected = {-9.0f, -8.0f}},
+    };
+    for (unsigned int i = 0; i < sizeof(testPoints) / sizeof(testPoints[0]); ++i) {
+        if (testPoints[i].relative) {
+            assert_int_equal(Physics_SetRelativePosition(entity, testPoints[i].given.x, testPoints[i].given.y), ERR_OK);
+        } else {
+            assert_int_equal(Physics_SetPosition(entity, testPoints[i].given.x, testPoints[i].given.y), ERR_OK);
+        }
+        assert_float_equal(entity->physics.position.x, testPoints[i].expected.x, EPSILON);
+        assert_float_equal(entity->physics.position.y, testPoints[i].expected.y, EPSILON);
+    }
 }
 
 /**
- * @brief Setter der Geschwindigkeit funtioniert.
+ * @brief Setter der Geschwindigkeit funtionieren.
  * 
  * @param state Pointer auf entity_t
  */
 static void physics_can_set_velocity_of_entity(void **state) {
     entity_t *entity = (entity_t *)*state;
-    // NULL
+    // Entität ist NULL -> Parameterfehler
     assert_int_equal(Physics_SetVelocity(NULL, 0.0f, 0.0f), ERR_PARAMETER);
-    // 0.0f, 0.0f
-    assert_int_equal(Physics_SetVelocity(entity, 0.0f, 0.0f), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, 0.0f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, 0.0f, EPSILON);
-    // -1.0f, -1.0f
-    assert_int_equal(Physics_SetVelocity(entity, -1.0f, -1.0f), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, -1.0f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, -1.0f, EPSILON);
-    // 123456.7f, -7.654321f
-    assert_int_equal(Physics_SetVelocity(entity, 123456.7f, -7.654321f), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, 123456.7f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, -7.654321f, EPSILON);
-    // Unendlich und NaN sind erlaubt
-    assert_int_equal(Physics_SetVelocity(entity, INFINITY, NAN), ERR_OK);
+    assert_int_equal(Physics_SetRelativeVelocity(NULL, 0.0f, 0.0f), ERR_PARAMETER);
+    // Teste verschiedene Zahlenpaare
+    struct {
+        int relative; // 0 = nutze SetVelocity, 1 = nutze SetRelativeVelocity
+        SDL_FPoint given; // welcher Wert der Funktion übergeben wird
+        SDL_FPoint expected; // welcher Wert die Geschwindigkeit nun haben sollte
+    } testPoints[] = {
+        {.relative = 0, .given = {0.0f, 0.0f}, .expected = {0.0f, 0.0f}},
+        {.relative = 0, .given = {-1.0f, -1.0f}, .expected = {-1.0f, -1.0f}},
+        {.relative = 0, .given = {1234.5f, -7.6543}, .expected = {1234.5f, -7.6543}},
+        {.relative = 0, .given = {INFINITY, -INFINITY}, .expected = {INFINITY, -INFINITY}},
+        {.relative = 0, .given = {NAN, 3.4f}, .expected = {INFINITY, 3.4f}},
+        {.relative = 0, .given = {1.2f, NAN}, .expected = {1.2f, 3.4f}},
+        {.relative = 1, .given = {-1.2f, -3.4f}, .expected = {0.0f, 0.0f}},
+        {.relative = 1, .given = {1.0f, 1.0f}, .expected = {1.0f, 1.0f}},
+        {.relative = 1, .given = {1.0f, 1.0f}, .expected = {2.0f, 2.0f}},
+        {.relative = 1, .given = {NAN, -10.0f}, .expected = {2.0f, -8.0f}},
+        {.relative = 1, .given = {-11.0f, NAN}, .expected = {-9.0f, -8.0f}},
+    };
+    for (unsigned int i = 0; i < sizeof(testPoints) / sizeof(testPoints[0]); ++i) {
+        if (testPoints[i].relative) {
+            assert_int_equal(Physics_SetRelativeVelocity(entity, testPoints[i].given.x, testPoints[i].given.y), ERR_OK);
+        } else {
+            assert_int_equal(Physics_SetVelocity(entity, testPoints[i].given.x, testPoints[i].given.y), ERR_OK);
+        }
+        assert_float_equal(entity->physics.velocity.x, testPoints[i].expected.x, EPSILON);
+        assert_float_equal(entity->physics.velocity.y, testPoints[i].expected.y, EPSILON);
+    }
 }
 
 /**
- * @brief Setter der Geschwindigkeit in Polarform funtioniert.
+ * @brief Setter der Geschwindigkeit in Polarform funtionieren.
  * 
  * @param state Pointer auf entity_t
  */
 static void physics_can_set_velocity_in_polar_of_entity(void **state) {
     entity_t *entity = (entity_t *)*state;
-    // NULL
-    assert_int_equal(Physics_SetVelocityPolar(NULL, 0.0f, 0.0f), ERR_PARAMETER);
-    // 0.0f, 0.0 -> Ursprung
-    assert_int_equal(Physics_SetVelocityPolar(entity, 0.0f, 0.0f), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, 0.0f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, 0.0f, EPSILON);
-    // Länge 1.0 mit 0.0° -> nach rechts, horizontal
-    assert_int_equal(Physics_SetVelocityPolar(entity, 1.0f, 0.0), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, 1.0f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, 0.0f, EPSILON);
-    // Länge 1.0 mit 90.0° -> nach unten
-    assert_int_equal(Physics_SetVelocityPolar(entity, 1.0f, 90.0), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, 0.0f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, 1.0f, EPSILON);
-    // Länge 1.0 mit 180.0° -> nach links
-    assert_int_equal(Physics_SetVelocityPolar(entity, 1.0f, 180.0), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, -1.0f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, 0.0f, EPSILON);
-    // Länge 1.0 mit 270.0° -> nach oben
-    assert_int_equal(Physics_SetVelocityPolar(entity, 1.0f, 270.0), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, 0.0f, EPSILON);
-    assert_float_equal(entity->physics.velocity.y, -1.0f, EPSILON);
-    // Länge 1.0 mit 45.0° -> nach rechts unten
-    assert_int_equal(Physics_SetVelocityPolar(entity, 1.0f, 45.0), ERR_OK);
-    assert_float_equal(entity->physics.velocity.x, 1.0f / sqrt(2.0), EPSILON);
-    assert_float_equal(entity->physics.velocity.y, 1.0f / sqrt(2.0), EPSILON);
-    // Unendlich und NaN sind erlaubt
-    assert_int_equal(Physics_SetVelocityPolar(entity, INFINITY, NAN), ERR_OK);
+    // Entität ist NULL -> Parameterfehler
+    assert_int_equal(Physics_SetVelocityPolar(NULL, 0.0f, 0.0), ERR_PARAMETER);
+    assert_int_equal(Physics_SetRelativeVelocityPolar(NULL, 0.0f, 0.0), ERR_PARAMETER);
+    // Teste verschiedene Zahlenpaare
+    struct {
+        int relative; // 0 = nutze SetVelocityPolar, 1 = nutze SetRelativeVelocityPolar
+        struct {
+            float v;
+            double angle;
+        } given; // welcher Wert der Funktion übergeben wird
+        SDL_FPoint expected; // welcher Wert die Geschwindigkeit nun haben sollte
+    } testPoints[] = {
+        // 0.0f, 0.0 -> Ursprung
+        {.relative = 0, .given = {0.0f, 0.0}, .expected = {0.0f, 0.0f}},
+        // Länge 1.0 mit 0.0° -> nach rechts, horizontal
+        {.relative = 0, .given = {1.0f, 0.0}, .expected = {1.0f, 0.0f}},
+        // Länge 1.0 mit 90.0° -> nach unten
+        {.relative = 0, .given = {1.0f, 90.0}, .expected = {0.0f, 1.0f}},
+        // Länge 1.0 mit 180.0° -> nach links
+        {.relative = 0, .given = {1.0f, 180.0}, .expected = {-1.0f, 0.0f}},
+        // Länge 1.0 mit 270.0° -> nach oben
+        {.relative = 0, .given = {1.0f, 270.0}, .expected = {0.0f, -1.0f}},
+        // Länge 1.0 mit 45.0° -> nach rechts unten
+        {.relative = 0, .given = {1.0f, 45.0}, .expected = {1.0f / sqrt(2.0), 1.0f / sqrt(2.0)}},
+        // Relative Länge 1.0 mit 225.0° -> nach links oben
+        {.relative = 1, .given = {1.0f, 225.0}, .expected = {0.0f, 0.0f}},
+        // Relative Länge 1.0 mit 0.0° -> nach rechts, horizontal
+        {.relative = 1, .given = {1.0f, 0.0}, .expected = {1.0f, 0.0f}},
+        // Relative Länge 1.0 mit 90.0° -> nach unten
+        {.relative = 1, .given = {1.0f, 90.0}, .expected = {1.0f, 1.0f}},
+    };
+    for (unsigned int i = 0; i < sizeof(testPoints) / sizeof(testPoints[0]); ++i) {
+        if (testPoints[i].relative) {
+            assert_int_equal(Physics_SetRelativeVelocityPolar(entity, testPoints[i].given.v, testPoints[i].given.angle), ERR_OK);
+        } else {
+            assert_int_equal(Physics_SetVelocityPolar(entity, testPoints[i].given.v, testPoints[i].given.angle), ERR_OK);
+        }
+        assert_float_equal(entity->physics.velocity.x, testPoints[i].expected.x, EPSILON);
+        assert_float_equal(entity->physics.velocity.y, testPoints[i].expected.y, EPSILON);
+    }
 }
 
 /**
- * @brief Setter der Rotation funtioniert.
+ * @brief Setter der Rotation funtionieren.
  * 
  * @param state Pointer auf entity_t
  */
 static void physics_can_set_rotation_of_entity(void **state) {
     entity_t *entity = (entity_t *)*state;
-    // NULL
+    // Entität ist NULL -> Parameterfehler
     assert_int_equal(Physics_SetRotation(NULL, 0.0), ERR_PARAMETER);
-    // 0.0
-    assert_int_equal(Physics_SetRotation(entity, 0.0), ERR_OK);
-    assert_float_equal(entity->physics.rotation, 0.0, EPSILON);
-    // 1.0
-    assert_int_equal(Physics_SetRotation(entity, 1.0), ERR_OK);
-    assert_float_equal(entity->physics.rotation, 1.0, EPSILON);
-    // -1.0
-    assert_int_equal(Physics_SetRotation(entity, -1.0), ERR_OK);
-    assert_float_equal(entity->physics.rotation, -1.0, EPSILON);
-    // 123456.7
-    assert_int_equal(Physics_SetRotation(entity, 123456.7), ERR_OK);
-    assert_float_equal(entity->physics.rotation, 123456.7, EPSILON);
-    // -7.654321
-    assert_int_equal(Physics_SetRotation(entity, -7.654321), ERR_OK);
-    assert_float_equal(entity->physics.rotation, -7.654321, EPSILON);
-    // Unendlich ist erlaubt
-    assert_int_equal(Physics_SetRotation(entity, INFINITY), ERR_OK);
-    // NaN ist erlaubt
-    assert_int_equal(Physics_SetRotation(entity, NAN), ERR_OK);
+    assert_int_equal(Physics_SetRelativeRotation(NULL, 0.0), ERR_PARAMETER);
+    // Teste verschiedene Zahlenpaare
+    struct {
+        int relative; // 0 = nutze SetRotation, 1 = nutze SetRelativeRotation
+        double given; // welcher Wert der Funktion übergeben wird
+        double expected; // welcher Wert die Rotation nun haben sollte
+    } testPoints[] = {
+        {.relative = 0, .given = 0.0, .expected = 0.0},
+        {.relative = 0, .given = 1.0, .expected = 1.0},
+        {.relative = 0, .given = -1.0, .expected = -1.0},
+        {.relative = 0, .given = 123456.7, .expected = 123456.7},
+        {.relative = 0, .given = -7.654321, .expected = -7.654321},
+        {.relative = 0, .given = INFINITY, .expected = INFINITY},
+        {.relative = 0, .given = -INFINITY, .expected = -INFINITY},
+        {.relative = 0, .given = 0.0, .expected = 0.0},
+        {.relative = 1, .given = 1.0, .expected = 1.0},
+        {.relative = 1, .given = 1.0, .expected = 2.0},
+        {.relative = 1, .given = -10.0, .expected = -8.0},
+    };
+    for (unsigned int i = 0; i < sizeof(testPoints) / sizeof(testPoints[0]); ++i) {
+        if (testPoints[i].relative) {
+            assert_int_equal(Physics_SetRelativeRotation(entity, testPoints[i].given), ERR_OK);
+        } else {
+            assert_int_equal(Physics_SetRotation(entity, testPoints[i].given), ERR_OK);
+        }
+        assert_float_equal(entity->physics.rotation, testPoints[i].expected, EPSILON);
+    }
 }
 
 /**
@@ -229,6 +264,8 @@ static void physics_can_set_rotation_of_entity(void **state) {
 static int onCollision(entity_t *self, entityCollision_t *collision) {
     function_called();
     check_expected_ptr(self);
+    // Callback wird nie mit leeren Flags aufgerufen
+    assert_int_not_equal(collision->flags, 0);
     // Wenn eine Kollision mit anderen Entitäten stattfindet sollte immer eine
     // Kollisionsnormale existieren.
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
@@ -297,8 +334,8 @@ static int teardownTestState(void **state) {
 static void physics_applies_gravity_to_entity(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Positionen so setzen, dass keine Kollisionen auftreten
-    testState->entity0.physics.position = (SDL_FPoint){.x = 0.0f, .y = 0.0f};
-    testState->entity1.physics.position = (SDL_FPoint){.x = 10.0f, .y = 0.0f};
+    Physics_SetPosition(&testState->entity0, 0.0f, 0.0f);
+    Physics_SetPosition(&testState->entity1, 10.0f, 0.0f);
     // keine Kollisionen mit der Welt abfragen
     will_return_always(__wrap_World_CheckCollision, 0);
     // Nach mindestens 10 Iterationen wurde Entität in y Richtung verschoben
@@ -429,7 +466,7 @@ static void physics_on_collision_callback_can_clear_flags(void **state) {
  */
 static void physics_two_falling_entities_that_are_aproaching_do_not_cross(void **state) {
     testState_t *testState = (testState_t *)*state;
-    // Startzustand setzen, zwei Rechtecke am oberen Rand
+    // Startzustand setzen, zwei Rechtecke am oberen Rand, 60 Pixel entfernt
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f) - 30.0f, 0.0f);
     Physics_SetPosition(&testState->entity1, (800.0f / 2.0f) + 30.0f, 0.0f);
     // rechtes Rechteck bewegt sich nach links
@@ -462,7 +499,7 @@ static void physics_two_falling_entities_that_are_aproaching_do_not_cross(void *
 #endif
     }
     // Das rechte Rechteck ist nicht durch das linke hindurch gegangen
-    assert_not_in_range(testState->entity1.physics.aabb.x, 0, testState->entity0.physics.aabb.x);
+    assert_true(testState->entity0.physics.position.x < testState->entity1.physics.position.x);
 #ifndef CI_TEST
     SDLW_Quit();
 #endif
@@ -502,7 +539,7 @@ static void physics_resting_entity_ontop_of_another_entity_does_not_fall_through
     // 5 Sekunden lang simulieren
     for (int i = 0; i < 60 * 5; ++i) {
         // Position und Geschwindigkeit des unteren Rechtecks fixieren
-        Physics_SetPosition(&testState->entity1, 100.0f, 100.0f);
+        Physics_SetPosition(&testState->entity1, (800.0f / 2.0f), 100.0f);
         Physics_SetVelocity(&testState->entity1, 0.0f, 0.0f);
         Physics_Update(testState->entityList);
 #ifndef CI_TEST
@@ -517,9 +554,9 @@ static void physics_resting_entity_ontop_of_another_entity_does_not_fall_through
 #endif
     }
     // Das fallende Rechteck ist nicht zur Seite bewegt worden.
-    assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
+    assert_float_equal(testState->entity0.physics.position.x, (800.0f / 2.0f), EPSILON);
     // Es ist in etwa an Ort und Stelle geblieben (+- 2 Pixel)
-    assert_in_range(testState->entity0.physics.aabb.y, 88, 92);
+    assert_float_equal(testState->entity0.physics.position.y, 90.0f, 2.0f);
 #ifndef CI_TEST
     SDLW_Quit();
 #endif
@@ -536,7 +573,7 @@ static void physics_resting_entity_ontop_of_another_entity_does_not_fall_through
  * 
  * @param state Pointer auf testState_t*
  */
-static void physics_falling_entity_stops_on_collision_with_another_entity_does_not_fall_through(void **state) {
+static void physics_falling_entity_stops_on_collision_with_another_entity_and_does_not_fall_through(void **state) {
     testState_t *testState = (testState_t *)*state;
     // Startzustand setzen, oberes Rechteck ist oben in der Mitte
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
@@ -559,7 +596,7 @@ static void physics_falling_entity_stops_on_collision_with_another_entity_does_n
     // 5 Sekunden lang simulieren
     for (int i = 0; i < 60 * 5; ++i) {
         // Position und Geschwindigkeit des unteren Rechtecks fixieren
-        Physics_SetPosition(&testState->entity1, 100.0f, 100.0f);
+        Physics_SetPosition(&testState->entity1, (800.0f / 2.0f), 100.0f);
         Physics_SetVelocity(&testState->entity1, 0.0f, 0.0f);
         Physics_Update(testState->entityList);
 #ifndef CI_TEST
@@ -574,9 +611,9 @@ static void physics_falling_entity_stops_on_collision_with_another_entity_does_n
 #endif
     }
     // Das fallende Rechteck ist höchstens nach oben, aber nicht zur Seite bewegt worden.
-    assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
+    assert_float_equal(testState->entity0.physics.position.x, (800.0f / 2.0f), EPSILON);
     // Es ist nicht durch das untere Rechteck gefallen
-    assert_in_range(testState->entity0.physics.aabb.y, 0, testState->entity1.physics.aabb.y);
+    assert_true(testState->entity0.physics.position.y < testState->entity1.physics.position.y);
 #ifndef CI_TEST
     SDLW_Quit();
 #endif
@@ -598,7 +635,7 @@ static void physics_falling_entity_that_collides_with_another_falling_entity_doe
     // Startzustand setzen, oberes Rechteck ist oben in der Mitte
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
     // unteres Rechteck ist sehr breit
-    Physics_SetPosition(&testState->entity1, 100.0f, 100.0f);
+    Physics_SetPosition(&testState->entity1, (800.0f / 2.0f), 100.0f);
     testState->entity1.physics.aabb.w = 600;
     testState->entity1.physics.aabb.h = 10;
     // keine Kollisionen mit der Welt abfragen
@@ -631,9 +668,9 @@ static void physics_falling_entity_that_collides_with_another_falling_entity_doe
 #endif
     }
     // Das fallende Rechteck ist höchstens nach oben, aber nicht zur Seite bewegt worden.
-    assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
+    assert_float_equal(testState->entity0.physics.position.x, (800.0f / 2.0f), EPSILON);
     // Es ist nicht durch das untere Rechteck gefallen
-    assert_in_range(testState->entity0.physics.aabb.y, 0, testState->entity1.physics.aabb.y);
+    assert_true(testState->entity0.physics.position.y < testState->entity1.physics.position.y);
 #ifndef CI_TEST
     SDLW_Quit();
 #endif
@@ -655,7 +692,7 @@ static void physics_falling_entity_that_collides_with_another_rising_entity_does
     // Startzustand setzen, oberes Rechteck ist oben in der Mitte
     Physics_SetPosition(&testState->entity0, (800.0f / 2.0f), 50.0f);
     // unteres Rechteck ist sehr breit
-    Physics_SetPosition(&testState->entity1, 100.0f, 100.0f);
+    Physics_SetPosition(&testState->entity1, (800.0f / 2.0f), 100.0f);
     testState->entity1.physics.aabb.w = 600;
     testState->entity1.physics.aabb.h = 10;
     // keine Kollisionen mit der Welt abfragen
@@ -688,7 +725,7 @@ static void physics_falling_entity_that_collides_with_another_rising_entity_does
 #endif
     }
     // Das fallende Rechteck ist höchstens nach oben, aber nicht zur Seite bewegt worden.
-    assert_int_equal(testState->entity0.physics.aabb.x, (800 / 2));
+    assert_float_equal(testState->entity0.physics.position.x, (800.0f / 2.0f), EPSILON);
 #ifndef CI_TEST
     SDLW_Quit();
 #endif
@@ -786,9 +823,9 @@ static void physics_resting_entity_ontop_of_the_world_does_not_fall_through(void
     will_return_always(onCollision, 0);
     // für alle Startpunkte testen
     for (int p = 0; p < points; p += 2) {
-        // Startpunkt setzen
-        Physics_SetPosition(&testState->entity0, startPoints[p].x, startPoints[p].y);
-        Physics_SetPosition(&testState->entity1, startPoints[p + 1].x, startPoints[p + 1].y);
+        // Startpunkt setzen (+5 Pixel um die Höhe der Entität zu berücksichtigen)
+        Physics_SetPosition(&testState->entity0, startPoints[p].x + 5, startPoints[p].y + 5);
+        Physics_SetPosition(&testState->entity1, startPoints[p + 1].x + 5, startPoints[p + 1].y + 5);
         // 2 Sekunden lang simulieren
         for (int i = 0; i < 60 * 2; ++i) {
             Physics_Update(testState->entityList);
@@ -841,8 +878,8 @@ static void physics_manually_moving_entity_ontop_of_the_world_does_not_fall_thro
     expect_not_value_count(onCollision, self, 0, -1);
     // alle Mockwerte sollen 0 sein
     will_return_always(onCollision, 0);
-    // Startpunkt setzen
-    Physics_SetPosition(&testState->entity0, startPoint.x, startPoint.y);
+    // Startpunkt setzen (+5 Pixel um die Höhe der Entität zu berücksichtigen)
+    Physics_SetPosition(&testState->entity0, startPoint.x + 5, startPoint.y + 5);
     // 30 Sekunden lang simulieren
     for (int i = 0; i < 60 * 30; ++i) {
         // per Pfeiltasten kann bewegt werden
@@ -879,18 +916,14 @@ static void physics_manually_moving_entity_ontop_of_the_world_does_not_fall_thro
  */
 int main(void) {
     const struct CMUnitTest physics[] = {
-        cmocka_unit_test_setup_teardown(
-            physics_can_set_position_of_entity,
-            setupOneEntity, teardownOneEntity),
-        cmocka_unit_test_setup_teardown(
-            physics_can_set_velocity_of_entity,
-            setupOneEntity, teardownOneEntity),
-        cmocka_unit_test_setup_teardown(
-            physics_can_set_velocity_in_polar_of_entity,
-            setupOneEntity, teardownOneEntity),
-        cmocka_unit_test_setup_teardown(
-            physics_can_set_rotation_of_entity,
-            setupOneEntity, teardownOneEntity),
+        cmocka_unit_test_setup(
+            physics_can_set_position_of_entity, setupOneEntity),
+        cmocka_unit_test_setup(
+            physics_can_set_velocity_of_entity, setupOneEntity),
+        cmocka_unit_test_setup(
+            physics_can_set_velocity_in_polar_of_entity, setupOneEntity),
+        cmocka_unit_test_setup(
+            physics_can_set_rotation_of_entity, setupOneEntity),
 
         cmocka_unit_test_setup_teardown(
             physics_applies_gravity_to_entity,
@@ -915,7 +948,7 @@ int main(void) {
             physics_resting_entity_ontop_of_another_entity_does_not_fall_through,
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
-            physics_falling_entity_stops_on_collision_with_another_entity_does_not_fall_through,
+            physics_falling_entity_stops_on_collision_with_another_entity_and_does_not_fall_through,
             setupTestState, teardownTestState),
         cmocka_unit_test_setup_teardown(
             physics_falling_entity_that_collides_with_another_falling_entity_does_not_fall_through,
