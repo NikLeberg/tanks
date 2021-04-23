@@ -54,6 +54,10 @@ static void tank_in_world(void **state) {
                 input.dummy = -1;
             } else if (e.key.keysym.sym == SDLK_RIGHT) {
                 input.dummy = 1;
+            } else if (e.key.keysym.sym == SDLK_UP) {
+                input.dummy = -2;
+            } else if (e.key.keysym.sym == SDLK_DOWN) {
+                input.dummy = 2;
             }
         }
         EntityHandler_Update(&input);

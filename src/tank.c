@@ -28,7 +28,11 @@
  * 
  */
 
-/* ... */
+typedef enum {
+    TANK_PART_CHASSIS = 0,
+    TANK_PART_TRACKS,
+    TANK_PART_TUBE
+} tankPartType_t;
 
 
 /*
@@ -80,26 +84,35 @@ int Tank_Create(const char *player, SDL_Point startPosition) {
     if (!parts) {
         goto errorStep2;
     }
-    tank->data = parts; // speichere Pointer für späteres löschen
+    tank->data = parts; // speichere Pointer für späteren Zugriff
     // Fahrgestell laden
     SDLW_GetResource("chassis", RESOURCETYPE_SPRITE, (void **)&rawSprite);
-    parts[0].name = "Fahrgestell";
-    parts[0].sprite = *rawSprite;
-    if (EntityHandler_AddEntityPart(tank, &parts[0])) {
+    if (!rawSprite) {
+        goto errorStep3;
+    }
+    parts[TANK_PART_CHASSIS].name = "Fahrgestell";
+    parts[TANK_PART_CHASSIS].sprite = *rawSprite;
+    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_CHASSIS])) {
         goto errorStep3;
     }
     // Raupen laden
     SDLW_GetResource("tracks", RESOURCETYPE_SPRITE, (void **)&rawSprite);
-    parts[1].name = "Raupen";
-    parts[1].sprite = *rawSprite;
-    if (EntityHandler_AddEntityPart(tank, &parts[1])) {
+    if (!rawSprite) {
+        goto errorStep4;
+    }
+    parts[TANK_PART_TRACKS].name = "Raupen";
+    parts[TANK_PART_TRACKS].sprite = *rawSprite;
+    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_TRACKS])) {
         goto errorStep4;
     }
     // Panzerrohr laden
     SDLW_GetResource("tube", RESOURCETYPE_SPRITE, (void **)&rawSprite);
-    parts[2].name = "Rohr";
-    parts[2].sprite = *rawSprite;
-    if (EntityHandler_AddEntityPart(tank, &parts[2])) {
+    if (!rawSprite) {
+        goto errorStep5;
+    }
+    parts[TANK_PART_TUBE].name = "Rohr";
+    parts[TANK_PART_TUBE].sprite = *rawSprite;
+    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_TUBE])) {
         goto errorStep5;
     }
     // Teile einrichten
@@ -135,11 +148,16 @@ int Tank_Destroy(entity_t *tank) {
 
 int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     float *x = &self->physics.velocity.x;
+    double *r = &((entityPart_t*)self->data)[TANK_PART_TUBE].sprite.rotation;
     // Geschwindigkeit gemäss Pfeiltasten verändern
     if (inputEvents->dummy == -1) {
         if (*x > -50.0f) *x -= 10.0f;
     } else if (inputEvents->dummy == 1) {
         if (*x < 50.0f) *x += 10.0f;
+    } else if (inputEvents->dummy == -2) {
+        *r -= 0.5;
+    } else if (inputEvents->dummy == 2) {
+        *r += 0.5;
     }
     *x *= 0.95; // dämpfen
     return ERR_OK;
