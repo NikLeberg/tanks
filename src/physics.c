@@ -45,6 +45,7 @@
 #define DELTA_TIME (1.0f / 60.0f) //!< Updateintervall [s]
 #define GRAVITY 40.0f             //!< Erdbeschleunigung [pixel / s2]
 #define NEAR_ZERO 0.1f            //!< Werte die kleiner sind zählen als 0
+#define DAMPENING_FACTOR_X 0.95f  //!< Dämpffaktor für Bewegungen nach oben
 
 /**
  * @brief Rückstossfaktor einer Kollision mit der Welt
@@ -81,11 +82,10 @@
  * berechnet einen Physikschritt.
  * 
  * @param data opaker Pointer auf eine Entität
- * @param userData opaker Pointer auf Entitätsliste
  *
  * @return ERR_OK oder ERR_FAIL
  */
-static int updateEntity(void *data, void *userData);
+static int updateEntity(void *data);
 
 /**
  * @brief Bereinige Physikdaten.
@@ -106,12 +106,12 @@ static void clearNearToZero(entityPhysics_t *physics);
  * 
  * @note Komplexität ist O(n^2)
  * 
- * @param entity zu prüfende Entität
- * @param entityList Liste aller Entitäten
+ * @param data opaker Pointer auf eine Entität
+ * @param userData opaker Pointer auf Entitätsliste
  * 
  * @return ERR_OK oder ERR_FAIL
  */
-static int checkForAllCollisions(entity_t *entity, list_t *entityList);
+static int checkForAllCollisions(void *data, void *userData);
 
 /**
  * @brief Überprüfe auf Kollision zwischen zwei Entitäten.
@@ -151,7 +151,9 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision);
 int Physics_Update(list_t *entityList) {
     int ret = ERR_OK;
     // Alle Entitäten aktualisieren
-    ret = List_ForeachArg(entityList, updateEntity, entityList);
+    ret = List_Foreach(entityList, updateEntity);
+    // Alle Kollision der Entitäten prüfen
+    ret |= List_ForeachArg(entityList, checkForAllCollisions, entityList);
     return ret;
 }
 
@@ -243,25 +245,25 @@ int Physics_SetRelativeRotation(entity_t *entity, double rotation) {
  * 
  */
 
-static int updateEntity(void *data, void *userData) {
+static int updateEntity(void *data) {
     entity_t *entity = (entity_t *)data;
-    list_t *entityList = (list_t *)userData;
     // Werte die nahezu 0 sind auf 0 setzen
     clearNearToZero(&entity->physics);
     // Erdbeschleunigung anwenden
     entity->physics.velocity.y += GRAVITY * DELTA_TIME;
+    // Dämpfen der nach oben gerichteten Geschwindigkeit. Bewirkt, dass nach
+    // Kollision die Entität nicht endlos auf und ab hüpft sondern irgendwann
+    // zur ruhe kommt.
+    if (entity->physics.velocity.y < 0.0f) {
+        entity->physics.velocity.y *= DAMPENING_FACTOR_X;
+    }
     // Geschwindigkeit anwenden
     entity->physics.position.x += entity->physics.velocity.x * DELTA_TIME;
     entity->physics.position.y += entity->physics.velocity.y * DELTA_TIME;
     // Position auf AABB übertragen
-    entity->physics.aabb.x = entity->physics.position.x;
-    entity->physics.aabb.y = entity->physics.position.y;
-    // Auf Kollision mit anderen Entitäten prüfen
-    int ret = checkForAllCollisions(entity, entityList);
-    // Position erneut auf AABB übertragen, wurde ev. von Kollision verändert
-    entity->physics.aabb.x = entity->physics.position.x;
-    entity->physics.aabb.y = entity->physics.position.y;
-    return ret;
+    entity->physics.aabb.x = entity->physics.position.x - entity->physics.aabb.w / 2;
+    entity->physics.aabb.y = entity->physics.position.y - entity->physics.aabb.h / 2;
+    return ERR_OK;
 }
 
 static void clearNearToZero(entityPhysics_t *physics) {
@@ -282,7 +284,9 @@ static void clearNearToZero(entityPhysics_t *physics) {
     }
 }
 
-static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
+static int checkForAllCollisions(void *data, void *userData) {
+    entity_t *entity = (entity_t *)data;
+    list_t *entityList = (list_t *)userData;
     int ret = ERR_OK;
     entityCollision_t worldCollision = {.partner = NULL};
     ret = World_CheckCollision(entity->physics.aabb, &worldCollision);
@@ -305,6 +309,9 @@ static int checkForAllCollisions(entity_t *entity, list_t *entityList) {
         }
     }
     ret = List_ForeachArg(entityList, checkForEntityCollision, entity);
+    // Position erneut auf AABB übertragen, wurde ev. von Kollision verändert
+    entity->physics.aabb.x = entity->physics.position.x - entity->physics.aabb.w / 2;
+    entity->physics.aabb.y = entity->physics.position.y - entity->physics.aabb.h / 2;
     return ret;
 }
 
