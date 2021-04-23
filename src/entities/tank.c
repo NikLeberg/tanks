@@ -17,10 +17,11 @@
 
 #include <math.h>
 
-#include "tank.h"
+#include "entities/tank.h"
 #include "error.h"
 #include "physics.h"
 #include "entityHandler.h"
+#include "world.h"
 
 
 /*
@@ -34,8 +35,8 @@
  * Dient als Arrayindex für die Eintelteile des Panzers.
  */
 typedef enum {
-    TANK_PART_CHASSIS = 0,
-    TANK_PART_TRACKS,
+    TANK_PART_TRACKS = 0,
+    TANK_PART_CHASSIS,
     TANK_PART_TUBE
 } tankPartType_t;
 
@@ -61,8 +62,9 @@ typedef enum {
  * 
  */
 
-int updateCallback(entity_t *self, inputEvent_t *inputEvents);
-int collisionCallback(entity_t *self, entityCollision_t *collision);
+static int updateCallback(entity_t *self, inputEvent_t *inputEvents);
+static int collisionCallback(entity_t *self, entityCollision_t *collision);
+static int rotateToWorld(entity_t *tank);
 
 
 /*
@@ -83,8 +85,8 @@ int Tank_Create(const char *player, float x, float y) {
     tank->name = "Panzer";
     tank->callbacks.onUpdate = updateCallback;
     tank->callbacks.onCollision = collisionCallback;
-    tank->physics.aabb.w = 35;
-    tank->physics.aabb.h = 20;
+    tank->physics.aabb.w = 40;
+    tank->physics.aabb.h = 30;
     if (Physics_SetPosition(tank, x, y)) {
         goto errorStep2;
     }
@@ -98,24 +100,24 @@ int Tank_Create(const char *player, float x, float y) {
         goto errorStep2;
     }
     tank->data = parts; // speichere Pointer auf Teile für späteren Zugriff
-    // Fahrgestell laden
-    SDLW_GetResource("chassis", RESOURCETYPE_SPRITE, (void **)&rawSprite);
-    if (!rawSprite) {
-        goto errorStep3;
-    }
-    parts[TANK_PART_CHASSIS].name = "Fahrgestell";
-    parts[TANK_PART_CHASSIS].sprite = *rawSprite;
-    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_CHASSIS])) {
-        goto errorStep3;
-    }
     // Raupen laden
     SDLW_GetResource("tracks", RESOURCETYPE_SPRITE, (void **)&rawSprite);
     if (!rawSprite) {
-        goto errorStep4;
+        goto errorStep3;
     }
     parts[TANK_PART_TRACKS].name = "Raupen";
     parts[TANK_PART_TRACKS].sprite = *rawSprite;
     if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_TRACKS])) {
+        goto errorStep3;
+    }
+    // Fahrgestell laden
+    SDLW_GetResource("chassis", RESOURCETYPE_SPRITE, (void **)&rawSprite);
+    if (!rawSprite) {
+        goto errorStep4;
+    }
+    parts[TANK_PART_CHASSIS].name = "Fahrgestell";
+    parts[TANK_PART_CHASSIS].sprite = *rawSprite;
+    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_CHASSIS])) {
         goto errorStep4;
     }
     // Panzerrohr laden
@@ -133,9 +135,9 @@ int Tank_Create(const char *player, float x, float y) {
 
     // Mache im Fehlerfall alle Schritte einzeln rückgängig
 errorStep5:
-    EntityHandler_RemoveEntityPart(tank, &parts[TANK_PART_TRACKS]);
-errorStep4:
     EntityHandler_RemoveEntityPart(tank, &parts[TANK_PART_CHASSIS]);
+errorStep4:
+    EntityHandler_RemoveEntityPart(tank, &parts[TANK_PART_TRACKS]);
 errorStep3:
     EntityHandler_RemoveEntity(tank);
     free(parts);
@@ -159,7 +161,7 @@ int Tank_Destroy(entity_t *tank) {
  * 
  */
 
-int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
+static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     entityPart_t *tube = &((entityPart_t*)self->data)[TANK_PART_TUBE];
     const float *vx = &self->physics.velocity.x;
     // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
@@ -179,19 +181,35 @@ int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     // Horizontale Bewegung in jedem Zyklus um 5% dämpfen damit der Panzer nicht
     // endlos in eine Richtung fährt.
     Physics_SetVelocity(self, *vx * 0.95f, NAN);
+    // rotiere den gesamten Panzer basierend auf der Position auf der Welt
+    rotateToWorld(self);
     return ERR_OK;
 }
 
-int collisionCallback(entity_t *self, entityCollision_t *collision) {
+static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     (void)self;
     (void)collision;
-    // // Richte den Panzer nach der Welt aus
-    // if (collision->flags & ENTITY_COLLISION_WORLD) {
-    //     double angle = atan2(-collision->normal.y, collision->normal.x);
-    //     angle = angle / M_PI * 180.0f;
-    //     angle -= 90.0f;
-    //     //double angle = atan(collision->normal.y / collision->normal.x);
-    //     Physics_SetRotation(self, -angle);
-    // }
+    return ERR_OK;
+}
+
+static int rotateToWorld(entity_t *tank) {
+    // Suche den Punkt auf der Welt der direkt unter der Mitte der Entität ist.
+    SDL_Point topOfWorld;
+    World_VerticalLineIntersection((SDL_Point){
+        .x = tank->physics.position.x,
+        .y = tank->physics.position.y},
+        &topOfWorld);
+    // Erhalte mittels Kollision in diesem Punkt eine Normale der Welt.
+    SDL_Rect testBox = {.x = topOfWorld.x - 10, .y = topOfWorld.y - 10, .w = 20, .h = 20};
+    entityCollision_t collision = {.partner = NULL};
+    World_CheckCollision(testBox, &collision);
+    if (collision.flags & ENTITY_COLLISION_WORLD) {
+        double angle = atan2(-collision.normal.y, collision.normal.x);
+        angle = angle / M_PI * 180.0f;
+        angle -= 90.0f;
+        //double angle = atan(collision.normal.y / collision.normal.x);
+        Physics_SetRotation(tank, -angle);
+    }
+    SDLW_DrawFilledRect(testBox, (SDL_Color){255, 0, 0, 0});
     return ERR_OK;
 }

@@ -14,7 +14,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Alle *.c Dateien im src Ordner ausser main.c als Bibliothek hinzufügen
-file(GLOB SOURCES "src/**.c")
+file(GLOB_RECURSE SOURCES "src/**.c")
 list(FILTER SOURCES EXCLUDE REGEX ".*main.c$")
 add_library(main STATIC ${SOURCES})
 
