@@ -45,6 +45,7 @@
 #define DELTA_TIME (1.0f / 60.0f) //!< Updateintervall [s]
 #define GRAVITY 40.0f             //!< Erdbeschleunigung [pixel / s2]
 #define NEAR_ZERO 0.1f            //!< Werte die kleiner sind zählen als 0
+#define DAMPENING_FACTOR_X 0.95f  //!< Dämpffaktor für Bewegungen nach oben
 
 /**
  * @brief Rückstossfaktor einer Kollision mit der Welt
@@ -250,6 +251,12 @@ static int updateEntity(void *data, void *userData) {
     clearNearToZero(&entity->physics);
     // Erdbeschleunigung anwenden
     entity->physics.velocity.y += GRAVITY * DELTA_TIME;
+    // Dämpfen der nach oben gerichteten Geschwindigkeit. Bewirkt, dass nach
+    // Kollision die Entität nicht endlos auf und ab hüpft sondern irgendwann
+    // zur ruhe kommt.
+    if (entity->physics.velocity.y < 0.0f) {
+        entity->physics.velocity.y *= DAMPENING_FACTOR_X;
+    }
     // Geschwindigkeit anwenden
     entity->physics.position.x += entity->physics.velocity.x * DELTA_TIME;
     entity->physics.position.y += entity->physics.velocity.y * DELTA_TIME;
