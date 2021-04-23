@@ -28,6 +28,11 @@
  * 
  */
 
+/**
+ * @brief Enummeration der Panzer-Teile
+ * 
+ * Dient als Arrayindex für die Eintelteile des Panzers.
+ */
 typedef enum {
     TANK_PART_CHASSIS = 0,
     TANK_PART_TRACKS,
@@ -40,7 +45,15 @@ typedef enum {
  * 
  */
 
-/* ... */
+/**
+ * @brief Maximale horizontale Geschwindigkeit
+ * 
+ * Je schneller ein Panzer sich bewegen darf, dessto grösser die Steigungen der
+ * Welt die er zurücklegen kann.
+ */
+#define TANK_MAX_HORIZONTAL_SPEED 50.0f
+#define TANK_TUBE_MAX_ROTATION_POSITIVE 10.0 //!< Max pos. Rotation des Rohrs
+#define TANK_TUBE_MAX_ROTATION_NEGATIVE -190.0 //!< Max neg. Rotation des Rohrs
 
 
 /*
@@ -57,8 +70,8 @@ int collisionCallback(entity_t *self, entityCollision_t *collision);
  * 
  */
 
-int Tank_Create(const char *player, SDL_Point startPosition) {
-    if (!player || !startPosition.x || !startPosition.y) {
+int Tank_Create(const char *player, float x, float y) {
+    if (!player) {
         return ERR_PARAMETER;
     }
     entity_t *tank = calloc(1, sizeof(entity_t));
@@ -72,19 +85,19 @@ int Tank_Create(const char *player, SDL_Point startPosition) {
     tank->callbacks.onCollision = collisionCallback;
     tank->physics.aabb.w = 35;
     tank->physics.aabb.h = 20;
-    if (Physics_SetPosition(tank, startPosition.x, startPosition.y)) {
+    if (Physics_SetPosition(tank, x, y)) {
         goto errorStep2;
     }
     if (EntityHandler_AddEntity(tank)) {
         goto errorStep2;
     }
-    // Teile laden und einrichten
+    // Einzelteile laden und einrichten
     sprite_t *rawSprite;
     entityPart_t *parts = calloc(3, sizeof(entityPart_t));
     if (!parts) {
         goto errorStep2;
     }
-    tank->data = parts; // speichere Pointer für späteren Zugriff
+    tank->data = parts; // speichere Pointer auf Teile für späteren Zugriff
     // Fahrgestell laden
     SDLW_GetResource("chassis", RESOURCETYPE_SPRITE, (void **)&rawSprite);
     if (!rawSprite) {
@@ -120,9 +133,9 @@ int Tank_Create(const char *player, SDL_Point startPosition) {
 
     // Mache im Fehlerfall alle Schritte einzeln rückgängig
 errorStep5:
-    EntityHandler_RemoveEntityPart(tank, &parts[1]); // Raupen
+    EntityHandler_RemoveEntityPart(tank, &parts[TANK_PART_TRACKS]);
 errorStep4:
-    EntityHandler_RemoveEntityPart(tank, &parts[0]); // Fahrgestell
+    EntityHandler_RemoveEntityPart(tank, &parts[TANK_PART_CHASSIS]);
 errorStep3:
     EntityHandler_RemoveEntity(tank);
     free(parts);
@@ -147,19 +160,25 @@ int Tank_Destroy(entity_t *tank) {
  */
 
 int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
-    float *x = &self->physics.velocity.x;
-    double *r = &((entityPart_t*)self->data)[TANK_PART_TUBE].sprite.rotation;
-    // Geschwindigkeit gemäss Pfeiltasten verändern
-    if (inputEvents->dummy == -1) {
-        if (*x > -50.0f) *x -= 10.0f;
-    } else if (inputEvents->dummy == 1) {
-        if (*x < 50.0f) *x += 10.0f;
-    } else if (inputEvents->dummy == -2) {
-        *r -= 0.5;
-    } else if (inputEvents->dummy == 2) {
-        *r += 0.5;
+    entityPart_t *tube = &((entityPart_t*)self->data)[TANK_PART_TUBE];
+    const float *vx = &self->physics.velocity.x;
+    // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
+    if (inputEvents->dummy == -1 && *vx > -TANK_MAX_HORIZONTAL_SPEED) {
+        Physics_SetRelativeVelocity(self, -10.0f, NAN);
+    } else if (inputEvents->dummy == 1 && *vx < TANK_MAX_HORIZONTAL_SPEED) {
+        Physics_SetRelativeVelocity(self, +10.0f, NAN);
     }
-    *x *= 0.95; // dämpfen
+    // Rohrstellung gemäss Pfeiltasten rotieren
+    if (inputEvents->dummy == -2
+     && tube->sprite.rotation > TANK_TUBE_MAX_ROTATION_NEGATIVE) {
+        tube->sprite.rotation -= 0.5;
+    } else if (inputEvents->dummy == 2
+            && tube->sprite.rotation < TANK_TUBE_MAX_ROTATION_POSITIVE) {
+        tube->sprite.rotation += 0.5;
+    }
+    // Horizontale Bewegung in jedem Zyklus um 5% dämpfen damit der Panzer nicht
+    // endlos in eine Richtung fährt.
+    Physics_SetVelocity(self, *vx * 0.95f, NAN);
     return ERR_OK;
 }
 

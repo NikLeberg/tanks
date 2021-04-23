@@ -41,8 +41,7 @@ static void tank_in_world(void **state) {
     ret |= SDLW_LoadResources("assets/test/config.cfg");
     ret |= SDLW_LoadResources("assets/config.cfg");
     ret |= World_Load("world");
-    SDL_Point start = {.x = 100, .y = 1};
-    Tank_Create("Nik", start);
+    Tank_Create("Nik", 100.0f, 0.0f);
     // 5 Sekunden lang simulieren
     for (int i = 0; i < 60 * 120; ++i) {
         inputEvent_t input = {0};

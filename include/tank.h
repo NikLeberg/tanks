@@ -47,11 +47,12 @@
  * Erzeugt ein Panzer und registriert diesen mit all seinen Einzelteilen
  * im EntityHandler.
  * 
- * @param owner Eigentümer des Panzers, wird für Kollisionen verwendet
- * @param startPosition Startposition in der Welt
+ * @param player Eigentümer des Panzers, wird für Kollisionen verwendet
+ * @param x x-Koordinate der Startposition in der Welt
+ * @param y y-Koordinate der Startposition in der Welt
  * 
  * @return ERR_OK, ERR_MEMORY oder ERR_FAIL
  */
-int Tank_Create(const char *player, SDL_Point startPosition);
+int Tank_Create(const char *player, float x, float y);
 
 int Tank_Destroy(entity_t *tank);
