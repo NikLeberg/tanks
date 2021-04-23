@@ -7,6 +7,11 @@
  * 
  * @copyright Copyright (c) 2021 Leuenberger Niklaus
  * 
+ * Dieses Modul stellt verschiedene Funktionen zum setzen von Physikparametern
+ * der Entitäten bereit. Dies sind die Physics_Set* Funktionen. Weiter wird
+ * durch dieses Modul die Physik der Entitäten in jedem Spielzyklus berechnet.
+ * Es kontrolliert dann auch auf Kollisionen und behebt diese automatisch.
+ * 
  */
 
 
@@ -163,6 +168,19 @@ int Physics_SetPosition(entity_t *entity, float x, float y) {
     return ERR_OK;
 }
 
+int Physics_SetRelativePosition(entity_t *entity, float x, float y) {
+    if (!entity) {
+        return ERR_PARAMETER;
+    }
+    if (!isnan(x)) {
+        entity->physics.position.x += x;
+    }
+    if (!isnan(y)) {
+        entity->physics.position.y += y;
+    }
+    return ERR_OK;
+}
+
 int Physics_SetVelocity(entity_t *entity, float x, float y) {
     if (!entity) {
         return ERR_PARAMETER;
@@ -176,9 +194,30 @@ int Physics_SetVelocity(entity_t *entity, float x, float y) {
     return ERR_OK;
 }
 
+int Physics_SetRelativeVelocity(entity_t *entity, float x, float y) {
+    if (!entity) {
+        return ERR_PARAMETER;
+    }
+    if (!isnan(x)) {
+        entity->physics.velocity.x += x;
+    }
+    if (!isnan(y)) {
+        entity->physics.velocity.y += y;
+    }
+    return ERR_OK;
+}
+
 int Physics_SetVelocityPolar(entity_t *entity, float velocity, double angle) {
     double angleRad = angle * (M_PI / 180.0);
+    // Gegebener Betrag und Winkel in Kartesische Form umrechnen
     return Physics_SetVelocity(entity, velocity * cos(-angleRad),
+                               -(velocity * sin(-angleRad)));
+}
+
+int Physics_SetRelativeVelocityPolar(entity_t *entity, float velocity, double angle) {
+    double angleRad = angle * (M_PI / 180.0);
+    // Gegebener Betrag und Winkel in Kartesische Form umrechnen
+    return Physics_SetRelativeVelocity(entity, velocity * cos(-angleRad),
                                -(velocity * sin(-angleRad)));
 }
 
@@ -187,6 +226,14 @@ int Physics_SetRotation(entity_t *entity, double rotation) {
         return ERR_PARAMETER;
     }
     entity->physics.rotation = rotation;
+    return ERR_OK;
+}
+
+int Physics_SetRelativeRotation(entity_t *entity, double rotation) {
+    if (!entity) {
+        return ERR_PARAMETER;
+    }
+    entity->physics.rotation += rotation;
     return ERR_OK;
 }
 
