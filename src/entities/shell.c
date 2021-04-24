@@ -138,5 +138,11 @@ static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     if (collision->flags & ENTITY_COLLISION_WORLD) {
         Shell_Destroy(self);
     }
+    // Kollisionen mit Entiäten die dem selben Spieler gehören ignorieren.
+    if (collision->flags & ENTITY_COLLISION_ENTITY) {
+        if (!strcmp(self->owner, collision->partner->owner)) {
+            collision->flags &= ~ENTITY_COLLISION_ENTITY;
+        }
+    }
     return ERR_OK;
 }

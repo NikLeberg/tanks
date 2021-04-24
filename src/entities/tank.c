@@ -186,15 +186,33 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     rotateToWorld(self);
     // Falls Leertaste -> Schuss feuern
     if (inputEvents->dummy == 4) {
+        // Der Schuss soll am Ende des Schussrohrs erscheinen, daher muss dessen
+        // aktuelle Position mit Vektorgeometrie berechnet werden.
+        // Starte im Zentrum der Entität
+        float x = self->physics.position.x;
+        float y = self->physics.position.y;
+        // Startpunkt zum Rohransatz schieben
+        double angleRad = (self->physics.rotation + 90.0) * (M_PI / 180.0);
+        x += tube->sprite.destination.y * cos(-angleRad);
+        y += -(tube->sprite.destination.y * sin(-angleRad));
+        // Startpunkt zum Rohrende schieben
+        angleRad = (self->physics.rotation + tube->sprite.rotation) * (M_PI / 180.0);
+        x += tube->sprite.destination.w * cos(-angleRad);
+        y += -(tube->sprite.destination.w * sin(-angleRad));
+        // Schuss erstellen
         double angle = self->physics.rotation + tube->sprite.rotation;
-        Shell_Create(self->owner, self->physics.position.x, self->physics.position.y - 50.0f, 100.0f, angle);
+        Shell_Create(self->owner, x, y, 200.0f, angle);
     }
     return ERR_OK;
 }
 
 static int collisionCallback(entity_t *self, entityCollision_t *collision) {
-    (void)self;
-    (void)collision;
+    // Kollisionen mit Entiäten die dem selben Spieler gehören ignorieren.
+    if (collision->flags & ENTITY_COLLISION_ENTITY) {
+        if (!strcmp(self->owner, collision->partner->owner)) {
+            collision->flags &= ~ENTITY_COLLISION_ENTITY;
+        }
+    }
     return ERR_OK;
 }
 

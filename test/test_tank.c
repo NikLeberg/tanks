@@ -64,11 +64,11 @@ static void tank_in_world(void **state) {
         EntityHandler_Update(&input);
         // Stelle die AABBs visuell dar
         SDL_Color black = {.r = 255, .g = 255, .b = 255};
+        SDLW_Clear(black);
         World_DrawBackground();
         World_DrawForeground();
         EntityHandler_Draw();
         SDLW_Render();
-        SDLW_Clear(black);
     }
     World_Quit();
     SDLW_Quit();
