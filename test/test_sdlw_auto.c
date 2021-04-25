@@ -70,8 +70,9 @@ static void test_config_files(void **state) {
     (void)state;
     SDLW_Init(500, 500);
     assert_int_equal(SDLW_LoadResources(NULL), ERR_NULLPARAMETER); // Kein string übergeben
+    // Leere Konfigurationsdateien sind erlaubt
+    assert_int_equal(SDLW_LoadResources("assets/test/e_empty.cfg"), ERR_OK);
     // Fehlerhafte Konfigurationsdateien. Fehlerbeschrieb sind in den einzelnen Konfigdateien beschrieben
-    assert_int_equal(SDLW_LoadResources("assets/test/e_empty.cfg"), ERR_PARAMETER);
     assert_int_equal(SDLW_LoadResources("assets/test/e_notype.cfg"), ERR_FAIL);
     assert_int_equal(SDLW_LoadResources("assets/test/e_unknowntype.cfg"), ERR_FAIL);
     assert_int_equal(SDLW_LoadResources("assets/test/e_config.cfg"), ERR_PARAMETER);
