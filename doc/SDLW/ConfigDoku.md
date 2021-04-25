@@ -68,6 +68,7 @@ Spritekonfiguration mit eingegebenen Offset und Pivot
     <th>Name</th>
     <th>"sprite"</th>
     <th>Textur ID</th>
+    <th>"size"</th>
     <th>Offset X</th>
     <th>Offset Y</th>
     <th>Breite</th>
