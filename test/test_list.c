@@ -454,6 +454,65 @@ static void check_null_catch(void **state) {
 }
 
 /**
+ * @brief Mock-Callback für nachfolgenden Test
+ * Wird für \ref lists_can_delete_elements_inside_for_loop benötigt. Löscht
+ * jedes Element der Liste währendem über die Liste iteriert wird.
+ * 
+ * @param data Pointer auf Listenelement
+ * 
+ * @return gemäss List_Remove
+ */
+static int forCallbackDeleteAll(void *data) {
+    function_called();
+    return List_Remove(mock_type(list_t*), data);
+}
+
+/**
+ * @brief Mock-Callback für nachfolgenden Test (mit Argument)
+ * Wird für \ref lists_can_delete_elements_inside_for_loop benötigt. Löscht
+ * jedes Element der Liste währendem über die Liste iteriert wird.
+ * 
+ * @param data Pointer auf Listenelement
+ * @param userData unbenutzt
+ * 
+ * @return gemäss List_Remove
+ */
+static int forCallbackDeleteAllArg(void *data, void *userData) {
+    (void)userData;
+    function_called();
+    return List_Remove(mock_type(list_t*), data);
+}
+
+/**
+ * @brief Testet ob während dem Interieren mit den For-Funktionen Elemente aus
+ * der Liste gelöscht werden dürfen.
+ *  
+ * @param state unbenutzt
+ */
+static void lists_can_delete_elements_inside_for_loop(void **state) {
+    (void)state;
+    list_t list;
+    int v1 = 1;
+    int v2 = 2;
+    int v3 = 3;
+    List_Init(&list);
+    // Standard For
+    List_Add(&list, &v3);
+    List_Add(&list, &v2);
+    List_Add(&list, &v1);
+    will_return_always(forCallbackDeleteAll, &list);
+    expect_function_calls(forCallbackDeleteAll, 3);
+    assert_int_equal(List_Foreach(&list, forCallbackDeleteAll), ERR_OK);
+    // For mit Argument (caste Callback auf Funktion ohne Argument)
+    List_Add(&list, &v3);
+    List_Add(&list, &v2);
+    List_Add(&list, &v1);
+    will_return_always(forCallbackDeleteAllArg, &list);
+    expect_function_calls(forCallbackDeleteAllArg, 3);
+    assert_int_equal(List_ForeachArg(&list, forCallbackDeleteAllArg, NULL), ERR_OK);
+}
+
+/**
  * @brief Testprogramm
  * 
  * @return int Anzahl fehlgeschlagener Tests
@@ -468,6 +527,8 @@ int main(void) {
         cmocka_unit_test(check_foreach_loop),
         cmocka_unit_test(check_search),
         cmocka_unit_test(check_dataAutoFree),
-        cmocka_unit_test(check_null_catch)};
+        cmocka_unit_test(check_null_catch),
+        cmocka_unit_test(lists_can_delete_elements_inside_for_loop),
+    };
     return cmocka_run_group_tests(list, NULL, NULL);
 }

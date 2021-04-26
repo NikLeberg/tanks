@@ -54,16 +54,16 @@
  */
 
 int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
-    char key[32] = {0};
-    char type[32] = {0};
-    char textureKey[32] = {0};
-    char spriteType[16] = {0};
-    int sizeXorDestX = 0;
-    int sizeYorDestY = 0;
-    int subSpriteCountorDestW = 0;
-    int destH = 0;
-    int pivotX = 0;
-    int pivotY = 0;
+    char key[32] = {0}; // Sprite ID-Schlüssel
+    char type[32] = {0}; // Ressurcentyp = sprite
+    char textureKey[32] = {0}; // Texturen ID
+    char spriteType[16] = {0}; // Typ des Sprites
+    int sizeXorDestX = 0; // Breite oder X-Offset
+    int sizeYorDestY = 0; // Höhe oder Y-Offset
+    int subSpriteCountorDestW = 0; // Anzahl Sprites oder Breite
+    int destH = 0; // Höhe
+    int pivotX = 0; // Pivot X-Offset
+    int pivotY = 0; // Pivot Y-Offset
 
     spriteResource->type = RESOURCETYPE_SPRITE;
 
@@ -92,21 +92,24 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
         return ERR_FAIL;
     }
 
-    if (count == 10) {
+    if (count == 10 && !strcmp(spriteType, "size")) { // Sprite mit destination grösse
+        //Source des Sprites definieren
         int w, h;
         SDL_QueryTexture(loadedSprite->texture, NULL, NULL, &w, &h);
         loadedSprite->source.w = w;
         loadedSprite->source.h = h;
+        // Destination des Sprites definieren
         loadedSprite->destination.x = sizeXorDestX;
         loadedSprite->destination.y = sizeYorDestY;
-        if (subSpriteCountorDestW <= 0)
+        if (subSpriteCountorDestW <= 0) // Breite undefiniert
             loadedSprite->destination.w = w;
         else
             loadedSprite->destination.w = subSpriteCountorDestW;
-        if (destH <= 0)
+        if (destH <= 0) // Höhe undefiniert
             loadedSprite->destination.h = h;
         else
             loadedSprite->destination.h = destH;
+        // Pivot offset definieren
         loadedSprite->pivot.x = pivotX;
         loadedSprite->pivot.y = pivotY;
         spriteResource->resource.sprite = loadedSprite;
@@ -119,6 +122,7 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
         SDL_QueryTexture(loadedSprite->texture, NULL, NULL, &w, &h);
         loadedSprite->source.w = w;
         loadedSprite->source.h = h;
+        // Definieren des destination
         loadedSprite->destination.w = w;
         loadedSprite->destination.h = h;
         spriteResource->resource.sprite = loadedSprite;
@@ -127,6 +131,7 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
 
     if (count == 7) { // Laden einer animations Textur
         if (!strcmp(spriteType, "animation")) {
+            //Multisprite daten setzen
             loadedSprite->multiSpriteSize = (SDL_Point){sizeXorDestX, sizeYorDestY};
             loadedSprite->multiSpriteCount = subSpriteCountorDestW;
             // Setzen der standard Breite und Höhe
@@ -137,22 +142,23 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
             return ERR_OK;
         }
     }
-
+    // Keine gültige konfiguration
     printf("Konfigurationsargumente fuer %s ungueltig! Sprite_Load()\n", key);
     free(loadedSprite);
     return ERR_FAIL;
 }
 
 int Sprite_CreateText(char *text, char *font, SDL_Color color, sprite_t *sprite) {
-    if (!sprite) {
+    if (!sprite) { // Fehlerüberprüfung
         printf("Sprite ungueltig! Sprite_CreateText()\n");
         return ERR_NULLPARAMETER;
     }
 
-    if (SDLW_CreateTextTexture(text, font, color, &sprite->texture)) {
+    if (SDLW_CreateTextTexture(text, font, color, &sprite->texture)) { // Erstellung einer Textur mit gegebenem Text
         return ERR_FAIL;
     }
 
+    // Grösse des Sprites auf görsse der Textur setzen
     int w, h;
     SDL_QueryTexture(sprite->texture, NULL, NULL, &w, &h);
     sprite->source = (SDL_Rect){0, 0, w, h};
@@ -163,11 +169,12 @@ int Sprite_CreateText(char *text, char *font, SDL_Color color, sprite_t *sprite)
 }
 
 int Sprite_SetRelativeToPivot(sprite_t sprite, double parentRotation, SDL_Point parentPivot, sprite_t *calculatedSprite) {
-    if (!calculatedSprite) {
+    if (!calculatedSprite) { // Fehlerüberprüfung
         printf("Sprite resultat ungueltig! Sprite_SetRelativePivot()\n");
         return ERR_NULLPARAMETER;
     }
 
+    // Cosinus und Sinus vorberechnen
     double cosRotation = cos(parentRotation * M_PI / 180.0);
     double sinRotation = sin(parentRotation * M_PI / 180.0);
 
