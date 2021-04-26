@@ -153,11 +153,14 @@ int List_Foreach(list_t *list, fnPntrDataCallback callback) {
 
     listElement_t *element = list->listHead;
 
-    while (element) {                           // Schleife über jedes Element
+    while (element) { // Schleife über jedes Element
+        // Nächstes Element vor Callback abfragen. So ist sichergestellt dass
+        // der Callback das Element für das er aufgerufen wird Löschen darf.
+        listElement_t *next = element->nextElement;
         int errorVal = callback(element->data); // Callback Aufruf
         if (errorVal)                           // Bei Error wird das Foreach abgebrochen
             return errorVal;
-        element = element->nextElement;
+        element = next;
     }
     return ERR_OK;
 }
@@ -175,11 +178,14 @@ int List_ForeachArg(list_t *list, fnPntrDataCallbackArg callback, void *userData
 
     listElement_t *element = list->listHead;
 
-    while (element) {                                     // Schleife über jedes Element
+    while (element) { // Schleife über jedes Element
+        // Nächstes Element vor Callback abfragen. So ist sichergestellt dass
+        // der Callback das Element für das er aufgerufen wird Löschen darf.
+        listElement_t *next = element->nextElement;
         int errorVal = callback(element->data, userData); // Callback Aufruf
         if (errorVal)                                     // Bei Error wird das Foreach abgebrochen
             return errorVal;
-        element = element->nextElement;
+        element = next;
     }
     return ERR_OK;
 }
