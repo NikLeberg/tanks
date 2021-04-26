@@ -30,16 +30,13 @@
  * 
  */
 
-/**
- * @brief Enummeration der Panzer-Teile
- * 
- * Dient als Arrayindex für die Eintelteile des Panzers.
- */
-typedef enum {
-    TANK_PART_TRACKS = 0,
-    TANK_PART_CHASSIS,
-    TANK_PART_TUBE
-} tankPartType_t;
+typedef struct {
+    entity_t tank;
+    entityPart_t tracks;
+    entityPart_t chassis;
+    entityPart_t tube;
+    entityPart_t fire;
+} tankData_t;
 
 
 /*
@@ -66,6 +63,7 @@ typedef enum {
 static int updateCallback(entity_t *self, inputEvent_t *inputEvents);
 static int collisionCallback(entity_t *self, entityCollision_t *collision);
 static int rotateToWorld(entity_t *tank);
+static void fire(entity_t *tank);
 
 
 /*
@@ -77,82 +75,95 @@ int Tank_Create(const char *player, float x, float y) {
     if (!player) {
         return ERR_PARAMETER;
     }
-    entity_t *tank = calloc(1, sizeof(entity_t));
-    if (!tank) {
-        goto errorStep1;
+    // Alloziere ein gesamter Panzer mit Speicher für Entität und dessen Teile.
+    tankData_t *tankData = calloc(1, sizeof(tankData_t));
+    if (!tankData) {
+        goto errorCalloc;
     }
+    // speichere Pointer auf gesamten Panzer für späteren Zugriff
+    tankData->tank.data = tankData;
     // Hauptentität einrichten
-    tank->owner = player;
-    tank->name = "Panzer";
-    tank->callbacks.onUpdate = updateCallback;
-    tank->callbacks.onCollision = collisionCallback;
-    tank->physics.aabb.w = 40;
-    tank->physics.aabb.h = 30;
-    if (Physics_SetPosition(tank, x, y)) {
-        goto errorStep2;
+    tankData->tank.owner = player;
+    tankData->tank.name = "Panzer";
+    tankData->tank.callbacks.onUpdate = updateCallback;
+    tankData->tank.callbacks.onCollision = collisionCallback;
+    tankData->tank.physics.aabb.w = 40;
+    tankData->tank.physics.aabb.h = 30;
+    if (Physics_SetPosition(&tankData->tank, x, y)) {
+        goto errorEntity;
     }
-    if (EntityHandler_AddEntity(tank)) {
-        goto errorStep2;
+    if (EntityHandler_AddEntity(&tankData->tank)) {
+        goto errorEntity;
     }
     // Einzelteile laden und einrichten
     sprite_t *rawSprite;
-    entityPart_t *parts = calloc(3, sizeof(entityPart_t));
-    if (!parts) {
-        goto errorStep2;
-    }
-    tank->data = parts; // speichere Pointer auf Teile für späteren Zugriff
     // Raupen laden
     SDLW_GetResource("tracks", RESOURCETYPE_SPRITE, (void **)&rawSprite);
     if (!rawSprite) {
-        goto errorStep3;
+        goto errorLoadTracks;
     }
-    parts[TANK_PART_TRACKS].name = "Raupen";
-    parts[TANK_PART_TRACKS].sprite = *rawSprite;
-    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_TRACKS])) {
-        goto errorStep3;
+    tankData->tracks.name = "Raupen";
+    tankData->tracks.sprite = *rawSprite;
+    if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->tracks)) {
+        goto errorLoadTracks;
     }
     // Fahrgestell laden
     SDLW_GetResource("chassis", RESOURCETYPE_SPRITE, (void **)&rawSprite);
     if (!rawSprite) {
-        goto errorStep4;
+        goto errorLoadChassis;
     }
-    parts[TANK_PART_CHASSIS].name = "Fahrgestell";
-    parts[TANK_PART_CHASSIS].sprite = *rawSprite;
-    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_CHASSIS])) {
-        goto errorStep4;
+    tankData->chassis.name = "Fahrgestell";
+    tankData->chassis.sprite = *rawSprite;
+    if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->chassis)) {
+        goto errorLoadChassis;
     }
     // Panzerrohr laden
     SDLW_GetResource("tube", RESOURCETYPE_SPRITE, (void **)&rawSprite);
     if (!rawSprite) {
-        goto errorStep5;
+        goto errorLoadTube;
     }
-    parts[TANK_PART_TUBE].name = "Rohr";
-    parts[TANK_PART_TUBE].sprite = *rawSprite;
-    if (EntityHandler_AddEntityPart(tank, &parts[TANK_PART_TUBE])) {
-        goto errorStep5;
+    tankData->tube.name = "Rohr";
+    tankData->tube.sprite = *rawSprite;
+    if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->tube)) {
+        goto errorLoadTube;
     }
-    // Teile einrichten
+    // Feuer Animation laden
+    SDLW_GetResource("tankFire", RESOURCETYPE_SPRITE, (void **)&rawSprite);
+    if (!rawSprite) {
+        goto errorLoadFire;
+    }
+    tankData->fire.name = "Rohr";
+    tankData->fire.sprite = *rawSprite;
+    tankData->fire.sprite.destination.h /= 2;
+    tankData->fire.sprite.destination.w /= 2;
+    // Positionsdaten des Rohr kopieren
+    tankData->fire.sprite.destination.x = tankData->tube.sprite.destination.x + tankData->tube.sprite.destination.w;
+    tankData->fire.sprite.destination.y = tankData->tube.sprite.destination.y - 2;
+    if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->fire)) {
+        goto errorLoadFire;
+    }
+    
     return ERR_OK;
 
     // Mache im Fehlerfall alle Schritte einzeln rückgängig
-errorStep5:
-    EntityHandler_RemoveEntityPart(tank, &parts[TANK_PART_CHASSIS]);
-errorStep4:
-    EntityHandler_RemoveEntityPart(tank, &parts[TANK_PART_TRACKS]);
-errorStep3:
-    EntityHandler_RemoveEntity(tank);
-    free(parts);
-errorStep2:
-    free(tank);
-errorStep1:
+errorLoadFire:
+    EntityHandler_RemoveEntityPart(&tankData->tank, &tankData->tube);
+errorLoadTube:
+    EntityHandler_RemoveEntityPart(&tankData->tank, &tankData->chassis);
+errorLoadChassis:
+    EntityHandler_RemoveEntityPart(&tankData->tank, &tankData->tracks);
+errorLoadTracks:
+    EntityHandler_RemoveEntity(&tankData->tank);
+errorEntity:
+    free(tankData);
+errorCalloc:
     return ERR_FAIL;
 }
 
 int Tank_Destroy(entity_t *tank) {
     EntityHandler_RemoveAllEntityParts(tank);
-    free(tank->data);
     EntityHandler_RemoveEntity(tank);
-    free(tank);
+    free(tank->data);
     return ERR_OK;
 }
 
@@ -163,7 +174,8 @@ int Tank_Destroy(entity_t *tank) {
  */
 
 static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
-    entityPart_t *tube = &((entityPart_t*)self->data)[TANK_PART_TUBE];
+    tankData_t *tankData = (tankData_t *)self->data;
+    entityPart_t *tube = &tankData->tube;
     const float *vx = &self->physics.velocity.x;
     // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
     if (inputEvents->dummy == -1 && *vx > -TANK_MAX_HORIZONTAL_SPEED) {
@@ -186,22 +198,11 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     rotateToWorld(self);
     // Falls Leertaste -> Schuss feuern
     if (inputEvents->dummy == 4) {
-        // Der Schuss soll am Ende des Schussrohrs erscheinen, daher muss dessen
-        // aktuelle Position mit Vektorgeometrie berechnet werden.
-        // Starte im Zentrum der Entität
-        float x = self->physics.position.x;
-        float y = self->physics.position.y;
-        // Startpunkt zum Rohransatz schieben
-        double angleRad = (self->physics.rotation + 90.0) * (M_PI / 180.0);
-        x += tube->sprite.destination.y * cos(-angleRad);
-        y += -(tube->sprite.destination.y * sin(-angleRad));
-        // Startpunkt zum Rohrende schieben
-        angleRad = (self->physics.rotation + tube->sprite.rotation) * (M_PI / 180.0);
-        x += tube->sprite.destination.w * cos(-angleRad);
-        y += -(tube->sprite.destination.w * sin(-angleRad));
-        // Schuss erstellen
-        double angle = self->physics.rotation + tube->sprite.rotation;
-        Shell_Create(self->owner, x, y, 200.0f, angle);
+        fire(self);
+    }
+    // Falls Schussanimation am laufen -> weiterschalten
+    if (tankData->fire.sprite.multiSpriteIndex != 0) {
+        Sprite_NextFrame(&tankData->fire.sprite);
     }
     return ERR_OK;
 }
@@ -236,4 +237,29 @@ static int rotateToWorld(entity_t *tank) {
     }
     SDLW_DrawFilledRect(testBox, (SDL_Color){255, 0, 0, 0});
     return ERR_OK;
+}
+
+static void fire(entity_t *tank) {
+    tankData_t *tankData = (tankData_t *)tank->data;
+    entityPart_t *tube = &tankData->tube;
+    // Der Schuss soll am Ende des Schussrohrs erscheinen, daher muss dessen
+    // aktuelle Position mit Vektorgeometrie berechnet werden.
+    // Starte im Zentrum der Entität
+    float x = tank->physics.position.x;
+    float y = tank->physics.position.y;
+    // Startpunkt zum Rohransatz schieben
+    double angleRad = (tank->physics.rotation + 90.0) * (M_PI / 180.0);
+    x += tube->sprite.destination.y * cos(-angleRad);
+    y += -(tube->sprite.destination.y * sin(-angleRad));
+    // Startpunkt zum Rohrende schieben
+    angleRad = (tank->physics.rotation + tube->sprite.rotation) * (M_PI / 180.0);
+    x += tube->sprite.destination.w * cos(-angleRad);
+    y += -(tube->sprite.destination.w * sin(-angleRad));
+    // Schuss erstellen
+    double angle = tank->physics.rotation + tube->sprite.rotation;
+    Shell_Create(tank->owner, x, y, 200.0f, angle);
+    // Feuer Animation aktivieren
+    tankData->fire.sprite.rotation = tankData->tube.sprite.rotation;
+    // ToDo: Positionierung korrigieren
+    Sprite_SetFrame(&tankData->fire.sprite, 1);
 }

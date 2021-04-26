@@ -42,8 +42,9 @@ static void tank_in_world(void **state) {
     ret |= SDLW_LoadResources("assets/config.cfg");
     ret |= World_Load("world");
     Tank_Create("Nik", 500.0f, 400.0f);
-    // 5 Sekunden lang simulieren
-    for (int i = 0; i < 60 * 30; ++i) {
+    Tank_Create("Other", 100.0f, 100.0f);
+    // 60 Sekunden lang simulieren
+    for (int i = 0; i < 60 * 60; ++i) {
         inputEvent_t input = {0};
         SDL_Event e = {0};
         SDL_PollEvent(&e);
@@ -62,7 +63,6 @@ static void tank_in_world(void **state) {
             }
         }
         EntityHandler_Update(&input);
-        // Stelle die AABBs visuell dar
         SDL_Color black = {.r = 255, .g = 255, .b = 255};
         SDLW_Clear(black);
         World_DrawBackground();
