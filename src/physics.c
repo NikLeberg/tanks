@@ -249,6 +249,10 @@ static int updateEntity(void *data) {
     entity_t *entity = (entity_t *)data;
     // Werte die nahezu 0 sind auf 0 setzen
     clearNearToZero(&entity->physics);
+    // Falls Entität keine Bewegung wünscht, dann breche hier ab.
+    if (entity->physics.isStatic == 1) {
+        return ERR_OK;
+    }
     // Erdbeschleunigung anwenden
     entity->physics.velocity.y += GRAVITY * DELTA_TIME;
     // Dämpfen der nach oben gerichteten Geschwindigkeit. Bewirkt, dass nach
