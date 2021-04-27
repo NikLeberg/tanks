@@ -40,7 +40,7 @@
  * 
  */
 static void tank_in_world(void **state) {
-    (void) *state;
+    (void)*state;
     // Test kann nicht in der Gitlab-Pipeline laufen, denn es wird ein Audiogerät
     // und Hardwarebeschleunigung bnötigt.
 #ifdef CI_TEST
@@ -52,6 +52,7 @@ static void tank_in_world(void **state) {
     ret |= SDLW_LoadResources("assets/test/config.cfg");
     ret |= SDLW_LoadResources("assets/config.cfg");
     ret |= World_Load("world");
+    assert_int_equal(ret, ERR_OK);
     entity_t *tank;
     Tank_Create(&tank, "Nik", 500.0f, 400.0f);
     // 60 Sekunden lang simulieren

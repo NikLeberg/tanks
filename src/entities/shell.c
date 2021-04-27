@@ -164,7 +164,6 @@ int Shell_Create(entity_t **shell, const char *player, float x, float y, float v
         goto errorLoadMask;
     }
     shellData->mask = *rawSprite;
-    
     if (shell) {
         *shell = &shellData->shell;
     }
@@ -210,15 +209,15 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     // Wenn der Schuss momentan explodiert, dann reagiere entsprechend.
     if (shellData->isExploding) {
         switch (shellData->explosion.sprite.multiSpriteIndex) {
-            case (0): // Animation wurde zuende gespielt, Lösche die Entität
-                Shell_Destroy(self);
-                break;
-            case (32): // Animation wurde zur Hälfte gespielt, zerstöre die Welt
-                destroyWorld(self); // fallthrough --> damit gcc nicht meckert
-                // break; <-- durchfallen, immer auch Animation weiterschalten
-            default:
-                Sprite_NextFrame(&shellData->explosion.sprite);
-                break;
+        case (0): // Animation wurde zuende gespielt, Lösche die Entität
+            Shell_Destroy(self);
+            break;
+        case (32): // Animation wurde zur Hälfte gespielt, zerstöre die Welt
+            destroyWorld(self); // fallthrough --> damit gcc nicht meckert
+            // break; <-- durchfallen, immer auch Animation weiterschalten
+        default:
+            Sprite_NextFrame(&shellData->explosion.sprite);
+            break;
         }
     }
     return ERR_OK;
@@ -230,9 +229,10 @@ static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     collision->flags &= ~ENTITY_COLLISION_BORDER_TOP;
     // Löse eine Explosion aus, falls Kollision mit: Welt, linke-, rechte- oder
     // untere Bildkante.
-    if (collision->flags
-     & (ENTITY_COLLISION_WORLD | ENTITY_COLLISION_BORDER_BOTTOM |
-       ENTITY_COLLISION_BORDER_LEFT | ENTITY_COLLISION_BORDER_RIGHT)) {
+    if (collision->flags & (ENTITY_COLLISION_WORLD |
+                            ENTITY_COLLISION_BORDER_BOTTOM |
+                            ENTITY_COLLISION_BORDER_LEFT |
+                            ENTITY_COLLISION_BORDER_RIGHT)) {
         // starte die Animation der Explosion
         triggerExplosion(self);
     }

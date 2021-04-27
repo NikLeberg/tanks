@@ -55,7 +55,7 @@ typedef struct {
  * Welt die er zurücklegen kann.
  */
 #define TANK_MAX_HORIZONTAL_SPEED 50.0f
-#define TANK_TUBE_MAX_ROTATION_POSITIVE 10.0 //!< Max pos. Rotation des Rohrs
+#define TANK_TUBE_MAX_ROTATION_POSITIVE 10.0   //!< Max pos. Rotation des Rohrs
 #define TANK_TUBE_MAX_ROTATION_NEGATIVE -190.0 //!< Max neg. Rotation des Rohrs
 
 
@@ -191,7 +191,6 @@ int Tank_Create(entity_t **tank, const char *player, float x, float y) {
     if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->fire)) {
         goto errorLoadFire;
     }
-    
     if (tank) {
         *tank = &tankData->tank;
     }
@@ -240,11 +239,11 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
         Physics_SetRelativeVelocity(self, +10.0f, NAN);
     }
     // Rohrstellung gemäss Pfeiltasten rotieren
-    if (inputEvents->dummy == -2
-     && tube->sprite.rotation > TANK_TUBE_MAX_ROTATION_NEGATIVE) {
+    if (inputEvents->dummy == -2 &&
+        tube->sprite.rotation > TANK_TUBE_MAX_ROTATION_NEGATIVE) {
         tube->sprite.rotation -= 0.5;
-    } else if (inputEvents->dummy == 2
-            && tube->sprite.rotation < TANK_TUBE_MAX_ROTATION_POSITIVE) {
+    } else if (inputEvents->dummy == 2 &&
+               tube->sprite.rotation < TANK_TUBE_MAX_ROTATION_POSITIVE) {
         tube->sprite.rotation += 0.5;
     }
     // Horizontale Bewegung in jedem Zyklus um 5% dämpfen damit der Panzer nicht
@@ -277,9 +276,9 @@ static void rotateToWorld(entity_t *tank) {
     // Suche den Punkt auf der Welt der direkt unter der Mitte der Entität ist.
     SDL_Point topOfWorld;
     World_VerticalLineIntersection((SDL_Point){
-        .x = tank->physics.position.x,
-        .y = tank->physics.position.y},
-        &topOfWorld);
+                                       .x = tank->physics.position.x,
+                                       .y = tank->physics.position.y},
+                                   &topOfWorld);
     // Erhalte mittels Kollision in diesem Punkt eine Normale der Welt.
     SDL_Rect testBox = {.x = topOfWorld.x - 10, .y = topOfWorld.y - 10, .w = 20, .h = 20};
     entityCollision_t collision = {.partner = NULL};
