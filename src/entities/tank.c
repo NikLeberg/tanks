@@ -30,12 +30,16 @@
  * 
  */
 
+/**
+ * @brief Alle Informationen und Datenspeicher für einen Panzer.
+ * 
+ */
 typedef struct {
-    entity_t tank;
-    entityPart_t tracks;
-    entityPart_t chassis;
-    entityPart_t tube;
-    entityPart_t fire;
+    entity_t tank;        //!< Der Panzer als Entität
+    entityPart_t tracks;  //!< Raupen
+    entityPart_t chassis; //!< Fahrgestell
+    entityPart_t tube;    //!< Schussrohr
+    entityPart_t fire;    //!< Schussanimation
 } tankData_t;
 
 
@@ -60,9 +64,52 @@ typedef struct {
  * 
  */
 
+/**
+ * @brief Update-Callback für EntityHandler.
+ * 
+ * Wird vom EntityHandler in der Update-Phase aufgerufen. Verarbeitet Benutzer-
+ * eingaben und z.B. bewegt dadurch den Panzer oder stellt das Rohr.
+ * 
+ * @param self Pointer auf Panzer-Entität
+ * @param inputEvents Eingabeevents vom Spieler
+ * 
+ * @return immer ERR_OK
+ */
 static int updateCallback(entity_t *self, inputEvent_t *inputEvents);
+
+/**
+ * @brief Collision-Callback für EntityHandler.
+ * 
+ * Wird vom EntityHandler bei einer Kollision aufgerufen. Ignoriert alle
+ * Kollisionen mit Entitäten des eigenen Besitzers. Also z.B. ein Schuss.
+ * 
+ * @param self Pointer auf Panzer-Entität
+ * @param collision Informationen zur Kollision
+ * 
+ * @return immer ERR_OK
+ */
 static int collisionCallback(entity_t *self, entityCollision_t *collision);
-static int rotateToWorld(entity_t *tank);
+
+/**
+ * @brief Rotiere Panzer gemäss Weltuntergrund.
+ * 
+ * Sucht den nähesten vertikalen Punkt auf der Weltoberfläche und ermittelt
+ * durch eine Kollisionsabfrage den Winkel der Kollisiosnormale.
+ * 
+ * @param tank Pointer auf Panzer der Rotiert werden soll
+ * 
+ */
+static void rotateToWorld(entity_t *tank);
+
+/**
+ * @brief Schiesse einen Schuss ab.
+ * 
+ * Erstellt eine Schuss-Entität im aktuellen Winkel des Rohrs. Diese ist
+ * unabhängig vom Panzer.
+ * 
+ * @param tank Pointer auf Panzer der den Schuss auslöst
+ * 
+ */
 static void fire(entity_t *tank);
 
 
@@ -71,7 +118,7 @@ static void fire(entity_t *tank);
  * 
  */
 
-int Tank_Create(const char *player, float x, float y) {
+int Tank_Create(entity_t **tank, const char *player, float x, float y) {
     if (!player) {
         return ERR_PARAMETER;
     }
@@ -145,6 +192,9 @@ int Tank_Create(const char *player, float x, float y) {
         goto errorLoadFire;
     }
     
+    if (tank) {
+        *tank = &tankData->tank;
+    }
     return ERR_OK;
 
     // Mache im Fehlerfall alle Schritte einzeln rückgängig
@@ -159,14 +209,18 @@ errorLoadTracks:
 errorEntity:
     free(tankData);
 errorCalloc:
+    if (tank) {
+        *tank = NULL;
+    }
     return ERR_FAIL;
 }
 
 int Tank_Destroy(entity_t *tank) {
-    EntityHandler_RemoveAllEntityParts(tank);
-    EntityHandler_RemoveEntity(tank);
+    int ret = ERR_OK;
+    ret |= EntityHandler_RemoveAllEntityParts(tank);
+    ret |= EntityHandler_RemoveEntity(tank);
     free(tank->data);
-    return ERR_OK;
+    return ret;
 }
 
 
@@ -219,7 +273,7 @@ static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     return ERR_OK;
 }
 
-static int rotateToWorld(entity_t *tank) {
+static void rotateToWorld(entity_t *tank) {
     // Suche den Punkt auf der Welt der direkt unter der Mitte der Entität ist.
     SDL_Point topOfWorld;
     World_VerticalLineIntersection((SDL_Point){
@@ -236,8 +290,7 @@ static int rotateToWorld(entity_t *tank) {
         angle -= 90.0;
         Physics_SetRotation(tank, -angle);
     }
-    SDLW_DrawFilledRect(testBox, (SDL_Color){255, 0, 0, 0});
-    return ERR_OK;
+    return;
 }
 
 static void fire(entity_t *tank) {
@@ -258,7 +311,7 @@ static void fire(entity_t *tank) {
     y += -(tube->sprite.destination.w * sin(-angleRad));
     // Schuss erstellen
     double angle = tank->physics.rotation + tube->sprite.rotation;
-    Shell_Create(tank->owner, x, y, 200.0f, angle);
+    Shell_Create(NULL, tank->owner, x, y, 200.0f, angle);
     // Feuer Animation aktivieren im aktuellen Winkel des Rohrs
     tankData->fire.sprite.rotation = tankData->tube.sprite.rotation;
     Sprite_SetFrame(&tankData->fire.sprite, 1);

@@ -33,16 +33,27 @@
  * 
  */
 
+/**
+ * @brief Testumgebung um visuell das Verhalten von Panzer und Schuss zu testen.
+ * 
+ * @param state unbenutzt
+ * 
+ */
 static void tank_in_world(void **state) {
     (void) *state;
+    // Test kann nicht in der Gitlab-Pipeline laufen, denn es wird ein Audiogerät
+    // und Hardwarebeschleunigung bnötigt.
+#ifdef CI_TEST
+    skip();
+#endif
     int ret = ERR_OK;
     ret |= SDLW_Init(1024, 576);
     ret |= World_Init();
     ret |= SDLW_LoadResources("assets/test/config.cfg");
     ret |= SDLW_LoadResources("assets/config.cfg");
     ret |= World_Load("world");
-    Tank_Create("Nik", 500.0f, 400.0f);
-    Tank_Create("Other", 100.0f, 100.0f);
+    entity_t *tank;
+    Tank_Create(&tank, "Nik", 500.0f, 400.0f);
     // 60 Sekunden lang simulieren
     for (int i = 0; i < 60 * 60; ++i) {
         inputEvent_t input = {0};
@@ -70,6 +81,8 @@ static void tank_in_world(void **state) {
         EntityHandler_Draw();
         SDLW_Render();
     }
+    EntityHandler_RemoveAllEntities();
+    Tank_Destroy(tank);
     World_Quit();
     SDLW_Quit();
 }

@@ -29,6 +29,10 @@
  * 
  */
 
+/**
+ * @brief Alle Informationen und Datenspeicher für einen Schuss.
+ * 
+ */
 typedef struct {
     entity_t shell;         //!< Der Schuss als Entität
     entityPart_t part;      //!< Schuss der tatsächlich angezeigt wird
@@ -51,17 +55,61 @@ typedef struct {
  * 
  */
 
+/**
+ * @brief Update-Callback für EntityHandler.
+ * 
+ * Wird vom EntityHandler in der Update-Phase aufgerufen. Rotiert den Schuss
+ * gemäss Flugbahn und verwaltet die Explosions-animation.
+ * 
+ * @param self Pointer auf Schuss-Entität
+ * @param inputEvents unbenutzt
+ * 
+ * @return immer ERR_OK
+ */
 static int updateCallback(entity_t *self, inputEvent_t *inputEvents);
+
+/**
+ * @brief Collision-Callback für EntityHandler.
+ * 
+ * Wird vom EntityHandler bei einer Kollision aufgerufen. Jede Kollision mit der
+ * Welt oder mit Entitäten die nicht dem Schuss-Besitzer gehören, lösen eine
+ * Explosion aus.
+ * 
+ * @param self Pointer auf Schuss-Entität
+ * @param collision Informationen zur Kollision
+ * 
+ * @return immer ERR_OK
+ */
 static int collisionCallback(entity_t *self, entityCollision_t *collision);
+
+/**
+ * @brief Aktiviere die Explosion.
+ * 
+ * Aktiviert die Explosion indem es die Animation weiterschaltet. Und spielt den
+ * Soundeffekt ab.
+ * 
+ * @param shell Pointer auf Schuss-Entität
+ * 
+ */
 static void triggerExplosion(entity_t *shell);
+
+/**
+ * @brief Zerstöre die Welt an Schussposition.
+ * 
+ * Wurde die Explosion ausgelöst, wird am Ende der Animation die Welt zerstört.
+ * 
+ * @param shell Pointer auf Schuss-Entität
+ * 
+ */
 static void destroyWorld(entity_t *shell);
+
 
 /*
  * Implementation Öffentlicher Funktionen
  * 
  */
 
-int Shell_Create(const char *player, float x, float y, float velocity, double angle) {
+int Shell_Create(entity_t **shell, const char *player, float x, float y, float velocity, double angle) {
     if (!player) {
         return ERR_PARAMETER;
     }
@@ -116,7 +164,10 @@ int Shell_Create(const char *player, float x, float y, float velocity, double an
         goto errorLoadMask;
     }
     shellData->mask = *rawSprite;
-
+    
+    if (shell) {
+        *shell = &shellData->shell;
+    }
     return ERR_OK;
 
     // Mache im Fehlerfall alle Schritte einzeln rückgängig
@@ -129,14 +180,18 @@ errorLoadShell:
 errorEntity:
     free(shellData);
 errorCalloc:
+    if (shell) {
+        *shell = NULL;
+    }
     return ERR_FAIL;
 }
 
 int Shell_Destroy(entity_t *shell) {
-    EntityHandler_RemoveAllEntityParts(shell);
-    EntityHandler_RemoveEntity(shell);
+    int ret = ERR_OK;
+    ret |= EntityHandler_RemoveAllEntityParts(shell);
+    ret |= EntityHandler_RemoveEntity(shell);
     free(shell->data);
-    return ERR_OK;
+    return ret;
 }
 
 
@@ -148,7 +203,6 @@ int Shell_Destroy(entity_t *shell) {
 static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     (void)inputEvents;
     shellData_t *shellData = (shellData_t *)self->data;
-    (void)shellData;
     // richte Schuss der Flugbahn aus
     double angle = atan2(-self->physics.velocity.y, self->physics.velocity.x);
     angle = angle / M_PI * 180.0;
@@ -181,8 +235,6 @@ static int collisionCallback(entity_t *self, entityCollision_t *collision) {
        ENTITY_COLLISION_BORDER_LEFT | ENTITY_COLLISION_BORDER_RIGHT)) {
         // starte die Animation der Explosion
         triggerExplosion(self);
-        // destroyWorld(self);
-        // Shell_Destroy(self);
     }
     // Kollisionen mit Entiäten die dem selben Spieler gehören ignorieren.
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
