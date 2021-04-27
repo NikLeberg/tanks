@@ -206,7 +206,8 @@ static void triggerExplosion(entity_t *shell) {
     Sprite_NextFrame(&shellData->explosion.sprite);
     // Schuss aus Entität entfernen
     EntityHandler_RemoveEntityPart(shell, &shellData->part);
-    //EntityHandler_AddEntityPart(shell, &shellData->part);
+    // Soundeffekt abspielen
+    SDLW_PlaySoundEffect("shellSound");
 }
 
 static void destroyWorld(entity_t *shell) {

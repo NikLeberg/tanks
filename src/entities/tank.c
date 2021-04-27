@@ -262,4 +262,6 @@ static void fire(entity_t *tank) {
     // Feuer Animation aktivieren im aktuellen Winkel des Rohrs
     tankData->fire.sprite.rotation = tankData->tube.sprite.rotation;
     Sprite_SetFrame(&tankData->fire.sprite, 1);
+    // Soundeffekt abspielen
+    SDLW_PlaySoundEffect("tankSound");
 }
