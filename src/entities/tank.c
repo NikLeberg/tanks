@@ -136,9 +136,11 @@ int Tank_Create(const char *player, float x, float y) {
     tankData->fire.sprite = *rawSprite;
     tankData->fire.sprite.destination.h /= 2;
     tankData->fire.sprite.destination.w /= 2;
-    // Positionsdaten des Rohr kopieren
-    tankData->fire.sprite.destination.x = tankData->tube.sprite.destination.x + tankData->tube.sprite.destination.w;
-    tankData->fire.sprite.destination.y = tankData->tube.sprite.destination.y - 2;
+    // An Positionierung des Rohr anpassen, soll am Ende des Rohrs entstehen.
+    tankData->fire.sprite.pivot.x = -(32 + tankData->tube.sprite.destination.w);
+    tankData->fire.sprite.pivot.y = tankData->tracks.sprite.pivot.y;
+    tankData->fire.sprite.destination.x = 32 + tankData->tube.sprite.destination.w;
+    tankData->fire.sprite.destination.y = -12;
     if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->fire)) {
         goto errorLoadFire;
     }
@@ -232,7 +234,6 @@ static int rotateToWorld(entity_t *tank) {
         double angle = atan2(-collision.normal.y, collision.normal.x);
         angle = angle / M_PI * 180.0;
         angle -= 90.0;
-        //double angle = atan(collision.normal.y / collision.normal.x);
         Physics_SetRotation(tank, -angle);
     }
     SDLW_DrawFilledRect(testBox, (SDL_Color){255, 0, 0, 0});
@@ -258,8 +259,7 @@ static void fire(entity_t *tank) {
     // Schuss erstellen
     double angle = tank->physics.rotation + tube->sprite.rotation;
     Shell_Create(tank->owner, x, y, 200.0f, angle);
-    // Feuer Animation aktivieren
+    // Feuer Animation aktivieren im aktuellen Winkel des Rohrs
     tankData->fire.sprite.rotation = tankData->tube.sprite.rotation;
-    // ToDo: Positionierung korrigieren
     Sprite_SetFrame(&tankData->fire.sprite, 1);
 }
