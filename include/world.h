@@ -35,6 +35,7 @@ struct sdlwResource_s; //!< Vorwärtsdeklaration einer SDLW-Ressource
 typedef struct worldConfig_s {
     SDL_Texture *foreground; //!< Vordergrundstextur
     SDL_Texture *background; //!< Hintergrundstextur
+    char bgMusic[32]; //!< Hintergrundsmusik
 } worldConfig_t;
 
 

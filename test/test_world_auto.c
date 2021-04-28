@@ -47,8 +47,11 @@ void test_world_init_and_load(void **state) {
     assert_int_equal(World_Load(NULL), ERR_NULLPARAMETER);
     assert_int_equal(World_Load("asdf"), ERR_FAIL);
     assert_int_equal(World_Load("world"), ERR_FAIL);
-    // Welt laden OK
+    // Laden einer Welt ohne gültige Musik
     assert_int_equal(SDLW_LoadResources("assets/test/config.cfg"), ERR_OK);
+    assert_int_equal(World_Load("worldse"), ERR_FAIL);
+    // Welt laden OK
+    assert_int_equal(World_Load("worlds"), ERR_OK);
     assert_int_equal(World_Load("world"), ERR_OK);
 
     // Error Nullparamter

@@ -124,3 +124,22 @@ Musik kann länger sein.
             <th>Pfad</th>
             <th>"music"</th>
 </tr></table>
+
+## World
+In der Weltenkonfiguration werden die Vorder- und Hintergrundstextur sowie die Hintergrundsmusik (optional) definiert.
+
+Die Vordergrundstextur ist im Spiel Zerstörbar und die Hintergrundsmusik wird beim Laden der Welt automatisch abgespielt.
+
+<table><tr>
+            <th>Name</th>
+            <th>"world"</th>
+            <th>Hintergrund Textur ID</th>
+            <th>Fordergrund Textur ID</th>
+</tr></table>
+<table><tr>
+            <th>Name</th>
+            <th>"world"</th>
+            <th>Hintergrund Textur ID</th>
+            <th>Fordergrund Textur ID</th>
+            <th>Hintergrund Musik ID</th>
+</tr></table>
