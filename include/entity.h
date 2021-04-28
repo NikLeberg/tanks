@@ -68,7 +68,7 @@ typedef struct {
      * 
      * 0 = Entität kann sich bewegen und die folgenden Parameter haben Wirkung
      * 1 = Entität kann sich nicht bewegen und bleibt an Ort un Stelle, die
-     *     folgenden Parameter haben keien Wirkung
+     *     folgenden Parameter haben keine Wirkung
      */
     int isStatic;
 

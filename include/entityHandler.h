@@ -44,7 +44,7 @@
  */
 
 /**
- * @brief Führe ein Update der Physik und aller Entitäten aus.
+ * @brief Führt ein Update der Physik und aller Entitäten aus.
  * 
  * Aktualisiert zuerst die Entitäten und danach deren Physik.
  * 
@@ -65,12 +65,12 @@ int EntityHandler_Update(inputEvent_t *inputEvents);
 int EntityHandler_Draw();
 
 /**
- * @brief Füge eine Entität hinzu.
+ * @brief Fügt eine Entität hinzu.
  * 
  * Fügt die gegebene Entität der internen Liste aller Entitäten hinzu. Die
  * Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der
  * Lebensdauer gültig bleiben (static).
- * @note Wird in einem laufendem Zyklus die Entität hinzugefügt, so ist diese
+ * @note Wird in einem laufendem Zyklus eine Entität hinzugefügt, so ist diese
  * erst nach Aufruf von \ref EntityHandler_Update() aktiv und sichtbar.
  * 
  * @param entity neue Entität
@@ -80,12 +80,15 @@ int EntityHandler_Draw();
 int EntityHandler_AddEntity(entity_t *entity);
 
 /**
- * @brief Entferne eine Entität.
+ * @brief Entfernt eine Entität.
  * 
  * Entfernt die gegebene Entität aus der internen Liste aller Entitäten.
  * Nach dem Aufruf darf der Speicher für die Entität freigegeben werden.
- * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
- * Heisst nach \ref EntityHandler_Draw() aber vor \ref EntityHandler_Update().
+ * @warning Entfernen von Entitäten inherhalb von
+ * \ref entityCallbacks_t.onCollision für Kollisionen zwischen zwei Entitäten
+ * ist untersagt. Denn die andere Entität erhält im \ref entityCollision_t einen
+ * Pointer zum Kollisionspartner. Ist dieser bereits gelöscht so könnte das
+ * System abstürzen.
  * 
  * @param entity zu entfernende Entität
  *
@@ -94,18 +97,21 @@ int EntityHandler_AddEntity(entity_t *entity);
 int EntityHandler_RemoveEntity(entity_t *entity);
 
 /**
- * @brief Entferne alle Entitäten.
+ * @brief Entfernt alle Entitäten.
  * 
  * Entferne alle Entitäten aus der internen Liste.
- * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
- * Heisst nach \ref EntityHandler_Draw() aber vor \ref EntityHandler_Update().
+ * @warning Entfernen von Entitäten inherhalb von
+ * \ref entityCallbacks_t.onCollision für Kollisionen zwischen zwei Entitäten
+ * ist untersagt. Denn die andere Entität erhält im \ref entityCollision_t einen
+ * Pointer zum Kollisionspartner. Ist dieser bereits gelöscht so könnte das
+ * System abstürzen.
  * 
  * @return int ERR_OK, ERR_PARAMETER oder ERR_FAIL
  */
 int EntityHandler_RemoveAllEntities();
 
 /**
- * @brief Füge ein Einzelteil einer Entität hinzu.
+ * @brief Fügt ein Einzelteil einer Entität hinzu.
  * 
  * Fügt das gegebene Teil der Liste an Teilen der Entität hinzu. Die
  * Speicherverwaltung ist dem Aufrufer überlassen, muss aber während der
@@ -120,11 +126,11 @@ int EntityHandler_RemoveAllEntities();
 int EntityHandler_AddEntityPart(entity_t *entity, entityPart_t *part);
 
 /**
- * @brief Entferne ein Einzelteil einer Entität.
+ * @brief Entfernt ein Einzelteil einer Entität.
  * 
  * Entfernt das gegebene Teil aus der Liste aller Teile in der Entität.
  * Nach dem Aufruf darf der Speicher für das Einzelteil freigegeben werden.
- * @note Gleiche Zyklusbedingungen wie \ref EntityHandler_RemoveEntity()
+ * @warning Gleiche Löschbedingungen wie \ref EntityHandler_RemoveEntity()
  * 
  * @param entity Entität der das Teil gehört
  * @param part zu entfernendes Einzelteil
@@ -134,11 +140,11 @@ int EntityHandler_AddEntityPart(entity_t *entity, entityPart_t *part);
 int EntityHandler_RemoveEntityPart(entity_t *entity, entityPart_t *part);
 
 /**
- * @brief Entferne alle Einzelteile einer Entität.
+ * @brief Entfernt alle Einzelteile einer Entität.
  * 
- * Entferne alle Einzelteile aus der internen Liste.
+ * Entfernt alle Einzelteile aus der internen Liste.
  * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
- * @note Gleiche Zyklusbedingungen wie \ref EntityHandler_RemoveAllEntities()
+ * @warning Gleiche Löschbedingungen wie \ref EntityHandler_RemoveAllEntities()
  * 
  * @param entity Entität deren Einzelteile entfernt werden sollen
  * 

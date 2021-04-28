@@ -16,6 +16,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "world.h"
 #include "error.h"
@@ -66,14 +67,15 @@ static int UpdateWorld();
  */
 
 int World_LoadConfig(char *config, struct sdlwResource_s *resource) {
-    char key[32] = {0};
-    char type[32] = {0};
-    char foregroundID[32] = {0};
-    char backgroundID[32] = {0};
+    char key[32] = {0}; // Welten ID
+    char type[32] = {0}; // Ressourcentyp = world
+    char foregroundID[32] = {0}; // Fordergrundstextur
+    char backgroundID[32] = {0}; // Hintergrundstextur
+    char bgMusicID[32] = {0}; // Hintergrundsmusik
 
-    int count = sscanf(config, "%31s %31s %31s %31s", key, type, foregroundID, backgroundID);
+    int count = sscanf(config, "%31s %31s %31s %31s %31s", key, type, foregroundID, backgroundID, bgMusicID);
 
-    if (count != 4) {
+    if (count < 4 || count > 5) { // Argumentenanzalüberprüfung
         printf("Konfigurationszeile ungueltig! World_LoadConfig()\n");
         return ERR_FAIL;
     }
@@ -91,10 +93,16 @@ int World_LoadConfig(char *config, struct sdlwResource_s *resource) {
     int code = SDLW_GetResource(foregroundID, RESOURCETYPE_TEXTURE, (void **)&worldConfig->foreground);
     if (code != ERR_OK)
         return code;
-    // Hintergrudn Textur holen
+    // Hintergrund Textur holen
     code = SDLW_GetResource(backgroundID, RESOURCETYPE_TEXTURE, (void **)&worldConfig->background);
     if (code != ERR_OK)
         return code;
+
+    // Hintergrundsmusik definieren
+    if (count == 5)
+        strcpy(worldConfig->bgMusic, bgMusicID);    
+    else
+        worldConfig->bgMusic[0] = '\0'; // Es wird keine Musik abgespielt
 
     // Abschluss
     resource->resource.world = worldConfig;
@@ -156,6 +164,7 @@ void World_Quit() {
 }
 
 int World_Load(char *worldID) {
+    int errCode = ERR_OK;
     if (!worldID) { // Fehlerüberprüfung
         printf("Ungueltige worldID! World_Load()\n");
         return ERR_NULLPARAMETER;
@@ -196,9 +205,13 @@ int World_Load(char *worldID) {
     background.source.w = w;
     background.source.h = h;
 
+    // Hintergrundmusik abspielen
+    if (config->bgMusic[0] != '\0')
+        errCode = SDLW_PlayMusic(config->bgMusic);
+
     // Abschluss
     loaded = 1;
-    return ERR_OK;
+    return errCode;
 }
 
 int World_DrawBackground() {

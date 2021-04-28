@@ -220,7 +220,7 @@ int Physics_SetRelativeVelocityPolar(entity_t *entity, float velocity, double an
     double angleRad = angle * (M_PI / 180.0);
     // Gegebener Betrag und Winkel in Kartesische Form umrechnen
     return Physics_SetRelativeVelocity(entity, velocity * cos(-angleRad),
-                               -(velocity * sin(-angleRad)));
+                                       -(velocity * sin(-angleRad)));
 }
 
 int Physics_SetRotation(entity_t *entity, double rotation) {
@@ -363,22 +363,21 @@ static int checkForEntityCollision(void *data, void *userData) {
     return ERR_OK;
 }
 
-
 static int handleCollision(entity_t *entity, entityCollision_t *collision) {
     if (!entity || !collision) {
         return ERR_PARAMETER;
     }
     // Kollision mit dem linken oder rechten Bildrand
-    if (collision->flags & ENTITY_COLLISION_BORDER_LEFT
-     || collision->flags & ENTITY_COLLISION_BORDER_RIGHT) {
+    if (collision->flags & ENTITY_COLLISION_BORDER_LEFT ||
+        collision->flags & ENTITY_COLLISION_BORDER_RIGHT) {
         // horizontale Bewegung rückgängig machen
         entity->physics.position.x -= entity->physics.velocity.x * DELTA_TIME;
         // und Geschwindigkeit 0 setzen
         entity->physics.velocity.x = 0.0f;
     }
     // Kollision mit dem oberen oder unteren Bildrand
-    if (collision->flags & ENTITY_COLLISION_BORDER_TOP
-     || collision->flags & ENTITY_COLLISION_BORDER_BOTTOM) {
+    if (collision->flags & ENTITY_COLLISION_BORDER_TOP ||
+        collision->flags & ENTITY_COLLISION_BORDER_BOTTOM) {
         // vertikale Bewegung rückgängig machen
         entity->physics.position.y -= entity->physics.velocity.y * DELTA_TIME;
         // und Geschwindigkeit 0 setzen
@@ -419,6 +418,6 @@ static int handleCollision(entity_t *entity, entityCollision_t *collision) {
             entity->physics.velocity.x += collision->normal.x * DELTA_TIME;
             entity->physics.velocity.y += collision->normal.y * DELTA_TIME;
         }
-     }
+    }
     return ERR_OK;
 }

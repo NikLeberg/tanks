@@ -167,7 +167,10 @@ int EntityHandler_Update(inputEvent_t *inputEvents) {
     int ret = ERR_OK;
     // Alle Entitäten aktualisieren
     ret = List_ForeachArg(entityHandler.entityList, callOnUpdate, inputEvents);
-    if (ret) {
+    if (ret == ERR_NULLPARAMETER) {
+        // Noch keine Entitäten in der Liste. Es gibt nichts zu tun.
+        return ERR_OK;
+    } else if (ret) {
         return ret;
     }
     // Physik aktualisieren
@@ -194,20 +197,26 @@ int EntityHandler_AddEntity(entity_t *entity) {
 }
 
 int EntityHandler_RemoveEntity(entity_t *entity) {
-    return List_Remove(entityHandler.entityList, entity);
+    int ret = EntityHandler_RemoveAllEntityParts(entity);
+    if (ret) {
+        return ret;
+    }
+    ret = List_Remove(entityHandler.entityList, entity);
+    return ret;
 }
 
 int EntityHandler_RemoveAllEntities() {
+    int ret = ERR_OK;
     if (!entityHandler.entityList || !entityHandler.entityList->listHead) {
-        return ERR_OK;
+        return ret;
     }
     do {
         entity_t *entity = entityHandler.entityList->listHead->data;
-        EntityHandler_RemoveAllEntityParts(entity);
-        List_Remove(entityHandler.entityList, entity);
+        ret |= EntityHandler_RemoveAllEntityParts(entity);
+        ret |= List_Remove(entityHandler.entityList, entity);
     } while (entityHandler.entityList->listHead);
-    List_Destroy(&entityHandler.entityList);
-    return ERR_OK;
+    ret |= List_Destroy(&entityHandler.entityList);
+    return ret;
 }
 
 int EntityHandler_AddEntityPart(entity_t *entity, entityPart_t *part) {
@@ -227,7 +236,7 @@ int EntityHandler_RemoveEntityPart(entity_t *entity, entityPart_t *part) {
 
 int EntityHandler_RemoveAllEntityParts(entity_t *entity) {
     if (entity && entity->parts) {
-        List_Destroy(&entity->parts);
+        return List_Destroy(&entity->parts);
     }
     return ERR_OK;
 }
