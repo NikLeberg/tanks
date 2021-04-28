@@ -18,6 +18,7 @@
  * einzeln Animieren lassen. Oder aber, dass ein Panzer verschiedene Waffentypen
  * haben kann.
  *      z.B. Panzerrohr, Fahrkabine, Chassis und Raupen
+ * Erweiterte Dokumentation ist in \ref Entitaet zu finden.
  * 
  */
 

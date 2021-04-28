@@ -16,6 +16,7 @@
  */
 
 #include "error.h"
+#include "list.h"
 #include "physics.h"
 
 
@@ -32,7 +33,7 @@
  * 
  */
 
-/* ... */
+#define PHYSICS_GRAVITY 10.0f //!< Erdbeschleunigung [pixel / s2]
 
 
 /*
@@ -48,9 +49,9 @@
  * 
  */
 
-int Physics_Update(entity_t *entities) {
-    (void) entities;
-    return ERR_FAIL;
+int Physics_Update(list_t *entityList) {
+    (void) entityList;
+    return ERR_OK;
 }
 
 
