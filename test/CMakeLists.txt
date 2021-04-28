@@ -48,3 +48,6 @@ add_custom_test(test_world_auto "test_world_auto.c;mocks/mock_heap.c;mocks/mock_
 add_custom_test(test_world_visual "test_world_visual.c;mocks/mock_heap.c")
 
 add_custom_test(test_entityHandler "test_entityHandler.c;mocks/mock_sdlw.c;mocks/mock_physics.c")
+
+add_custom_test(test_physics "test_physics.c")
+target_link_options(test_physics PRIVATE "-Wl,--wrap=World_CheckCollision")
