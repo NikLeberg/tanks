@@ -64,6 +64,15 @@ typedef enum {
  */
 typedef struct {
     /**
+     * @brief Entität ist Bewegungslos
+     * 
+     * 0 = Entität kann sich bewegen und die folgenden Parameter haben Wirkung
+     * 1 = Entität kann sich nicht bewegen und bleibt an Ort un Stelle, die
+     *     folgenden Parameter haben keine Wirkung
+     */
+    int isStatic;
+
+    /**
      * @brief Position der Entität
      *
      * Angaben sind absolut und zeigen auf das Zentrum der Entität
