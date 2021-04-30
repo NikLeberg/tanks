@@ -42,7 +42,7 @@
 static void tank_in_world(void **state) {
     (void)*state;
     // Test kann nicht in der Gitlab-Pipeline laufen, denn es wird ein Audiogerät
-    // und Hardwarebeschleunigung bnötigt.
+    // und Hardwarebeschleunigung benötigt.
 #ifdef CI_TEST
     skip();
 #endif
