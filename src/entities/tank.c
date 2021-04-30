@@ -310,7 +310,7 @@ static void fire(entity_t *tank) {
     y += -(tube->sprite.destination.w * sin(-angleRad));
     // Schuss erstellen
     double angle = tank->physics.rotation + tube->sprite.rotation;
-    Shell_Create(NULL, tank->owner, x, y, 200.0f, angle);
+    Shell_Create(NULL, tank->owner, x, y, 100.0f, angle);
     // Feuer Animation aktivieren im aktuellen Winkel des Rohrs
     tankData->fire.sprite.rotation = tankData->tube.sprite.rotation;
     Sprite_SetFrame(&tankData->fire.sprite, 1);
