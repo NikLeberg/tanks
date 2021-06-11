@@ -52,8 +52,9 @@ static void test_world_draw(void **state) {
     // Initialisierung
     SDLW_Init(1024, 576);
     SDLW_LoadResources("assets/test/config.cfg");
+    SDLW_LoadResources("assets/world/config.cfg");
     World_Init();
-    World_Load("world");
+    World_Load("aquaduct");
 
     // Resourcen holen
     sprite_t mask = {0};
