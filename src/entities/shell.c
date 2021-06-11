@@ -47,7 +47,13 @@ typedef struct {
  * 
  */
 
-/* ... */
+/**
+ * @brief Skalierung der Explosion
+ * 
+ * Die Explosionanimation und die Zersörung der Welt lassen sich hiermit
+ * skalieren. Ein Faktor von 1 entspricht einer Grösse von ca. 50*50 Pixel.
+ */
+#define SHELL_EXPLOSION_SCALE_FACTOR 1.0f
 
 
 /*
@@ -153,8 +159,12 @@ int Shell_Create(entity_t **shell, const char *player, float x, float y, float v
     }
     shellData->explosion.name = "Explosion";
     shellData->explosion.sprite = *rawSprite;
+    // Die originale animationst-Textur im Assets-Ordner ist zu gross, halbiere
+    // die Grösse und skaliere danach entsprechend Einstellungen.
     shellData->explosion.sprite.destination.h /= 2;
+    shellData->explosion.sprite.destination.h *= SHELL_EXPLOSION_SCALE_FACTOR;
     shellData->explosion.sprite.destination.w /= 2;
+    shellData->explosion.sprite.destination.w *= SHELL_EXPLOSION_SCALE_FACTOR;
     if (EntityHandler_AddEntityPart(&shellData->shell, &shellData->explosion)) {
         goto errorLoadExplosion;
     }
@@ -164,6 +174,9 @@ int Shell_Create(entity_t **shell, const char *player, float x, float y, float v
         goto errorLoadMask;
     }
     shellData->mask = *rawSprite;
+    shellData->mask.destination.w *= SHELL_EXPLOSION_SCALE_FACTOR;
+    shellData->mask.destination.h *= SHELL_EXPLOSION_SCALE_FACTOR;
+    // dem Aufrufer ein Pointer zurückgeben
     if (shell) {
         *shell = &shellData->shell;
     }
@@ -263,14 +276,12 @@ static void triggerExplosion(entity_t *shell) {
 }
 
 static void destroyWorld(entity_t *shell) {
-    // Lade ein Kreis als Explosions-Maske
-    sprite_t *rawSprite;
-    SDLW_GetResource("shellMask", RESOURCETYPE_SPRITE, (void **)&rawSprite);
-    sprite_t mask = *rawSprite;
+    // Nutze die zuvor geladene Explosions-Maske
+    shellData_t *shellData = (shellData_t *)shell->data;
     // Setze die Position gemäss Schussposition
-    mask.position.x = shell->physics.position.x;
-    mask.position.y = shell->physics.position.y;
+    shellData->mask.position.x = shell->physics.position.x;
+    shellData->mask.position.y = shell->physics.position.y;
     // Übergebe die Explosion der Welt, welche diese aus dem Vordergrund
     // auschneidet.
-    World_Modify(mask);
+    World_Modify(shellData->mask);
 }
