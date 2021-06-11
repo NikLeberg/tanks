@@ -1,5 +1,5 @@
 /**
- * @file shell.h
+ * @file shell.c
  * @author Leuenberger Niklaus (leuen4@bfh.ch)
  * @brief Panzerschussentität
  * @version 0.1

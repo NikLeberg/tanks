@@ -45,7 +45,7 @@
 #define DELTA_TIME (1.0f / 60.0f) //!< Updateintervall [s]
 #define GRAVITY 40.0f             //!< Erdbeschleunigung [pixel / s2]
 #define NEAR_ZERO 0.1f            //!< Werte die kleiner sind zählen als 0
-#define DAMPENING_FACTOR_X 1.0f  //!< Dämpffaktor für Bewegungen nach oben
+#define DAMPENING_FACTOR_X 1.0f   //!< Dämpffaktor für Bewegungen nach oben
 
 /**
  * @brief Rückstossfaktor einer Kollision mit der Welt
