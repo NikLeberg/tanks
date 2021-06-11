@@ -7,8 +7,8 @@
  * 
  * @copyright Copyright (c) 2021 Leuenberger Niklaus
  * 
- * Dieses Modul dient als Vorlage für andere Module.
- * Im eventuellen Release ist dies zu entfernen.
+ * Dieses Modul dient lediglich als Vorlage für andere Module. Die Funktionen
+ * sind nur exemplarisch und sind nicht zu verwenden.
  * 
  */
 
