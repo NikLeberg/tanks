@@ -243,7 +243,7 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
     }
 
     char config[256] = {0};
-    char key[32] = {0};  // Die ID der zu ladenen Ressource
+    char key[64] = {0};  // Die ID der zu ladenen Ressource
     char type[32] = {0}; // Der Typ der zu ladenen Ressource
 
     int line = 0;
@@ -251,7 +251,7 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
     while (fgets(config, 255, file)) { // Lesen der Konfigurationszeilen
         line++;
 
-        int count = sscanf(config, "%31s %31s", key, type);
+        int count = sscanf(config, "%63s %31s", key, type);
         if (count == 0)
             continue;
         if (!strcmp(key, "#")) // Kommentar
