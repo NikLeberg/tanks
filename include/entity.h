@@ -205,7 +205,8 @@ typedef struct {
      * informiert, denn die Physik kann nicht ermitteln wer der Auslöser der
      * Kollision war. Der \p onCollision Callback wird für A mit \p self = A und
      * \ref entityCollision_t.partner = B aufgerufen und für B wird
-     * \p onCollision mit \p self = B und \ref entityCollision_t.partner = A.
+     * \p onCollision mit \p self = B und \ref entityCollision_t.partner = A
+     * aufgerufen.
      * @note Ist dieser Callback NULL, so wird die Kollision gänzlich ignoriert.
      * Dies bedeutet aber, dass das physik-Modul auch nicht reagiert und die
      * Entität wird durch die Welt fallen.
