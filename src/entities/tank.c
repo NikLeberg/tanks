@@ -263,9 +263,15 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
 }
 
 static int collisionCallback(entity_t *self, entityCollision_t *collision) {
-    // Kollisionen mit Entiäten die dem selben Spieler gehören ignorieren.
+    // Reagiere Auf Kollisionen mit Entitäten
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
         if (!strcmp(self->owner, collision->partner->owner)) {
+            // gehört dem eigenen Spieler, ignorieren
+            collision->flags &= ~ENTITY_COLLISION_ENTITY;
+        } else if (!strcmp(collision->partner->name, "Panzerschuss")) {
+            // Kollision mit einem Schuss der nicht von uns ist.
+            // Ziehe Lebenspunkte ab
+            // ToDo...
             collision->flags &= ~ENTITY_COLLISION_ENTITY;
         }
     }

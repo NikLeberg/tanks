@@ -1,7 +1,7 @@
 /**
  * @file test_tank.c
  * @author Leuenberger Niklaus (leuen4@bfh.ch)
- * @brief Tests für Tank-Entität
+ * @brief Tests für Tank- und Shell Entität
  * @version 0.1
  * @date 2021-04-18
  * 

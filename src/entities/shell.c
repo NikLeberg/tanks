@@ -221,13 +221,26 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     Physics_SetRotation(self, -angle);
     // Wenn der Schuss momentan explodiert, dann reagiere entsprechend.
     if (shellData->isExploding) {
+        // In triggerExplosion() wurde die Animation gestartet und auf den Index
+        // 1 gesetzt. Bei jedem Update wird nun auf das nächste Frame der
+        // Animation geschaltet bis diese fertig ist bez. wieder bei 0 angelangt
+        // ist. Danach ist der Schuss explodiert und kann gelöscht werden.
         switch (shellData->explosion.sprite.multiSpriteIndex) {
         case (0): // Animation wurde zuende gespielt, Lösche die Entität
             Shell_Destroy(self);
             break;
+        case (1): // Animation wurde gerade Aktiviert, setzte AABB auf 0
+            // Wird AABB nicht auf 0 gesetzt wird der Panzer nochmals mit dem
+            // bereits explodierenden Schuss kollidieren und sich selber erneut
+            // Lebenspunkte abziehen. Verhindere dies.
+            self->physics.aabb.h = 0;
+            self->physics.aabb.w = 0;
+            Sprite_NextFrame(&shellData->explosion.sprite);
+            break;
         case (32): // Animation wurde zur Hälfte gespielt, zerstöre die Welt
-            destroyWorld(self); // fallthrough --> damit gcc nicht meckert
-            // break; <-- durchfallen, immer auch Animation weiterschalten
+            destroyWorld(self);
+            Sprite_NextFrame(&shellData->explosion.sprite);
+            break;
         default:
             Sprite_NextFrame(&shellData->explosion.sprite);
             break;
@@ -249,9 +262,14 @@ static int collisionCallback(entity_t *self, entityCollision_t *collision) {
         // starte die Animation der Explosion
         triggerExplosion(self);
     }
-    // Kollisionen mit Entiäten die dem selben Spieler gehören ignorieren.
+    // Kollisionen mit Entitäten verarbeiten
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
         if (!strcmp(self->owner, collision->partner->owner)) {
+            // gehört dem eigenen Spieler, ignorieren
+            collision->flags &= ~ENTITY_COLLISION_ENTITY;
+        } else {
+            // gehört anderem Spieler, löse Explosion aus
+            triggerExplosion(self);
             collision->flags &= ~ENTITY_COLLISION_ENTITY;
         }
     }
