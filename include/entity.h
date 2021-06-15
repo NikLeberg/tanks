@@ -42,7 +42,8 @@
  * 
  */
 
-struct entity_s; // Vorwärtsdeklaration einer Entitätsstruktur
+struct entity_s;     // Vorwärtsdeklaration einer Entitätsstruktur
+struct inputEvent_s; // Vorwärtsdeklaration eines Input-Events
 
 /**
  * @brief Status der Entität
@@ -130,7 +131,7 @@ typedef enum {
  * Eine Struktur mit den folgenden Informationen wird einer Entität bei einer
  * Kollision übergeben.
  */
-typedef struct {
+typedef struct entityCollision_s {
     /**
      * @brief Kollisionsflags
      * 
@@ -191,7 +192,7 @@ typedef struct {
      * 
      * @return Fehlercode gemäss \ref error.h
      */
-    int (*onUpdate)(struct entity_s *self, inputEvent_t *inputEvents);
+    int (*onUpdate)(struct entity_s *self, struct inputEvent_s *inputEvents);
 
     /**
      * @brief Kollision mit der Welt oder anderen Entitäten

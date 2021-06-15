@@ -230,7 +230,7 @@ int World_DrawForeground() {
     return SDLW_DrawTexture(foreground); // Zeichnen des Vordergrunds
 }
 
-int World_CheckCollision(SDL_Rect aabb, entityCollision_t *collision) {
+int World_CheckCollision(SDL_Rect aabb, struct entityCollision_s *collision) {
     // Fehlerüberprüfung
     if (!loaded) {
         printf("Keine Welt geladen! World_CheckCollision()\n");

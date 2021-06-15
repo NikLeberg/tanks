@@ -17,7 +17,7 @@
  * 
  */
 
-/* ... */
+#include "sdlWrapper.h"
 
 
 /*
@@ -27,10 +27,29 @@
 
 /**
  * @brief inputEvent Struktur
- * 
+ *
  */
-typedef struct {
-	int dummy; //!< dummy, zu definieren
+typedef struct inputEvent_s {
+    SDL_Point mousePosition; //!< Mausposition
+    int mouseButtons;        //!< gedrückte Maustasten
+    char *lastKey;           //!< zuletzt gedrückte Taste
+    char lastChar;           //!< letztes Zeichen
+
+    /**
+     * @brief Richtung gegeben über WASD-Tasten
+     *
+     * x: -1 = links, 0 = nichts, +1 = rechts
+     * y: -1 = hoch, 0 = nichts, +1 = runter
+     */
+    SDL_Point axisWASD;
+
+    /**
+     * @brief Richtung gegeben über Pfeiltasten
+     *
+     * x: -1 = links, 0 = nichts, +1 = rechts
+     * y: -1 = hoch, 0 = nichts, +1 = runter
+     */
+    SDL_Point axisArrow;
 } inputEvent_t;
 
 /*

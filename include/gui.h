@@ -16,10 +16,23 @@
  * Includes
  *
  */
+
 #include "SDL_ttf.h"
 #include "sdlWrapper.h"
 #include "list.h"
-#include "button.h"
+#include "guiElements/button.h"
+#include "guiElements/text.h"
+
+
+/**
+ * @brief Enum von möglichen GUI Elementen Bausteine
+ *
+ */
+
+typedef enum {
+    TYPE_BUTTON, //!< enum für Taste
+    TYPE_TEXT    //!< enum für Text
+} guiElemntType_t;
 
 /**
  * @brief Union von möglichen GUI Elementen Bausteine
@@ -27,9 +40,8 @@
  */
 
 typedef union {
-    button_t button;    //!< Speicher für Taster
-    // Textfeld
-    // ...
+    button_t button;  //!< Speicher für Taster
+    text_t textInput; //!< Speicher für Text
 } elementUnion_t;
 
 /**
@@ -38,8 +50,8 @@ typedef union {
  */
 
 typedef struct {
-    int type;                      //!< Element Typen Bezeichnung (zb: 0 = Button, 1 = Text, ...)
-    elementUnion_t elementData;    //!< Zugriff auf die Union von Elementen
+    guiElemntType_t type;       //!< Element Typen Bezeichnung (0 = Button, 1 = Text, ...)
+    elementUnion_t elementData; //!< Zugriff auf die Union von Elementen
 } guiElement_t;
 
 /**
@@ -48,12 +60,21 @@ typedef struct {
  */
 
 typedef struct {
-    list_t elemente; //!< Die Liste der Elemente
+    list_t element; //!< Die Liste der Elemente
 } gui_t;
+
+
+/*
+ * Öffentliche Funktionen
+ *
+ */
 
 /**
  * @brief GUI_Init
- * @param gui Neues GUI
+ *
+ * Initialisiert die GUI Liste.
+ *
+ * @param[in] gui Neues GUI
  * @return 0 oder error code
  */
 
@@ -62,25 +83,25 @@ int GUI_Init(gui_t *gui);
 /**
  * @brief GUI_Update
  *
- * Jegliche Ereignisse/Interaktionen mit dem UI in der scene werdem dem GUI_Update übergeben,
+ * Jegliche Ereignisse/Interaktionen mit dem UI in der scene werden dem GUI_Update übergeben,
  * welche die erhaltenen Informationen mit der dazugehörigen Aktion vergleicht und ausführt.
- * die verarbeiteten Informationen werde darauf übr das Button Modul and den SDL_Wrapper übergeben.
+ * die verarbeiteten Informationen werden darauf über das Button Modul and den SDL_Wrapper übergeben.
  *
- * @param inputEvents Aktualisiertung des GUI, je nach Ereignisse
- * @param gui gewählte GUI Elemente
+ * @param[in] inputEvents Aktualisierung des GUI, je nach Ereignisse
+ * @param[in] gui gewählte GUI Elemente
  * @return 0 oder error code
  */
 
-int GUI_Update(void *inputEvents, gui_t *gui);
+int GUI_Update(inputEvent_t *inputEvents, gui_t *gui);
 
 /**
  * @brief GUI_Draw
  *
  * Durch die vom GUI enthaltenen Ereignisse/Interaktionen, durchsucht die Funktion GUI_Draw die Liste
- * von Gui Elementen, nach dem Ereigniss entsprechende Element das Grafisch aktualiesiert werden muss.
+ * von Gui Elementen, nach dem Ereignis entsprechende Element das Grafisch aktualisiert werden muss.
  * über das Button Modul an den SDL_Wrapper übergeben.
  *
- * @param gui auswahl der zu zeichnenden GUI Elemente
+ * @param[in] gui Auswahl der zu zeichnenden GUI Elemente
  * @return 0 oder error code
  */
 
@@ -89,11 +110,11 @@ int GUI_Draw(gui_t *gui);
 /**
  * @brief GUI_AddElement
  *
- * Wird beim aktualisieren der Sceene oder  dem UI weitere Elemente hinzugefügt, zb. einen weitern Spieler,
+ * Wird beim aktualisieren der Scene oder dem UI weitere Elemente hinzugefügt, z.B. einen weiteren Spieler,
  * fügt die Funktion GUI_AddElement die noch fehlenden Elemente der Liste der GUI Elemente hinzu.
  *
- * @param element Neues hinzuzufügendes GUI Element
- * @param gui Zugehörige GUI Liste
+ * @param[in] element Neues hinzuzufügendes GUI Element
+ * @param[in] gui Zugehörige GUI Liste
  * @return 0 oder error code
  */
 
@@ -105,8 +126,8 @@ int GUI_AddElement(guiElement_t *element, gui_t *gui);
  * Identisch zur Funktion GUI_AddElement, macht die Funktion GUI_RemoveElement genau das Gegenteil.
  * Nicht benötigte Elemente werden aus der Liste der GUI Elemente entfernt.
  *
- * @param element Zu entfernendes GUI Element
- * @param gui Zugehörige GUI Liste
+ * @param[in] element Zu entfernendes GUI Element
+ * @param[in] gui Zugehörige GUI Liste
  * @return 0 oder error code
  */
 
