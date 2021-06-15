@@ -26,7 +26,8 @@
  *
  */
 
-struct sdlwResource_s; //!< Vorwärtsdeklaration einer SDLW-Ressource
+struct sdlwResource_s;    // Vorwärtsdeklaration einer SDLW-Ressource
+struct entityCollision_s; // Vorwärtsdeklaration eine Kollisions-Struktur
 
 /**
  * @brief Struktur zum Laden einer Konfiguration
@@ -35,7 +36,7 @@ struct sdlwResource_s; //!< Vorwärtsdeklaration einer SDLW-Ressource
 typedef struct worldConfig_s {
     SDL_Texture *foreground; //!< Vordergrundstextur
     SDL_Texture *background; //!< Hintergrundstextur
-    char bgMusic[32]; //!< Hintergrundsmusik
+    char bgMusic[32];        //!< Hintergrundsmusik
 } worldConfig_t;
 
 
@@ -116,7 +117,7 @@ int World_DrawForeground();
  *
  * @return 0 oder Errorcode
  */
-int World_CheckCollision(SDL_Rect aabb, entityCollision_t *collision);
+int World_CheckCollision(SDL_Rect aabb, struct entityCollision_s *collision);
 
 /**
  * @brief Modifiziert die Welt.

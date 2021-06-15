@@ -303,8 +303,7 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
         // Hinzufügen der geladenen Ressource
         printf("Geladen %s als %s\n", key, type);
         List_Add(&resourceList, resource);
-    }
-
+    }    
     // Abschluss
     fclose(file);
     return ERR_OK;
