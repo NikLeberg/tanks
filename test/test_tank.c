@@ -82,8 +82,8 @@ static void tank_in_world(void **state) {
         EntityHandler_Draw();
         SDLW_Render();
     }
-    EntityHandler_RemoveAllEntities();
     Tank_Destroy(tank);
+    EntityHandler_RemoveAllEntities();
     World_Quit();
     SDLW_Quit();
 }
