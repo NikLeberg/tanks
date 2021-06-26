@@ -17,7 +17,7 @@
  * 
  */
 
-/* ... */
+#include "sdlWrapper.h"
 
 
 /*

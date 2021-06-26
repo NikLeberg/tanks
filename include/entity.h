@@ -191,7 +191,7 @@ typedef struct {
      * 
      * @return Fehlercode gemäss \ref error.h
      */
-    int (*onUpdate)(struct entity_s *self, inputEvent_t *inputEvents);
+    int (*onUpdate)(struct entity_s *self, struct inputEvent_s *inputEvents);
 
     /**
      * @brief Kollision mit der Welt oder anderen Entitäten

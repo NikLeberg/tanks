@@ -60,7 +60,7 @@ typedef union {
     Mix_Chunk *soundEffect; //!< Speicher für Soundeffekte
     Mix_Music *bgMusic;     //!< Speicher für Hintergrundmusik
     sprite_t *sprite;       //!< Speicher für Sprite
-    worldConfig_t *world;   //!< Speicher für Welt
+    struct worldConfig_s *world;   //!< Speicher für Welt
 } sdlwResourceUnion_t;
 
 /**
