@@ -53,25 +53,37 @@ static void tank_in_world(void **state) {
     ret |= SDLW_LoadResources("assets/config.cfg");
     ret |= World_Load("world");
     assert_int_equal(ret, ERR_OK);
-    entity_t *tank;
-    Tank_Create(&tank, "Nik", 500.0f, 400.0f);
+    entity_t *tankA;
+    player_t playerA = {"Nik", 100, PLAYER_STEP_MOVE};
+    Tank_Create(&tankA, &playerA, 500.0f, 400.0f);
+    entity_t *tankB;
+    player_t playerB = {"Angelo", 100, PLAYER_STEP_MOVE};
+    Tank_Create(&tankB, &playerB, 200.0f, 200.0f);
+    inputEvent_t input = {.currentPlayer = &playerA};
     // 60 Sekunden lang simulieren
     for (int i = 0; i < 60 * 60; ++i) {
-        inputEvent_t input = {0};
+        // Aktiver Spieler umschalten
+        if (PLAYER_STEP_DONE == input.currentPlayer->step) {
+            input.currentPlayer = (input.currentPlayer == &playerA) ? &playerB : &playerA;
+            input.currentPlayer->step = PLAYER_STEP_MOVE;
+        }
         SDL_Event e = {0};
         SDL_PollEvent(&e);
+        input.axisWASD.x = 0;
+        input.axisWASD.y = 0;
+        input.lastKey = 0;
         if (e.type == SDL_KEYDOWN) {
             // Geschwindigkeit gemäss Pfeiltasten verändern
             if (e.key.keysym.sym == SDLK_LEFT) {
-                input.dummy = -1;
+                input.axisWASD.x = -1;
             } else if (e.key.keysym.sym == SDLK_RIGHT) {
-                input.dummy = 1;
+                input.axisWASD.x = 1;
             } else if (e.key.keysym.sym == SDLK_UP) {
-                input.dummy = -2;
+                input.axisWASD.y = -1;
             } else if (e.key.keysym.sym == SDLK_DOWN) {
-                input.dummy = 2;
+                input.axisWASD.y = 1;
             } else if (e.key.keysym.sym == SDLK_SPACE) {
-                input.dummy = 4;
+                input.lastKey = ' ';
             }
         }
         EntityHandler_Update(&input);
@@ -82,7 +94,8 @@ static void tank_in_world(void **state) {
         EntityHandler_Draw();
         SDLW_Render();
     }
-    Tank_Destroy(tank);
+    Tank_Destroy(tankA);
+    Tank_Destroy(tankB);
     EntityHandler_RemoveAllEntities();
     World_Quit();
     SDLW_Quit();

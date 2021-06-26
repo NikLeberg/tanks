@@ -40,6 +40,7 @@ typedef struct {
     entityPart_t chassis; //!< Fahrgestell
     entityPart_t tube;    //!< Schussrohr
     entityPart_t fire;    //!< Schussanimation
+    entityPart_t arrow;   //!< Pfeil der den aktiven Spieler signalisiert
 } tankData_t;
 
 
@@ -57,6 +58,14 @@ typedef struct {
 #define TANK_MAX_HORIZONTAL_SPEED 50.0f
 #define TANK_TUBE_MAX_ROTATION_POSITIVE 10.0   //!< Max pos. Rotation des Rohrs
 #define TANK_TUBE_MAX_ROTATION_NEGATIVE -190.0 //!< Max neg. Rotation des Rohrs
+
+/**
+ * @brief Gesundheitsabzug per Treffer
+ * 
+ * Wie viele Gesundheitspunkte von \ref player_t.healthpoints abgezogen werden
+ * per Treffer eines Geschosses.
+ */
+#define TANK_NEG_HEALTH_PER_HIT 30
 
 
 /*
@@ -112,13 +121,39 @@ static void rotateToWorld(entity_t *tank);
  */
 static void fire(entity_t *tank);
 
+/**
+ * @brief Bewege Panzer in der Horizontalen.
+ * 
+ * Der Panzer kann per WASD-Tasten bewegt werden:
+ *      A -> Links  -> Bewegung in x--
+ *      D -> Rechts -> Bewegung in x++
+ * 
+ * @param self Panzer der bewegt werden soll
+ * @param axisWASD Richtung aus dem \ref inputEvent_t
+ * 
+ */
+static void moveHorizontal(entity_t *self, SDL_Point axisWASD);
+
+/**
+ * @brief Rotiere Schussrohr.
+ * 
+ * Das Schussrohr kann per WASD-Tasten rotiert werden:
+ *      W -> Hoch   -> Rotation im Gegenuhrzeigersinn
+ *      S -> Runter -> Bewegung im Uhrzeigersinn
+ * 
+ * @param tankData Erweiterte Daten zum Panzer
+ * @param axisWASD Richtung aus dem \ref inputEvent_t
+ * 
+ */
+static void rotateTube(tankData_t *tankData, SDL_Point axisWASD);
+
 
 /*
  * Implementation Öffentlicher Funktionen
  * 
  */
 
-int Tank_Create(entity_t **tank, const char *player, float x, float y) {
+int Tank_Create(entity_t **tank, player_t *player, float x, float y) {
     if (!player) {
         return ERR_PARAMETER;
     }
@@ -191,12 +226,24 @@ int Tank_Create(entity_t **tank, const char *player, float x, float y) {
     if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->fire)) {
         goto errorLoadFire;
     }
+    // Pfeil Animation laden
+    SDLW_GetResource("arrow", RESOURCETYPE_SPRITE, (void **)&rawSprite);
+    if (!rawSprite) {
+        goto errorLoadArrow;
+    }
+    tankData->arrow.name = "Pfeil";
+    tankData->arrow.sprite = *rawSprite;
+    tankData->arrow.sprite.destination.y = -50;
+    // Pfeil noch nicht der Entität hinzufügen, wird im UpdateCallback gemacht.
+    // So kann die Sichtbarkeit gemäss aktivem Spieler umgeschaltet werden.
     if (tank) {
         *tank = &tankData->tank;
     }
     return ERR_OK;
 
     // Mache im Fehlerfall alle Schritte einzeln rückgängig
+errorLoadArrow:
+    EntityHandler_RemoveEntityPart(&tankData->tank, &tankData->fire);
 errorLoadFire:
     EntityHandler_RemoveEntityPart(&tankData->tank, &tankData->tube);
 errorLoadTube:
@@ -230,34 +277,48 @@ int Tank_Destroy(entity_t *tank) {
 
 static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     tankData_t *tankData = (tankData_t *)self->data;
-    entityPart_t *tube = &tankData->tube;
-    const float *vx = &self->physics.velocity.x;
-    // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
-    if (inputEvents->dummy == -1 && *vx > -TANK_MAX_HORIZONTAL_SPEED) {
-        Physics_SetRelativeVelocity(self, -10.0f, NAN);
-    } else if (inputEvents->dummy == 1 && *vx < TANK_MAX_HORIZONTAL_SPEED) {
-        Physics_SetRelativeVelocity(self, +10.0f, NAN);
-    }
-    // Rohrstellung gemäss Pfeiltasten rotieren
-    if (inputEvents->dummy == -2 &&
-        tube->sprite.rotation > TANK_TUBE_MAX_ROTATION_NEGATIVE) {
-        tube->sprite.rotation -= 0.5;
-    } else if (inputEvents->dummy == 2 &&
-               tube->sprite.rotation < TANK_TUBE_MAX_ROTATION_POSITIVE) {
-        tube->sprite.rotation += 0.5;
+    // Wenn der Panzer dem aktuellen Spieler gehört und im momentanen Spielzug
+    // "Move" ist, so reagiere auf Bewegungs-Events.
+    if (self->owner == inputEvents->currentPlayer
+     && inputEvents->currentPlayer->step == PLAYER_STEP_MOVE) {
+        // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
+        moveHorizontal(self, inputEvents->axisWASD);
+        // Rohrstellung gemäss WASD-Tasten rotieren
+        rotateTube(tankData, inputEvents->axisWASD);
+        // Falls Leertaste -> Schuss feuern
+        if (inputEvents->lastKey == ' ') {
+            // übergang in den nächsten Spielzug
+            inputEvents->currentPlayer->step = PLAYER_STEP_FIRE;
+            // erstelle Schussentität und spiele Animation ab
+            fire(self);
+        }
     }
     // Horizontale Bewegung in jedem Zyklus um 5% dämpfen damit der Panzer nicht
     // endlos in eine Richtung fährt.
-    Physics_SetVelocity(self, *vx * 0.95f, NAN);
+    Physics_SetVelocity(self, self->physics.velocity.x * 0.95f, NAN);
     // rotiere den gesamten Panzer basierend auf der Position auf der Welt
     rotateToWorld(self);
-    // Falls Leertaste -> Schuss feuern
-    if (inputEvents->dummy == 4) {
-        fire(self);
-    }
     // Falls Schussanimation am laufen -> weiterschalten
     if (tankData->fire.sprite.multiSpriteIndex != 0) {
         Sprite_NextFrame(&tankData->fire.sprite);
+    }
+    // Wenn dieser Panzer dem aktuellen Spieler gehört, so zeige einen Pfeil
+    // als Indikator über dem Panzer an.
+    if (self->owner == inputEvents->currentPlayer) {
+        if (4 == tankData->tank.parts->elementCount
+         && PLAYER_STEP_MOVE == inputEvents->currentPlayer->step) {
+            // Wenn der Panzer nur aus vier Teilen besteht so wurde der Pfeil
+            // noch nicht hinzugefügt. Füge den Pfeil hinzu.
+            EntityHandler_AddEntityPart(self, &tankData->arrow);
+        } else if (PLAYER_STEP_FIRE == inputEvents->currentPlayer->step) {
+            // Schuss wurde abgefeuert -> entferne den Pfeil
+            EntityHandler_RemoveEntityPart(self, &tankData->arrow);
+        } else {
+            // Pfeil ist sichtbar -> Animation weiterschalten
+            Sprite_NextFrame(&tankData->arrow.sprite);
+            // Entferne die relative Rotation des Panzers auf dem Pfeil
+            tankData->arrow.sprite.rotation = -self->physics.rotation;
+        }
     }
     return ERR_OK;
 }
@@ -265,14 +326,14 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
 static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     // Reagiere Auf Kollisionen mit Entitäten
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
-        if (!strcmp(self->owner, collision->partner->owner)) {
+        if (!strcmp(self->owner->name, collision->partner->owner->name)) {
             // gehört dem eigenen Spieler, ignorieren
             collision->flags &= ~ENTITY_COLLISION_ENTITY;
         } else if (!strcmp(collision->partner->name, "Panzerschuss")) {
             // Kollision mit einem Schuss der nicht von uns ist.
-            // Ziehe Lebenspunkte ab
-            // ToDo...
             collision->flags &= ~ENTITY_COLLISION_ENTITY;
+            // Ziehe Lebenspunkte ab
+            self->owner->healthpoints -= TANK_NEG_HEALTH_PER_HIT;
         }
     }
     return ERR_OK;
@@ -322,4 +383,26 @@ static void fire(entity_t *tank) {
     Sprite_SetFrame(&tankData->fire.sprite, 1);
     // Soundeffekt abspielen
     SDLW_PlaySoundEffect("tankSound");
+}
+
+static void moveHorizontal(entity_t *self, SDL_Point axisWASD) {
+    const float *vx = &self->physics.velocity.x;
+    // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
+    if (axisWASD.x == -1 && *vx > -TANK_MAX_HORIZONTAL_SPEED) {
+        Physics_SetRelativeVelocity(self, -10.0f, NAN);
+    } else if (axisWASD.x == 1 && *vx < TANK_MAX_HORIZONTAL_SPEED) {
+        Physics_SetRelativeVelocity(self, +10.0f, NAN);
+    }
+}
+
+static void rotateTube(tankData_t *tankData, SDL_Point axisWASD) {
+    entityPart_t *tube = &tankData->tube;
+    // Rohrstellung gemäss WASD-Tasten rotieren
+    if (axisWASD.y == -1 &&
+        tube->sprite.rotation > TANK_TUBE_MAX_ROTATION_NEGATIVE) {
+        tube->sprite.rotation -= 0.5;
+    } else if (axisWASD.y == 2 &&
+               tube->sprite.rotation < TANK_TUBE_MAX_ROTATION_POSITIVE) {
+        tube->sprite.rotation += 0.5;
+    }
 }

@@ -56,7 +56,7 @@
  * 
  * @return ERR_OK, ERR_MEMORY oder ERR_FAIL
  */
-int Shell_Create(entity_t **shell, const char *player, float x, float y, float velocity, double angle);
+int Shell_Create(entity_t **shell, player_t *player, float x, float y, float velocity, double angle);
 
 /**
  * @brief Zerstöre einen Panzerschuss.

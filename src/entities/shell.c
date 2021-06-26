@@ -115,7 +115,7 @@ static void destroyWorld(entity_t *shell);
  * 
  */
 
-int Shell_Create(entity_t **shell, const char *player, float x, float y, float velocity, double angle) {
+int Shell_Create(entity_t **shell, player_t *player, float x, float y, float velocity, double angle) {
     if (!player) {
         return ERR_PARAMETER;
     }
@@ -227,6 +227,10 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
         // ist. Danach ist der Schuss explodiert und kann gelöscht werden.
         switch (shellData->explosion.sprite.multiSpriteIndex) {
         case (0): // Animation wurde zuende gespielt, Lösche die Entität
+            if (self->owner == inputEvents->currentPlayer) {
+                // Schuss ist explodiert, markiere das Ende des Spielzuges
+                inputEvents->currentPlayer->step = PLAYER_STEP_DONE;
+            }
             Shell_Destroy(self);
             break;
         case (1): // Animation wurde gerade Aktiviert, setzte AABB auf 0
@@ -264,7 +268,7 @@ static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     }
     // Kollisionen mit Entitäten verarbeiten
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
-        if (!strcmp(self->owner, collision->partner->owner)) {
+        if (!strcmp(self->owner->name, collision->partner->owner->name)) {
             // gehört dem eigenen Spieler, ignorieren
             collision->flags &= ~ENTITY_COLLISION_ENTITY;
         } else {

@@ -25,13 +25,8 @@
  * 
  */
 
-/**
- * @brief inputEvent Struktur
- * 
- */
-typedef struct {
-	int dummy; //!< dummy, zu definieren
-} inputEvent_t;
+/* ... */
+
 
 /*
  * Variablendeklarationen

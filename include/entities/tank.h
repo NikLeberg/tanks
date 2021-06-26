@@ -54,7 +54,7 @@
  * 
  * @return ERR_OK, ERR_MEMORY oder ERR_FAIL
  */
-int Tank_Create(entity_t **tank, const char *player, float x, float y);
+int Tank_Create(entity_t **tank, player_t *player, float x, float y);
 
 /**
  * @brief Zerstöre einen Panzer.

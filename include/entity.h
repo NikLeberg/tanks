@@ -32,8 +32,8 @@
 
 #include <SDL.h>
 
+#include "input.h"
 #include "sprite.h"
-#include "scene.h"
 #include "list.h"
 
 
@@ -130,7 +130,7 @@ typedef enum {
  * Eine Struktur mit den folgenden Informationen wird einer Entität bei einer
  * Kollision übergeben.
  */
-typedef struct {
+typedef struct entityCollision_s {
     /**
      * @brief Kollisionsflags
      * 
@@ -267,9 +267,9 @@ typedef struct entity_s {
      */
     entityCallbacks_t callbacks;
 
-    const char *owner; //!< Eigentümer der Entität, Spielername
-    const char *name;  //!< Name der Entität
-    void *data;        //!< Optionale Daten der Entität, zur freien Benutzung.
+    player_t *owner;  //!< Eigentümer der Entität, Spielername
+    const char *name; //!< Name der Entität
+    void *data;       //!< Optionale Daten der Entität, zur freien Benutzung.
 } entity_t;
 
 
