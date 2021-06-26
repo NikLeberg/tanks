@@ -228,7 +228,7 @@ static void gui_text_update_changes_text(void **state) {
     };
     inputEvent_t input = {0}; // Maus ist an Position 0,0
     // Ohne Klick ins Textfeld kann noch kein Text verändert werden
-    input.lastChar = 'H';
+    input.lastKey = 'H';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Pomelo-Banane");
     // Nach einem Klick lässt sich das Feld aber verändern
@@ -238,26 +238,26 @@ static void gui_text_update_changes_text(void **state) {
     assert_string_equal(text.text, "H");
     // Weitere Änderungen sich möglich auch ohne Mausklick
     input.mouseButtons = 0;
-    input.lastChar = 'a';
+    input.lastKey = 'a';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Ha");
-    input.lastChar = 'l';
+    input.lastKey = 'l';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hall");
-    input.lastChar = 'o';
+    input.lastKey = 'o';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hallo");
     // Text lässt sich auch wieder löschen
-    input.lastChar = '\b';
+    input.lastKey = '\b';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hall");
     // Klick ausserhalb des Textfeldes deaktiviert den Editier-Modus
     input.mouseButtons = SDL_BUTTON_LEFT;
     input.mousePosition = (SDL_Point){.x = 10, .y = 10};
-    input.lastChar = '\0';
+    input.lastKey = '\0';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
-    input.lastChar = 'o';
+    input.lastKey = 'o';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hall"); // 'o' wurde nicht hinzugefügt
 }

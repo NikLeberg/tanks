@@ -105,15 +105,15 @@ int Text_Update(inputEvent_t *inputEvents, text_t *textInput) {
     }
     if (textInput->state > 0) { // ist das Textfeld aktiv, wird auf die zuletzt registrierte Tastatureingabe überprüft.
 
-        if (inputEvents->lastChar == 8) { // Ist die Letzte Eingabe ein Backspace, (Wert 8 in ASCII)
+        if (inputEvents->lastKey == 8) { // Ist die Letzte Eingabe ein Backspace, (Wert 8 in ASCII)
             if (textInput->index > 0) {   // wird der zuletzt erhaltene Eintrag gelöscht bzw. auf NULL gesetzt.
                 textInput->text[textInput->index - 1] = '\0';
                 textInput->index--;
             }
             UpdateText(textInput);                                         // Aktualisiert die Textausgabe.
-        } else if (inputEvents->lastChar != '\0') {                        // Wen eine Tastatureingabe registriert wird,
+        } else if (inputEvents->lastKey != '\0') {                        // Wen eine Tastatureingabe registriert wird,
             if (textInput->index < 31) {                                   // und die maximale Texteingabe noch nicht erreicht wurde,
-                textInput->text[textInput->index] = inputEvents->lastChar; // wird die Eingabe dem entsprechenden Text Array hinzugefügt.
+                textInput->text[textInput->index] = inputEvents->lastKey; // wird die Eingabe dem entsprechenden Text Array hinzugefügt.
                 textInput->index++;
                 textInput->text[textInput->index] = '\0'; // Der darauf folgende Eintrag, im Text Array, wird auf NULL gesetzt.
             }
