@@ -49,9 +49,8 @@ static void tank_in_world(void **state) {
     int ret = ERR_OK;
     ret |= SDLW_Init(1024, 576);
     ret |= World_Init();
-    ret |= SDLW_LoadResources("assets/test/config.cfg");
     ret |= SDLW_LoadResources("assets/config.cfg");
-    ret |= World_Load("world");
+    ret |= World_Load("aquaduct");
     assert_int_equal(ret, ERR_OK);
     entity_t *tankA;
     player_t playerA = {"Nik", 100, PLAYER_STEP_MOVE};
