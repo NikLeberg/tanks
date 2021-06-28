@@ -70,7 +70,7 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
     // Allozieren eines Sprites
     sprite_t *loadedSprite = malloc(sizeof(sprite_t));
     if (!loadedSprite) {
-        printf("Memory fuer Sprite konnte nicht alloziert werden! Sprite_Load()\n");
+        SDL_Log("Memory fuer Sprite konnte nicht alloziert werden! Sprite_Load()\n");
         return ERR_MEMORY;
     }
     (*loadedSprite) = (sprite_t){0};
@@ -79,7 +79,7 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
     int count = sscanf(config, "%31s %31s %31s %15s %d %d %d %d %d %d", key, type, textureKey, spriteType, &sizeXorDestX, &sizeYorDestY, &subSpriteCountorDestW, &destH, &pivotX, &pivotY);
 
     if (count < 3) { // Arguentanzahl Fehlerüberwachung
-        printf("Zu wenig Konfigurationsargumente! Sprite_Load()\n");
+        SDL_Log("Zu wenig Konfigurationsargumente! Sprite_Load()\n");
         free(loadedSprite);
         return ERR_FAIL;
     }
@@ -87,7 +87,7 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
     // Laden der angegebenen Textur
     SDLW_GetTexture(textureKey, &loadedSprite->texture);
     if (!loadedSprite->texture) { 
-        printf("Textur mit Schluessel [%s] existiert nicht! Sprite_Load()\n", textureKey);
+        SDL_Log("Textur mit Schluessel [%s] existiert nicht! Sprite_Load()\n", textureKey);
         free(loadedSprite);
         return ERR_FAIL;
     }
@@ -143,14 +143,14 @@ int Sprite_Load(char *config, struct sdlwResource_s *spriteResource) {
         }
     }
     // Keine gültige konfiguration
-    printf("Konfigurationsargumente fuer %s ungueltig! Sprite_Load()\n", key);
+    SDL_Log("Konfigurationsargumente fuer %s ungueltig! Sprite_Load()\n", key);
     free(loadedSprite);
     return ERR_FAIL;
 }
 
 int Sprite_CreateText(char *text, char *font, SDL_Color color, sprite_t *sprite) {
     if (!sprite) { // Fehlerüberprüfung
-        printf("Sprite ungueltig! Sprite_CreateText()\n");
+        SDL_Log("Sprite ungueltig! Sprite_CreateText()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -170,7 +170,7 @@ int Sprite_CreateText(char *text, char *font, SDL_Color color, sprite_t *sprite)
 
 int Sprite_SetRelativeToPivot(sprite_t sprite, double parentRotation, SDL_Point parentPivot, sprite_t *calculatedSprite) {
     if (!calculatedSprite) { // Fehlerüberprüfung
-        printf("Sprite resultat ungueltig! Sprite_SetRelativePivot()\n");
+        SDL_Log("Sprite resultat ungueltig! Sprite_SetRelativePivot()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -200,15 +200,15 @@ int Sprite_SetRelativeToPivot(sprite_t sprite, double parentRotation, SDL_Point 
 int Sprite_SetFrame(sprite_t *sprite, int index) {
     // Fehlerüberprüfung
     if (!sprite) {
-        printf("Sprite ungueltig! Sprite_SetFrame()\n");
+        SDL_Log("Sprite ungueltig! Sprite_SetFrame()\n");
         return ERR_NULLPARAMETER;
     }
     if (sprite->multiSpriteCount <= index || index < 0) {
-        printf("Index zu gross! %d maximal %d Sprite_SetFrame()\n", index, sprite->multiSpriteIndex);
+        SDL_Log("Index zu gross! %d maximal %d Sprite_SetFrame()\n", index, sprite->multiSpriteIndex);
         return ERR_PARAMETER;
     }
     if (!sprite->texture) {
-        printf("Sprite Textur ungueltig! Sprite_SetFrame()\n");
+        SDL_Log("Sprite Textur ungueltig! Sprite_SetFrame()\n");
         return ERR_PARAMETER;
     }
 
@@ -236,7 +236,7 @@ int Sprite_SetFrame(sprite_t *sprite, int index) {
 int Sprite_NextFrame(sprite_t *sprite) {
     // Fehlerüberprüfung
     if (!sprite) {
-        printf("Sprite ungueltig! Sprite_SetFrame()\n");
+        SDL_Log("Sprite ungueltig! Sprite_SetFrame()\n");
         return ERR_NULLPARAMETER;
     }
 
