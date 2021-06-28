@@ -4,7 +4,7 @@
 Über die GUI lässt sich eine der zwei verfügbaren Welten (Evergreen oder Aquaduct) auswählen. Auf ihr werden dann zwei Panzer platziert. Diese Panzer reagieren (wenn der entsprechende Spieler am Zug ist) auf die WASD-Tasten sowie auf die Leertaste. Mit WASD wird der Panzer und das Schussrohr bewegt sowie mit der Leertaste ein Schuss abgefeuert. Bei jedem Schuss wechselt die Kontrolle zum anderen Spieler. Da das Spiel nur lokal spielbar ist, muss an diesem Punkt die Tastatur dem Mitspieler übergeben werden. Der jeweils aktive Spieler ist in den Oberen Ecken des Spielfensters orange markiert. Jeder Treffer zieht Lebenspunkte ab. Diese werden direkt unterhalb des Spielernamens angezeigt. Gewonnen hat, wer den Panzer des Gegners komplett zerstört hat.
 
 [<img src="SpielAufbau.png" width="50%"/>](SpielAufbau.png)
-<p style="font-size:0px">@image latex SpielAufbau.png Programmfluss</p>
+<p style="font-size:0px">@image latex SpielAufbau.png Spielaufbau</p>
 
 # Technischer Ablauf
 Das Spiel ist aus den implementierten Modulen: SDLW, Sprite, Gui und EntityHandler aufgebaut. Diese drei Module werden vom Scene-Modul zusammen verknüpft und in der benötigten Abfolge (siehe [Fluss](Programmfluss.md)) aufgerufen.
