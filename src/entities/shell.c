@@ -268,7 +268,7 @@ static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     }
     // Kollisionen mit Entitäten verarbeiten
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
-        if (!strcmp(self->owner->name, collision->partner->owner->name)) {
+        if (self->owner == collision->partner->owner) {
             // gehört dem eigenen Spieler, ignorieren
             collision->flags &= ~ENTITY_COLLISION_ENTITY;
         } else {

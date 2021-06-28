@@ -147,6 +147,18 @@ static void moveHorizontal(entity_t *self, SDL_Point axisWASD);
  */
 static void rotateTube(tankData_t *tankData, SDL_Point axisWASD);
 
+/**
+ * @brief Aktualisierie die Sichtbarkeit des Pfeil Indikators
+ * 
+ * Wenn der Panzer dem aktuellen Psieler gehört so aktualisiert diese Funktion
+ * die Sichtbarkeit des Pfeils und schaltet dessen Animation weiter.
+ * 
+ * @param self Panzer dessen Pfeil aktualisiert werden soll
+ * @param step Aktueller Spielschritt aus \ref inputEvent_t
+ * 
+ */
+static void updateArrowIndicator(entity_t *tank, playerStep_t step);
+
 
 /*
  * Implementation Öffentlicher Funktionen
@@ -305,20 +317,7 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     // Wenn dieser Panzer dem aktuellen Spieler gehört, so zeige einen Pfeil
     // als Indikator über dem Panzer an.
     if (self->owner == inputEvents->currentPlayer) {
-        if (4 == tankData->tank.parts->elementCount
-         && PLAYER_STEP_MOVE == inputEvents->currentPlayer->step) {
-            // Wenn der Panzer nur aus vier Teilen besteht so wurde der Pfeil
-            // noch nicht hinzugefügt. Füge den Pfeil hinzu.
-            EntityHandler_AddEntityPart(self, &tankData->arrow);
-        } else if (PLAYER_STEP_FIRE == inputEvents->currentPlayer->step) {
-            // Schuss wurde abgefeuert -> entferne den Pfeil
-            EntityHandler_RemoveEntityPart(self, &tankData->arrow);
-        } else {
-            // Pfeil ist sichtbar -> Animation weiterschalten
-            Sprite_NextFrame(&tankData->arrow.sprite);
-            // Entferne die relative Rotation des Panzers auf dem Pfeil
-            tankData->arrow.sprite.rotation = -self->physics.rotation;
-        }
+        updateArrowIndicator(self, inputEvents->currentPlayer->step);
     }
     return ERR_OK;
 }
@@ -326,7 +325,7 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
 static int collisionCallback(entity_t *self, entityCollision_t *collision) {
     // Reagiere Auf Kollisionen mit Entitäten
     if (collision->flags & ENTITY_COLLISION_ENTITY) {
-        if (!strcmp(self->owner->name, collision->partner->owner->name)) {
+        if (self->owner == collision->partner->owner) {
             // gehört dem eigenen Spieler, ignorieren
             collision->flags &= ~ENTITY_COLLISION_ENTITY;
         } else if (!strcmp(collision->partner->name, "Panzerschuss")) {
@@ -401,8 +400,25 @@ static void rotateTube(tankData_t *tankData, SDL_Point axisWASD) {
     if (axisWASD.y == -1 &&
         tube->sprite.rotation > TANK_TUBE_MAX_ROTATION_NEGATIVE) {
         tube->sprite.rotation -= 0.5;
-    } else if (axisWASD.y == 2 &&
+    } else if (axisWASD.y == 1 &&
                tube->sprite.rotation < TANK_TUBE_MAX_ROTATION_POSITIVE) {
         tube->sprite.rotation += 0.5;
+    }
+}
+
+static void updateArrowIndicator(entity_t *tank, playerStep_t step) {
+    tankData_t *tankData = (tankData_t *)tank->data;
+    if (4 == tankData->tank.parts->elementCount && PLAYER_STEP_MOVE == step) {
+        // Wenn der Panzer nur aus vier Teilen besteht so wurde der Pfeil
+        // noch nicht hinzugefügt. Füge den Pfeil hinzu.
+        EntityHandler_AddEntityPart(tank, &tankData->arrow);
+    } else if (PLAYER_STEP_FIRE == step) {
+        // Schuss wurde abgefeuert -> entferne den Pfeil
+        EntityHandler_RemoveEntityPart(tank, &tankData->arrow);
+    } else {
+        // Pfeil ist sichtbar -> Animation weiterschalten
+        Sprite_NextFrame(&tankData->arrow.sprite);
+        // Entferne die relative Rotation des Panzers auf dem Pfeil
+        tankData->arrow.sprite.rotation = -tank->physics.rotation;
     }
 }

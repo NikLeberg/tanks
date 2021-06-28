@@ -165,14 +165,14 @@ static int defaultDrawEntityPart(void *data, void *userData);
 
 int EntityHandler_Update(inputEvent_t *inputEvents) {
     int ret = ERR_OK;
-    // Alle Entitäten aktualisieren
-    ret = List_ForeachArg(entityHandler.entityList, callOnUpdate, inputEvents);
-    if (ret == ERR_NULLPARAMETER) {
-        // Noch keine Entitäten in der Liste. Es gibt nichts zu tun.
-        return ERR_OK;
-    } else if (ret) {
+    // Falls liste noch nicht initialissiert ist, gibts auch keine Entitäten zu
+    // behandenln.
+    if (!entityHandler.entityList) {
         return ret;
     }
+    // Alle Entitäten aktualisieren
+    ret = List_ForeachArg(entityHandler.entityList, callOnUpdate, inputEvents);
+    if (ret) return ret;
     // Physik aktualisieren
     ret = Physics_Update(entityHandler.entityList);
     if (ret) return ret;
