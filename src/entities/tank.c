@@ -216,6 +216,10 @@ int Tank_Create(entity_t **tank, player_t *player, float x, float y) {
     }
     tankData->tube.name = "Rohr";
     tankData->tube.sprite = *rawSprite;
+    // Wenn der Panzer auf der rechten Spielseite spawnt, so rotiere das Rohr.
+    if (x > (1024 / 2)) {
+        tankData->tube.sprite.rotation = -180.0;
+    }
     if (EntityHandler_AddEntityPart(&tankData->tank, &tankData->tube)) {
         goto errorLoadTube;
     }
