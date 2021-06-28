@@ -114,7 +114,7 @@ int GUI_AddElement(guiElement_t *element, gui_t *gui) {
         return ERR_NULLPARAMETER;
     }
     if (List_Add(&gui->element, element) != ERR_OK) { // Ist das Hinzufügen von gui Elemente fehlgeschlagen wird eine Fehlermeldung ausgegeben.
-        printf("Hinzufügen des Elements fehlgeschlagen");
+        SDL_Log("Hinzufügen des Elements fehlgeschlagen");
     }
     return ERR_OK;
 }

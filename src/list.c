@@ -13,6 +13,7 @@
  * Includes
  *
  */
+#include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,13 +27,13 @@
 
 int List_Create(list_t **list) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungueltig! List_Create()\n");
+        SDL_Log("Liste ungueltig! List_Create()\n");
         return ERR_NULLPARAMETER;
     }
 
     (*list) = malloc(sizeof(list_t)); // Erstellen einer neuen Liste
     if (!*list) {                     // Fehlerüberprüfung
-        printf("Liste konnte nicht alloziert werden! List_Create()\n");
+        SDL_Log("Liste konnte nicht alloziert werden! List_Create()\n");
         return ERR_MEMORY;
     }
 
@@ -42,7 +43,7 @@ int List_Create(list_t **list) {
 
 int List_Init(list_t *list) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungueltig! List_Init()\n");
+        SDL_Log("Liste ungueltig! List_Init()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -55,7 +56,7 @@ int List_Init(list_t *list) {
 
 int List_Destroy(list_t **list) {
     if (!list || !(*list)) { // Fehlerüberprüfung
-        printf("Liste ungueltig! List_Destroy()\n");
+        SDL_Log("Liste ungueltig! List_Destroy()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -67,13 +68,13 @@ int List_Destroy(list_t **list) {
 
 int List_Add(list_t *list, void *data) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungueltig! List_Add()\n");
+        SDL_Log("Liste ungueltig! List_Add()\n");
         return ERR_NULLPARAMETER;
     }
 
     listElement_t *element = malloc(sizeof(listElement_t)); // Erstellen eines neuen Elementes
     if (!element) {                                         // Fehlerüberprüfung
-        printf("Element konnte nicht alloziert werden! List_Add()\n");
+        SDL_Log("Element konnte nicht alloziert werden! List_Add()\n");
         return ERR_MEMORY;
     }
 
@@ -87,7 +88,7 @@ int List_Add(list_t *list, void *data) {
 
 int List_Remove(list_t *list, void *data) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungültig! List_Remove()\n");
+        SDL_Log("Liste ungültig! List_Remove()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -123,7 +124,7 @@ int List_Remove(list_t *list, void *data) {
 
 int List_Clear(list_t *list) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungültig! List_Clear()\n");
+        SDL_Log("Liste ungültig! List_Clear()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -142,12 +143,12 @@ int List_Clear(list_t *list) {
 
 int List_Foreach(list_t *list, fnPntrDataCallback callback) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungültig! List_Foreach()\n");
+        SDL_Log("Liste ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
     if (!callback) { // Fehlerüberprüfung
-        printf("Callback ungültig! List_Foreach()\n");
+        SDL_Log("Callback ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -167,12 +168,12 @@ int List_Foreach(list_t *list, fnPntrDataCallback callback) {
 
 int List_ForeachArg(list_t *list, fnPntrDataCallbackArg callback, void *userData) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungültig! List_Foreach()\n");
+        SDL_Log("Liste ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
     if (!callback) { // Fehlerüberprüfung
-        printf("Callback ungültig! List_Foreach()\n");
+        SDL_Log("Callback ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -192,17 +193,17 @@ int List_ForeachArg(list_t *list, fnPntrDataCallbackArg callback, void *userData
 
 int List_Search(list_t *list, fnPntrDataCallback searchCmpFn, void **data) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungültig! List_Search()\n");
+        SDL_Log("Liste ungültig! List_Search()\n");
         return ERR_NULLPARAMETER;
     }
 
     if (!searchCmpFn) { // Fehlerüberprüfung
-        printf("Searchfunktion ungültig! List_Foreach()\n");
+        SDL_Log("Searchfunktion ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
     if (!data) { // Fehlerüberprüfung
-        printf("Datenziel ungültig! List_Foreach()\n");
+        SDL_Log("Datenziel ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -220,17 +221,17 @@ int List_Search(list_t *list, fnPntrDataCallback searchCmpFn, void **data) {
 
 int List_SearchArg(list_t *list, fnPntrDataCallbackArg searchCmpFn, void *userData, void **data) {
     if (!list) { // Fehlerüberprüfung
-        printf("Liste ungültig! List_Search()\n");
+        SDL_Log("Liste ungültig! List_Search()\n");
         return ERR_NULLPARAMETER;
     }
 
     if (!searchCmpFn) { // Fehlerüberprüfung
-        printf("Searchfunktion ungültig! List_Foreach()\n");
+        SDL_Log("Searchfunktion ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
     if (!data) { // Fehlerüberprüfung
-        printf("Datenziel ungültig! List_Foreach()\n");
+        SDL_Log("Datenziel ungültig! List_Foreach()\n");
         return ERR_NULLPARAMETER;
     }
 
