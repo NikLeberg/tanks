@@ -9,9 +9,13 @@ Infos über das `Was?` finden sich im [Pflichtenheft](doc/Pflichtenheft.md).
 Ausführliche Dokumentation zu vereinzelten Modulen findet sich unter:
 - [Sprite](doc/SDLW/SpriteDoku.md)
 - [Config](doc/SDLW/ConfigDoku.md)
+- [Entity](doc/Entitaet.md)
 
 Die komplette Dokumentation des Quellcodes lässt sich per Doxygen generieren: `doxygen doc/doxygen/Doxyfile`. Dies generiert die Dokumentation in den Ordner `doc/doxygen/html` hinein.
 Alternativ findet sich das aktuellste Exemplar auf [GitLab-Pages](http://leuen4.pages.ti.bfh.ch/tanks).
+
+## Spiel
+Viele Module sind sehr generell gehalten und mit ihnen wäre nahezu jedes erdenkliche 2D-Game implementierbar. Es wurde auf Basis von ihnen das Tanks-Spiel gemäss Pflichtenheft umgesetzt. Näheres dazu ist hier: [Spielaufbau](doc/Spielaufbau.md).
 
 ## Installation und Nutzung
 - `cmake -S . -B ./build` - Buildsystem erzeugen, für MinGW unter Windows: `-G "MinGW Makefiles"` anfügen.

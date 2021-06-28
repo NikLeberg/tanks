@@ -16,8 +16,6 @@
  */
 
 #include "guiElements/button.h"
-#include "sdlWrapper.h"
-#include "scene.h"
 #include "error.h"
 
 #include <stdio.h>
@@ -105,7 +103,8 @@ int Button_Draw(button_t *button) {
 
     case 0:
         SDLW_DrawFilledRect(button->buttonSize, button->buttonColor); // ist die Taste nicht gedrueckt wird die Taste mit der vorgegebenen groesse und Farbe gezeichnet.
-        SDLW_DrawTexture(button->textTextur);
+        if (button->textTextur.texture)
+            SDLW_DrawTexture(button->textTextur);
         break;
     case 1:
 
@@ -118,7 +117,8 @@ int Button_Draw(button_t *button) {
                                 button->buttonSize.w - 2 * button->borderWidth,
                                 button->buttonSize.h - 2 * button->borderWidth},
                             button->buttonColor);
-        SDLW_DrawTexture(button->textTextur);
+        if (button->textTextur.texture)
+            SDLW_DrawTexture(button->textTextur);
         break;
     }
 

@@ -181,11 +181,10 @@ static void gui_button_draw_calls_sdlw(void **state) {
         .buttonSize = {.w = 1, .h = 1} // An Position 0,0 mit 1 Pixel an Fläche
     };
     assert_int_equal(Button_Init(&button, "fontXYZ", "Pomelo-Banane"), ERR_OK);
-    // Erwarte das Zeichnen von Rahmen und Text-Textur
+    // Erwarte das Zeichnen vom Rahmen
+    // Die Text-Textur wird nicht gezeichnet, da dieser aufrug gemockt wurde.
     expect_function_call(SDLW_DrawFilledRect);
     will_return(SDLW_DrawFilledRect, ERR_OK);
-    expect_function_call(SDLW_DrawTexture);
-    will_return(SDLW_DrawTexture, ERR_OK);
     assert_int_equal(Button_Draw(&button), ERR_OK);
 }
 
@@ -228,7 +227,7 @@ static void gui_text_update_changes_text(void **state) {
     };
     inputEvent_t input = {0}; // Maus ist an Position 0,0
     // Ohne Klick ins Textfeld kann noch kein Text verändert werden
-    input.lastChar = 'H';
+    input.currentChar = 'H';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Pomelo-Banane");
     // Nach einem Klick lässt sich das Feld aber verändern
@@ -238,26 +237,26 @@ static void gui_text_update_changes_text(void **state) {
     assert_string_equal(text.text, "H");
     // Weitere Änderungen sich möglich auch ohne Mausklick
     input.mouseButtons = 0;
-    input.lastChar = 'a';
+    input.currentChar = 'a';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Ha");
-    input.lastChar = 'l';
+    input.currentChar = 'l';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hall");
-    input.lastChar = 'o';
+    input.currentChar = 'o';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hallo");
     // Text lässt sich auch wieder löschen
-    input.lastChar = '\b';
+    input.currentChar = '\b';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hall");
     // Klick ausserhalb des Textfeldes deaktiviert den Editier-Modus
     input.mouseButtons = SDL_BUTTON_LEFT;
     input.mousePosition = (SDL_Point){.x = 10, .y = 10};
-    input.lastChar = '\0';
+    input.currentChar = '\0';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
-    input.lastChar = 'o';
+    input.currentChar = 'o';
     assert_int_equal(Text_Update(&input, &text), ERR_OK);
     assert_string_equal(text.text, "Hall"); // 'o' wurde nicht hinzugefügt
 }
@@ -276,11 +275,10 @@ static void gui_text_draw_calls_sdlw(void **state) {
         .textRectSize = {.w = 1, .h = 1} // An Position 0,0 mit 1 Pixel an Fläche
     };
     assert_int_equal(Text_Init(&text), ERR_OK);
-    // Erwarte das Zeichnen von Rahmen und Text-Textur
+    // Erwarte das Zeichnen vom Rahmen
+    // Die Text-Textur wird nicht gezeichnet, da dieser aufrug gemockt wurde.
     expect_function_call(SDLW_DrawFilledRect);
     will_return(SDLW_DrawFilledRect, ERR_OK);
-    expect_function_call(SDLW_DrawTexture);
-    will_return(SDLW_DrawTexture, ERR_OK);
     assert_int_equal(Text_Draw(&text), ERR_OK);
 }
 

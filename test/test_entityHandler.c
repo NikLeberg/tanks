@@ -37,7 +37,10 @@
  */
 static void an_entity_can_be_added_and_removed(void **state) {
     (void)state;
-    entity_t entity = {.owner = "Testuser", .name = "Test"};
+    entity_t entity = {
+        .owner = (player_t *)1, // müsste eigentlich Pointer auf player_t sein
+        .name = "Test"
+    };
     assert_int_equal(EntityHandler_AddEntity(&entity), ERR_OK);
     assert_int_equal(EntityHandler_RemoveEntity(&entity), ERR_OK);
 }
@@ -49,7 +52,11 @@ static void an_entity_can_be_added_and_removed(void **state) {
  */
 static void invalid_entities_cant_be_added(void **state) {
     (void)state;
-    entity_t entityOk = {.state = ENTITY_STATE_CREATED, .owner = "Testuser", .name = "Test"};
+    entity_t entityOk = {
+        .state = ENTITY_STATE_CREATED,
+        .owner = (player_t *)1, // müsste eigentlich Pointer auf player_t sein
+        .name = "Test"
+    };
     // NULL als Entität
     assert_int_not_equal(EntityHandler_AddEntity(NULL), ERR_OK);
     // Entität mit falschem Zustand
@@ -73,7 +80,10 @@ static void invalid_entities_cant_be_added(void **state) {
  */
 static void one_hundred_entities_can_be_added_and_removed(void **state) {
     (void)state;
-    entity_t entityOk = {.owner = "Testuser", .name = "Test"};
+    entity_t entityOk = {
+        .owner = (player_t *)1, // müsste eigentlich Pointer auf player_t sein
+        .name = "Test"
+    };
     entity_t entityArray[100];
     for (int i = 0; i < 100; ++i) {
         entityArray[i] = entityOk;
@@ -105,7 +115,11 @@ static void one_hundred_entities_can_be_added_and_removed(void **state) {
  * @return 0 Setup erfolgreich, -1 Setup fehlgeschlagen
  */
 static int setupOneEntity(void **state) {
-    static entity_t entity = {.owner = "Testuser", .name = "Test", .parts = NULL};
+    static entity_t entity = {
+        .owner = (player_t *)1, // müsste eigentlich Pointer auf player_t sein
+        .name = "Test",
+        .parts = NULL
+    };
     *state = (void *)&entity;
     return (EntityHandler_AddEntity(&entity) != ERR_OK);
 }
@@ -136,9 +150,7 @@ static void an_entitypart_can_be_added_and_removed(void **state) {
         .name = "Test",
         .sprite = {
             .texture = (SDL_Texture *)0xDEADBEEF,
-            .destination = {.h = 10, .w = 10}
-        }
-    };
+            .destination = {.h = 10, .w = 10}}};
     assert_int_equal(EntityHandler_AddEntityPart(entity, &part), ERR_OK);
     assert_int_equal(EntityHandler_RemoveEntityPart(entity, &part), ERR_OK);
 }
@@ -155,9 +167,7 @@ static void invalid_entityparts_cant_be_added(void **state) {
         .name = "Test",
         .sprite = {
             .texture = (SDL_Texture *)0xDEADBEEF,
-            .destination = {.h = 10, .w = 10}
-        }
-    };
+            .destination = {.h = 10, .w = 10}}};
     // NULL
     assert_int_not_equal(EntityHandler_AddEntityPart(entity, NULL), ERR_OK);
     // Entitätsteil ohne Namen
@@ -190,9 +200,7 @@ static void one_hundred_entityparts_can_be_added_and_removed(void **state) {
         .name = "Test",
         .sprite = {
             .texture = (SDL_Texture *)0xDEADBEEF,
-            .destination = {.h = 10, .w = 10}
-        }
-    };
+            .destination = {.h = 10, .w = 10}}};
     // Erstelle 100 gültige Entitäten
     entityPart_t partArray[100];
     for (int i = 0; i < 100; ++i) {
@@ -256,15 +264,13 @@ static int setupOneEntityAndOnePart(void **state) {
     // Erstelle eine gültige Entität
     static entity_t entity;
     entity_t entityOk = {
-        .owner = "Testuser",
+        .owner = (player_t *)1, // müsste eigentlich Pointer auf player_t sein
         .name = "Test",
         .state = ENTITY_STATE_CREATED,
         .parts = NULL,
         .callbacks = {
             .onUpdate = onUpdate,
-            .onDraw = onDraw
-        }
-    };
+            .onDraw = onDraw}};
     entity = entityOk;
     *state = (void *)&entity;
     // Erstelle ein gültiges Entitätsteil
@@ -273,9 +279,7 @@ static int setupOneEntityAndOnePart(void **state) {
         .name = "Test",
         .sprite = {
             .texture = (SDL_Texture *)0xDEADBEEF,
-            .destination = {.h = 10, .w = 10}
-        }
-    };
+            .destination = {.h = 10, .w = 10}}};
     part = partOk;
     return (EntityHandler_AddEntity(&entity) != ERR_OK) || (EntityHandler_AddEntityPart(&entity, &part) != ERR_OK);
 }

@@ -7,6 +7,8 @@
  * 
  * @copyright Copyright (c) 2021 Leuenberger Niklaus
  * 
+ * Dieses Modul dient lediglich als Vorlage für andere Module.
+ * 
  */
 
 /*

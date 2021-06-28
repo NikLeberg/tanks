@@ -23,7 +23,7 @@ target_include_directories(main PUBLIC include)
 
 # Compiler Warnungen aktivieren
 if(MSVC)
-    target_compile_options(main PUBLIC /W4 /WX)
+    target_compile_options(main PUBLIC /W4)
     target_compile_definitions(main PUBLIC -D_CRT_SECURE_NO_WARNINGS)
 else()
     target_compile_options(main PUBLIC -Wall -Wextra -pedantic -Werror)

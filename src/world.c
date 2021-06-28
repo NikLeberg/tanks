@@ -126,12 +126,14 @@ int World_Init() {
     SDL_Renderer *renderer = SDLW_GetRenderer(); // Renderer hohlen
     if (!renderer) {
         free(worldCollision);
+        worldCollision = 0;
         SDL_Log("SDLW nicht richtig initialisiert! World_Init()\n");
         return ERR_FAIL;
     }
     foreground.texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height); // Textur erstellen
     if (!foreground.texture) {
         free(worldCollision);
+        worldCollision = 0;
         SDL_Log("SDL CreateTexture fehler! [%s]\n", SDL_GetError());
         return ERR_FAIL;
     }
@@ -158,7 +160,9 @@ int World_Init() {
 void World_Quit() {
     if (init) {
         free(worldCollision);
+        worldCollision = 0;
         SDL_DestroyTexture(foreground.texture);
+        Mix_HaltMusic();
         init = 0;
     }
 }
@@ -240,6 +244,11 @@ int World_CheckCollision(SDL_Rect aabb, struct entityCollision_s *collision) {
     if (!collision) {
         SDL_Log("Kollisionsbuffer ungueltig! World_CheckCollision()\n");
         return ERR_NULLPARAMETER;
+    }
+
+    if (!worldCollision) {
+        printf("Weltbuffer ungueltig! World_CheckCollision()\n");
+        return ERR_FAIL;
     }
 
     // Initialisierung der Rückgabe
@@ -332,6 +341,11 @@ int World_VerticalLineIntersection(SDL_Point searchStart, SDL_Point *hitPoint) {
     if (!hitPoint) {
         SDL_Log("Rueckgabespeicher hitPoint ungueltig! World_VerticalLineIntersection()\n");
         return ERR_NULLPARAMETER;
+    }
+
+    if (!worldCollision) {
+        printf("Weltbuffer ungueltig! World_CheckCollision()\n");
+        return ERR_FAIL;
     }
 
     // Out of bounds check
