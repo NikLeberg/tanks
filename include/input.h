@@ -34,9 +34,11 @@
  * Spielzugug beendet.
  */
 typedef enum {
-    PLAYER_STEP_MOVE = 0, //!< Spieler kann sich bewegen
-    PLAYER_STEP_FIRE,     //!< Spieler hat abgefeuert, warte auf Explosion
-    PLAYER_STEP_DONE      //!< Spielerzug ist beendet
+    PLAYER_STEP_START = 0, //!< Start des Spielzugs
+    PLAYER_STEP_MOVE,      //!< Spieler kann sich bewegen
+	PLAYER_STEP_VELOCITY,  //!< Spieler wählt Schussgeschwindigkeit aus
+    PLAYER_STEP_FIRE,      //!< Spieler hat abgefeuert, warte auf Explosion
+    PLAYER_STEP_DONE       //!< Spielerzug ist beendet
 } playerStep_t;
 
 /**
@@ -46,8 +48,7 @@ typedef enum {
 typedef struct {
     char *name; 		//!< Spielernamen
 	int healthpoints;	//!< Lebenspunkte des Spielers
-	playerStep_t step;	//!< Aktueller Spielzug
-                      	// ...
+	playerStep_t step;	//!< Aktueller Spielzug//!<
 } player_t;
 
 /**

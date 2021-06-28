@@ -35,12 +35,13 @@
  * 
  */
 typedef struct {
-    entity_t tank;        //!< Der Panzer als Entität
-    entityPart_t tracks;  //!< Raupen
-    entityPart_t chassis; //!< Fahrgestell
-    entityPart_t tube;    //!< Schussrohr
-    entityPart_t fire;    //!< Schussanimation
-    entityPart_t arrow;   //!< Pfeil der den aktiven Spieler signalisiert
+    entity_t tank;         //!< Der Panzer als Entität
+    entityPart_t tracks;   //!< Raupen
+    entityPart_t chassis;  //!< Fahrgestell
+    entityPart_t tube;     //!< Schussrohr
+    entityPart_t fire;     //!< Schussanimation
+    entityPart_t arrow;    //!< Pfeil der den aktiven Spieler signalisiert
+    entityPart_t velocity; //!< Indikater der aktuellen Schussgeschwindigkeit
 } tankData_t;
 
 
@@ -66,6 +67,15 @@ typedef struct {
  * per Treffer eines Geschosses.
  */
 #define TANK_NEG_HEALTH_PER_HIT 30
+
+/**
+ * @brief Multiplikator der Schussgeschwindigkeit
+ * 
+ * Nach der Auswahl der Schussgeschwindigkeit mit dem Schuss-Indikator wird die
+ * aktuelle Indexzahl der Animation mit diesem Multiplikator zur Schussgeschw.
+ * zusammenmultimpliziert. Die Animation hat 62 Bilder.
+ */
+#define TANK_FIRE_MULTIPLICATOR 5.0f
 
 
 /*
@@ -146,18 +156,6 @@ static void moveHorizontal(entity_t *self, SDL_Point axisWASD);
  * 
  */
 static void rotateTube(tankData_t *tankData, SDL_Point axisWASD);
-
-/**
- * @brief Aktualisierie die Sichtbarkeit des Pfeil Indikators
- * 
- * Wenn der Panzer dem aktuellen Psieler gehört so aktualisiert diese Funktion
- * die Sichtbarkeit des Pfeils und schaltet dessen Animation weiter.
- * 
- * @param tank Panzer dessen Pfeil aktualisiert werden soll
- * @param step Aktueller Spielschritt aus \ref inputEvent_t
- * 
- */
-static void updateArrowIndicator(entity_t *tank, playerStep_t step);
 
 
 /*
@@ -248,6 +246,17 @@ int Tank_Create(entity_t **tank, player_t *player, float x, float y) {
     tankData->arrow.sprite.destination.y = -50;
     // Pfeil noch nicht der Entität hinzufügen, wird im UpdateCallback gemacht.
     // So kann die Sichtbarkeit gemäss aktivem Spieler umgeschaltet werden.
+    // Geschwindigkeit Animation laden
+    SDLW_GetResource("velocity", RESOURCETYPE_SPRITE, (void **)&rawSprite);
+    if (!rawSprite) {
+        goto errorLoadArrow;
+    }
+    tankData->velocity.name = "Geschwindigkeit";
+    tankData->velocity.sprite = *rawSprite;
+    tankData->velocity.sprite.destination.y = -50;
+    // Indikator noch nicht hinzufügen, wird im UpdateCallback gemacht.
+    // So kann die Sichtbarkeit gemäss aktivem Spieler umgeschaltet werden.
+    // Pointer auf gesamte Panzer-Daten in der Entität speichern.
     if (tank) {
         *tank = &tankData->tank;
     }
@@ -289,20 +298,58 @@ int Tank_Destroy(entity_t *tank) {
 
 static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     tankData_t *tankData = (tankData_t *)self->data;
-    // Wenn der Panzer dem aktuellen Spieler gehört und im momentanen Spielzug
-    // "Move" ist, so reagiere auf Bewegungs-Events.
-    if (self->owner == inputEvents->currentPlayer
-     && inputEvents->currentPlayer->step == PLAYER_STEP_MOVE) {
-        // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
-        moveHorizontal(self, inputEvents->axisWASD);
-        // Rohrstellung gemäss WASD-Tasten rotieren
-        rotateTube(tankData, inputEvents->axisWASD);
-        // Falls Leertaste -> Schuss feuern
-        if (inputEvents->lastKey == ' ') {
-            // übergang in den nächsten Spielzug
-            inputEvents->currentPlayer->step = PLAYER_STEP_FIRE;
-            // erstelle Schussentität und spiele Animation ab
-            fire(self);
+    // Wenn der Panzer dem aktuellen Spieler gehört so reagiere auf Events.
+    if (self->owner == inputEvents->currentPlayer) {
+        switch (inputEvents->currentPlayer->step) {
+        case (PLAYER_STEP_START): // Start des Zugs
+            // Pfeil-Indikator sichtbar schalten
+            EntityHandler_AddEntityPart(self, &tankData->arrow);
+            // Auf nächsten Schritt weiterschalten
+            inputEvents->currentPlayer->step = PLAYER_STEP_MOVE;
+            break;
+        case (PLAYER_STEP_MOVE): // Kann sich bewegen
+            // horizontale Geschwindigkeit gemäss WASD-Tasten verändern
+            moveHorizontal(self, inputEvents->axisWASD);
+            // Rohrstellung gemäss WASD-Tasten rotieren
+            rotateTube(tankData, inputEvents->axisWASD);
+            // Animation des Pfeils weiterschalten & Winkellage korrigieren
+            Sprite_NextFrame(&tankData->arrow.sprite);
+            tankData->arrow.sprite.rotation = -self->physics.rotation;
+            // Falls Leertaste gedrückt
+            if (inputEvents->currentChar == ' ') {
+                // Pfeil-Indikator entfernen
+                EntityHandler_RemoveEntityPart(self, &tankData->arrow);
+                // Geschwindikeits-Indikator sichtbar schalten
+                Sprite_SetFrame(&tankData->velocity.sprite, 1);
+                EntityHandler_AddEntityPart(self, &tankData->velocity);
+                // Übergang in nächsten Spielzug "Velocity"
+                inputEvents->currentPlayer->step = PLAYER_STEP_VELOCITY;
+            }
+            break;
+        case (PLAYER_STEP_VELOCITY): // Kann die Schussgeschw. auswählen
+            // Animation des Indikators weiterschalten & Winkellage korrigieren
+            Sprite_NextFrame(&tankData->velocity.sprite);
+            tankData->velocity.sprite.rotation = -self->physics.rotation;
+            // Wenn Leertaste erneut gedrückt wurde
+            if (inputEvents->currentChar == ' ') {
+                // Indikator entfernen
+                EntityHandler_RemoveEntityPart(self, &tankData->velocity);
+                // Erstelle Schussentität spiele Feuer-Animation ab.
+                fire(self);
+                // Übergang in nächsten Spielzug "Fire"
+                inputEvents->currentPlayer->step = PLAYER_STEP_FIRE;
+            }
+            break;
+        case (PLAYER_STEP_FIRE): // Schuss ist am fliegen
+            // Animation des Schusses 1x laufen lassen
+            if (tankData->fire.sprite.multiSpriteIndex != 0) {
+                Sprite_NextFrame(&tankData->fire.sprite);
+            }
+            // Der Übergang in den "Done" Spielzug wird im collision-Callback
+            // des Schusses getätigt.
+            break;
+        default:
+            break;
         }
     }
     // Horizontale Bewegung in jedem Zyklus um 5% dämpfen damit der Panzer nicht
@@ -310,15 +357,6 @@ static int updateCallback(entity_t *self, inputEvent_t *inputEvents) {
     Physics_SetVelocity(self, self->physics.velocity.x * 0.95f, NAN);
     // rotiere den gesamten Panzer basierend auf der Position auf der Welt
     rotateToWorld(self);
-    // Falls Schussanimation am laufen -> weiterschalten
-    if (tankData->fire.sprite.multiSpriteIndex != 0) {
-        Sprite_NextFrame(&tankData->fire.sprite);
-    }
-    // Wenn dieser Panzer dem aktuellen Spieler gehört, so zeige einen Pfeil
-    // als Indikator über dem Panzer an.
-    if (self->owner == inputEvents->currentPlayer) {
-        updateArrowIndicator(self, inputEvents->currentPlayer->step);
-    }
     return ERR_OK;
 }
 
@@ -376,7 +414,9 @@ static void fire(entity_t *tank) {
     y += -(tube->sprite.destination.w * sin(-angleRad));
     // Schuss erstellen
     double angle = tank->physics.rotation + tube->sprite.rotation;
-    Shell_Create(NULL, tank->owner, x, y, 100.0f, angle);
+    // Anhand Animationsindex die Geschwindigkeit ermitteln
+    float velocity = tankData->velocity.sprite.multiSpriteIndex * TANK_FIRE_MULTIPLICATOR;
+    Shell_Create(NULL, tank->owner, x, y, velocity, angle);
     // Feuer Animation aktivieren im aktuellen Winkel des Rohrs
     tankData->fire.sprite.rotation = tankData->tube.sprite.rotation;
     Sprite_SetFrame(&tankData->fire.sprite, 1);
@@ -403,22 +443,5 @@ static void rotateTube(tankData_t *tankData, SDL_Point axisWASD) {
     } else if (axisWASD.y == 1 &&
                tube->sprite.rotation < TANK_TUBE_MAX_ROTATION_POSITIVE) {
         tube->sprite.rotation += 0.5;
-    }
-}
-
-static void updateArrowIndicator(entity_t *tank, playerStep_t step) {
-    tankData_t *tankData = (tankData_t *)tank->data;
-    if (4 == tankData->tank.parts->elementCount && PLAYER_STEP_MOVE == step) {
-        // Wenn der Panzer nur aus vier Teilen besteht so wurde der Pfeil
-        // noch nicht hinzugefügt. Füge den Pfeil hinzu.
-        EntityHandler_AddEntityPart(tank, &tankData->arrow);
-    } else if (PLAYER_STEP_FIRE == step) {
-        // Schuss wurde abgefeuert -> entferne den Pfeil
-        EntityHandler_RemoveEntityPart(tank, &tankData->arrow);
-    } else {
-        // Pfeil ist sichtbar -> Animation weiterschalten
-        Sprite_NextFrame(&tankData->arrow.sprite);
-        // Entferne die relative Rotation des Panzers auf dem Pfeil
-        tankData->arrow.sprite.rotation = -tank->physics.rotation;
     }
 }
