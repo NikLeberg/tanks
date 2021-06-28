@@ -45,7 +45,6 @@ typedef struct {
     int multiSpriteIndex;      //!< Jetziges angezeigter Subsprite
 } sprite_t;
 
-
 /*
  * Öffentliche Funktionen
  *

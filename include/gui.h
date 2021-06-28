@@ -19,20 +19,20 @@
 
 #include "SDL_ttf.h"
 #include "sdlWrapper.h"
+#include "input.h"
 #include "list.h"
 #include "guiElements/button.h"
 #include "guiElements/text.h"
 
 
 /**
- * @brief Enum von möglichen GUI Elementen Bausteine
+ * @brief Union von möglichen GUI Elementen Bausteine
  *
  */
-
 typedef enum {
-    TYPE_BUTTON, //!< enum für Taste
-    TYPE_TEXT    //!< enum für Text
-} guiElemntType_t;
+    TYPE_BUTTON,        //!< enum für Taste
+    TYPE_TEXT           //!< enum für Text
+}guiElemntType_t;
 
 /**
  * @brief Union von möglichen GUI Elementen Bausteine

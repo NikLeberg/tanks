@@ -32,8 +32,8 @@
 
 #include <SDL.h>
 
+#include "input.h"
 #include "sprite.h"
-#include "scene.h"
 #include "list.h"
 
 
@@ -42,8 +42,7 @@
  * 
  */
 
-struct entity_s;     // Vorwärtsdeklaration einer Entitätsstruktur
-struct inputEvent_s; // Vorwärtsdeklaration eines Input-Events
+struct entity_s; // Vorwärtsdeklaration einer Entitätsstruktur
 
 /**
  * @brief Status der Entität
@@ -192,7 +191,7 @@ typedef struct {
      * 
      * @return Fehlercode gemäss \ref error.h
      */
-    int (*onUpdate)(struct entity_s *self, struct inputEvent_s *inputEvents);
+    int (*onUpdate)(struct entity_s *self, inputEvent_t *inputEvents);
 
     /**
      * @brief Kollision mit der Welt oder anderen Entitäten
@@ -206,7 +205,8 @@ typedef struct {
      * informiert, denn die Physik kann nicht ermitteln wer der Auslöser der
      * Kollision war. Der \p onCollision Callback wird für A mit \p self = A und
      * \ref entityCollision_t.partner = B aufgerufen und für B wird
-     * \p onCollision mit \p self = B und \ref entityCollision_t.partner = A.
+     * \p onCollision mit \p self = B und \ref entityCollision_t.partner = A
+     * aufgerufen.
      * @note Ist dieser Callback NULL, so wird die Kollision gänzlich ignoriert.
      * Dies bedeutet aber, dass das physik-Modul auch nicht reagiert und die
      * Entität wird durch die Welt fallen.
@@ -267,9 +267,9 @@ typedef struct entity_s {
      */
     entityCallbacks_t callbacks;
 
-    const char *owner; //!< Eigentümer der Entität, Spielername
-    const char *name;  //!< Name der Entität
-    void *data;        //!< Optionale Daten der Entität, zur freien Benutzung.
+    player_t *owner;  //!< Eigentümer der Entität, Spielername
+    const char *name; //!< Name der Entität
+    void *data;       //!< Optionale Daten der Entität, zur freien Benutzung.
 } entity_t;
 
 

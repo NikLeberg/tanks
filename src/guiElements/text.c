@@ -16,9 +16,6 @@
  */
 
 #include "guiElements/text.h"
-#include "sdlWrapper.h"
-#include "scene.h"
-#include "SDL_rect.h"
 #include "error.h"
 
 #include <stdio.h>
@@ -105,15 +102,15 @@ int Text_Update(inputEvent_t *inputEvents, text_t *textInput) {
     }
     if (textInput->state > 0) { // ist das Textfeld aktiv, wird auf die zuletzt registrierte Tastatureingabe überprüft.
 
-        if (inputEvents->lastChar == 8) { // Ist die Letzte Eingabe ein Backspace, (Wert 8 in ASCII)
+        if (inputEvents->currentChar == 8) { // Ist die Letzte Eingabe ein Backspace, (Wert 8 in ASCII)
             if (textInput->index > 0) {   // wird der zuletzt erhaltene Eintrag gelöscht bzw. auf NULL gesetzt.
                 textInput->text[textInput->index - 1] = '\0';
                 textInput->index--;
             }
             UpdateText(textInput);                                         // Aktualisiert die Textausgabe.
-        } else if (inputEvents->lastChar != '\0') {                        // Wen eine Tastatureingabe registriert wird,
+        } else if (inputEvents->currentChar != '\0') {                        // Wen eine Tastatureingabe registriert wird,
             if (textInput->index < 31) {                                   // und die maximale Texteingabe noch nicht erreicht wurde,
-                textInput->text[textInput->index] = inputEvents->lastChar; // wird die Eingabe dem entsprechenden Text Array hinzugefügt.
+                textInput->text[textInput->index] = inputEvents->currentChar; // wird die Eingabe dem entsprechenden Text Array hinzugefügt.
                 textInput->index++;
                 textInput->text[textInput->index] = '\0'; // Der darauf folgende Eintrag, im Text Array, wird auf NULL gesetzt.
             }
@@ -132,7 +129,9 @@ int Text_Draw(text_t *textInput) {
 
     case 0:                                                               // Ist das Textfeld deaktiviert,
         SDLW_DrawFilledRect(textInput->textRectSize, textInput->textBgc); // wird die Eingabefläche und
-        SDLW_DrawTexture(textInput->textTextur);                          // den darin enthaltenden Text gezeichnet.
+        if (textInput->textTextur.texture) {
+            SDLW_DrawTexture(textInput->textTextur);                      // den darin enthaltenden Text gezeichnet.
+        }
         break;
     case 1:                                                                      // Ist das Textfeld aktiviert,
         SDLW_DrawFilledRect(textInput->textRectSize, textInput->highlightColor); // wird die Eingabefläche,
@@ -143,7 +142,9 @@ int Text_Draw(text_t *textInput) {
                                        textInput->textRectSize.w - 2 * textInput->borderWidth,
                                        textInput->textRectSize.h - 2 * textInput->borderWidth},
                             textInput->textBgc);
-        SDLW_DrawTexture(textInput->textTextur); // den darin enthaltenden Text gezeichnet.
+        if (textInput->textTextur.texture) {
+            SDLW_DrawTexture(textInput->textTextur); // den darin enthaltenden Text gezeichnet.
+        }
         break;
     }
     return ERR_OK;

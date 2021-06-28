@@ -17,7 +17,7 @@
  * 
  */
 
-#include "scene.h"
+#include "input.h"
 #include "entity.h"
 #include "sdlWrapper.h"
 
@@ -143,7 +143,6 @@ int EntityHandler_RemoveEntityPart(entity_t *entity, entityPart_t *part);
  * @brief Entfernt alle Einzelteile einer Entität.
  * 
  * Entfernt alle Einzelteile aus der internen Liste.
- * @warning Entfernen von Entitäten ist nur am Anfgang jedes Zyklus erlaubt.
  * @warning Gleiche Löschbedingungen wie \ref EntityHandler_RemoveAllEntities()
  * 
  * @param entity Entität deren Einzelteile entfernt werden sollen

@@ -18,7 +18,7 @@
  */
 
 #include "sdlWrapper.h"
-#include "scene.h"
+#include "input.h"
 #include "SDL_rect.h"
 
 

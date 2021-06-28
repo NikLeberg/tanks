@@ -35,11 +35,11 @@ Um interaktive Entitäten zu gestalten, kann das Callback-System verwendet werde
 - `onCollision`
 - `onDraw`
 
-Die Reihenfolge des Aufrufs ist `onUpdate` -> `onDraw` und wird dann zyklisch wiederholt. Die Kollisionen werden während der Update-Phase detektiert und dadurch wird `onCollision` in dieser Phase aufgerufen. Definiert eine Entität nicht alle oder keine Callbacks, werden die Standard-Callbacks des EntityHandler verwendet. Diese Standards sind: `onUpdate` -> mache gar nichts, `onCollision` -> das Physics-Modul sorgt dafür dass Entitäten nicht in der Welt versinken, `onDraw` -> zeichne alle Entitätsteile in Reihenfolge der internen Liste (zuletzt hinzugefügte werden zuerst gezeichnet).
+Die Reihenfolge des Aufrufs ist `onUpdate` -> `onDraw` und wird dann zyklisch wiederholt. Die Kollisionen werden während der Update-Phase detektiert und dadurch wird `onCollision` in dieser Phase aufgerufen. Definiert eine Entität nicht alle oder keine Callbacks, werden die Standard-Callbacks des EntityHandler verwendet. Diese Standards sind: `onUpdate` -> mache gar nichts, `onCollision` -> das Physics-Modul sorgt dafür dass Entitäten nicht in der Welt versinken, `onDraw` -> zeichne alle Entitätsteile in Reihenfolge der internen Liste (zuletzt hinzugefügte Teile werden zuerst gezeichnet, werden also ev. von anderen überdeckt).
 
 ### onUpdate
 
-Hier kann die Logik der Entität implementiert werden. Sie darf sich selber verändern, sich bewegen, andere Entitäten hinufügen, Soundeffekte abspielen und vieles weiteres.
+Hier kann die Logik der Entität implementiert werden. Sie darf sich selber verändern, sich bewegen, andere Entitäten hinzufügen, Soundeffekte abspielen und vieles weiteres.
 Als Argument des Callbacks wird unter anderem eine Struktur der letzten Systemeingaben bez. Steuerbefehle übergeben.
 
 ### onCollision
