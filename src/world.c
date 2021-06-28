@@ -76,7 +76,7 @@ int World_LoadConfig(char *config, struct sdlwResource_s *resource) {
     int count = sscanf(config, "%31s %31s %31s %31s %31s", key, type, foregroundID, backgroundID, bgMusicID);
 
     if (count < 4 || count > 5) { // Argumentenanzalüberprüfung
-        printf("Konfigurationszeile ungueltig! World_LoadConfig()\n");
+        SDL_Log("Konfigurationszeile ungueltig! World_LoadConfig()\n");
         return ERR_FAIL;
     }
 
@@ -85,7 +85,7 @@ int World_LoadConfig(char *config, struct sdlwResource_s *resource) {
     worldConfig_t *worldConfig = malloc(sizeof(worldConfig_t));
 
     if (!worldConfig) {
-        printf("Memory Error! World_LoadConfig()\n");
+        SDL_Log("Memory Error! World_LoadConfig()\n");
         return ERR_MEMORY;
     }
 
@@ -111,14 +111,14 @@ int World_LoadConfig(char *config, struct sdlwResource_s *resource) {
 
 int World_Init() {
     if (init) { // Fehlerüberprüfung
-        printf("Welt wurde schon initialisiert!\n");
+        SDL_Log("Welt wurde schon initialisiert!\n");
         return ERR_FAIL;
     }
 
     // Initialisieren des Kollisionsraster auf eine gewisse grösse
     worldCollision = malloc(sizeof(int) * width * height * 4);
     if (!worldCollision) {
-        printf("Memory Error! World_Init()\n");
+        SDL_Log("Memory Error! World_Init()\n");
         return ERR_MEMORY;
     }
 
@@ -126,13 +126,13 @@ int World_Init() {
     SDL_Renderer *renderer = SDLW_GetRenderer(); // Renderer hohlen
     if (!renderer) {
         free(worldCollision);
-        printf("SDLW nicht richtig initialisiert! World_Init()\n");
+        SDL_Log("SDLW nicht richtig initialisiert! World_Init()\n");
         return ERR_FAIL;
     }
     foreground.texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height); // Textur erstellen
     if (!foreground.texture) {
         free(worldCollision);
-        printf("SDL CreateTexture fehler! [%s]\n", SDL_GetError());
+        SDL_Log("SDL CreateTexture fehler! [%s]\n", SDL_GetError());
         return ERR_FAIL;
     }
     SDL_SetTextureBlendMode(foreground.texture, SDL_BLENDMODE_BLEND);
@@ -166,27 +166,27 @@ void World_Quit() {
 int World_Load(char *worldID) {
     int errCode = ERR_OK;
     if (!worldID) { // Fehlerüberprüfung
-        printf("Ungueltige worldID! World_Load()\n");
+        SDL_Log("Ungueltige worldID! World_Load()\n");
         return ERR_NULLPARAMETER;
     }
 
     // Laden der Konfiguration
     worldConfig_t *config;
     if (SDLW_GetResource(worldID, RESOURCETYPE_WORLD, (void **)&config)) {
-        printf("Weltenkonfiguration konnte nicht geladen werden! %s World_Load()\n", worldID);
+        SDL_Log("Weltenkonfiguration konnte nicht geladen werden! %s World_Load()\n", worldID);
         return ERR_FAIL;
     }
 
     // Renderer vom SDLW holen
     SDL_Renderer *renderer = SDLW_GetRenderer();
     if (!renderer) {
-        printf("SDLW nicht richtig initialisiert! World_Load()\n");
+        SDL_Log("SDLW nicht richtig initialisiert! World_Load()\n");
         return ERR_FAIL;
     }
 
     // Vordergrund zum Schreiben vorbereiten
     if (SDL_SetRenderTarget(renderer, foreground.texture)) {
-        printf("SDL_SetRenderTarget Error! [%s]\n", SDL_GetError());
+        SDL_Log("SDL_SetRenderTarget Error! [%s]\n", SDL_GetError());
         return ERR_FAIL;
     }
 
@@ -216,7 +216,7 @@ int World_Load(char *worldID) {
 
 int World_DrawBackground() {
     if (!loaded) { // Fehlerüberprüfung
-        printf("Keine Welt geladen! World_DrawBackground()\n");
+        SDL_Log("Keine Welt geladen! World_DrawBackground()\n");
         return ERR_FAIL;
     }
     return SDLW_DrawTexture(background); // Zeichnen des Hintergrunds
@@ -224,7 +224,7 @@ int World_DrawBackground() {
 
 int World_DrawForeground() {
     if (!loaded) { // Fehlerüberprüfung
-        printf("Keine Welt geladen! World_DrawForeground()\n");
+        SDL_Log("Keine Welt geladen! World_DrawForeground()\n");
         return ERR_FAIL;
     }
     return SDLW_DrawTexture(foreground); // Zeichnen des Vordergrunds
@@ -233,12 +233,12 @@ int World_DrawForeground() {
 int World_CheckCollision(SDL_Rect aabb, struct entityCollision_s *collision) {
     // Fehlerüberprüfung
     if (!loaded) {
-        printf("Keine Welt geladen! World_CheckCollision()\n");
+        SDL_Log("Keine Welt geladen! World_CheckCollision()\n");
         return ERR_FAIL;
     }
 
     if (!collision) {
-        printf("Kollisionsbuffer ungueltig! World_CheckCollision()\n");
+        SDL_Log("Kollisionsbuffer ungueltig! World_CheckCollision()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -296,20 +296,20 @@ int World_CheckCollision(SDL_Rect aabb, struct entityCollision_s *collision) {
 
 int World_Modify(sprite_t sprite) {
     if (!loaded) {
-        printf("Keine Welt geladen! World_Modify()\n");
+        SDL_Log("Keine Welt geladen! World_Modify()\n");
         return ERR_FAIL;
     }
 
     // Renderer vom SDLW holen
     SDL_Renderer *renderer = SDLW_GetRenderer();
     if (!renderer) {
-        printf("SDLW nicht richtig initialisiert! World_Load()\n");
+        SDL_Log("SDLW nicht richtig initialisiert! World_Load()\n");
         return ERR_FAIL;
     }
 
     // Vordergrund zum Schreiben vorbereiten
     if (SDL_SetRenderTarget(renderer, foreground.texture)) {
-        printf("SDL_SetRenderTarget Error! [%s]\n", SDL_GetError());
+        SDL_Log("SDL_SetRenderTarget Error! [%s]\n", SDL_GetError());
         return ERR_FAIL;
     }
 
@@ -325,12 +325,12 @@ int World_Modify(sprite_t sprite) {
 int World_VerticalLineIntersection(SDL_Point searchStart, SDL_Point *hitPoint) {
     // Fehlerüberprüfung
     if (!loaded) {
-        printf("Keine Welt geladen! World_VerticalLineIntersection()\n");
+        SDL_Log("Keine Welt geladen! World_VerticalLineIntersection()\n");
         return ERR_FAIL;
     }
 
     if (!hitPoint) {
-        printf("Rueckgabespeicher hitPoint ungueltig! World_VerticalLineIntersection()\n");
+        SDL_Log("Rueckgabespeicher hitPoint ungueltig! World_VerticalLineIntersection()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -338,7 +338,7 @@ int World_VerticalLineIntersection(SDL_Point searchStart, SDL_Point *hitPoint) {
     if (searchStart.y < 0)
         searchStart.y = 0;
     if (searchStart.x < 0 || searchStart.x >= width) {
-        printf("Suchstart out of bounds! [%d]\n", searchStart.x);
+        SDL_Log("Suchstart out of bounds! [%d]\n", searchStart.x);
         return ERR_PARAMETER;
     }
 
@@ -358,12 +358,12 @@ int World_VerticalLineIntersection(SDL_Point searchStart, SDL_Point *hitPoint) {
 int World_CreateStartLocations(SDL_Rect aabb, int count, SDL_Point *locations) {
     // Fehlerüberprüfung
     if (!loaded) {
-        printf("Keine Welt geladen! World_VerticalLineIntersection()\n");
+        SDL_Log("Keine Welt geladen! World_VerticalLineIntersection()\n");
         return ERR_FAIL;
     }
 
     if (!locations) {
-        printf("Rueckgabespeicher locations ungueltig! World_VerticalLineIntersection()\n");
+        SDL_Log("Rueckgabespeicher locations ungueltig! World_VerticalLineIntersection()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -395,12 +395,12 @@ int World_CreateStartLocations(SDL_Rect aabb, int count, SDL_Point *locations) {
 static int UpdateWorld() {
     SDL_Renderer *renderer = SDLW_GetRenderer(); // Holt den Renderer von SDLW
     if (!renderer) {
-        printf("SDLW nicht richtig initialisiert! World_Load()\n");
+        SDL_Log("SDLW nicht richtig initialisiert! World_Load()\n");
         return ERR_FAIL;
     }
 
     if (SDL_SetRenderTarget(renderer, foreground.texture)) { // Bereitet Vordergrund zum Lesen vor
-        printf("SDL_SetRenderTarget Error! [%s]\n", SDL_GetError());
+        SDL_Log("SDL_SetRenderTarget Error! [%s]\n", SDL_GetError());
         return ERR_FAIL;
     }
 

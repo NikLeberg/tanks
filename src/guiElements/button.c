@@ -54,7 +54,7 @@ int Button_Init(button_t *button, char *font, char *text) {
 
     if (Sprite_CreateText(text, font, button->textColor, &button->textTextur) != ERR_OK) { // Die erhaltenen Parameter werden an die Struktur des zu erstellenden Taster uebergeben.
 
-        printf("Sprite ungueltig! Sprite_CreateText()\n");
+        SDL_Log("Sprite ungueltig! Sprite_CreateText()\n");
 
         return ERR_FAIL;
     }

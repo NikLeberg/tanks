@@ -116,49 +116,49 @@ static int FreeSDLWResource(sdlwResource_t *resource);
 
 int SDLW_Init(int windowWidth, int windowHeight) {
     if (initialized) {
-        printf("SDLW ist schon Initialisiert! SDLW_Init()\n");
+        SDL_Log("SDLW ist schon Initialisiert! SDLW_Init()\n");
         return ERR_FAIL;
     }
 
     if (windowWidth < 1 || windowWidth > 2000 || windowHeight < 1 || windowHeight > 2000) { // Boundcheck der Grössenangabe
-        printf("Fenstergroesse ausserhalb Schranken! width:%d, height:%d SDLW_Init()\n", windowWidth, windowHeight);
+        SDL_Log("Fenstergroesse ausserhalb Schranken! width:%d, height:%d SDLW_Init()\n", windowWidth, windowHeight);
         return ERR_PARAMETER;
     }
 
     // Initialisierung der verschiedenen SDL Bibliotheken
     if (SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_SENSOR)) { // ohne Sensor-System
         SDLW_Quit();
-        printf("SDL Error beim initialisieren! [%s] SDLW_Init()\n", SDL_GetError());
+        SDL_Log("SDL Error beim initialisieren! [%s] SDLW_Init()\n", SDL_GetError());
         return ERR_FAIL;
     }
 
     if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
-        printf("Mix Error beim Audio oeffnen! [%s] SDLW_Init()\n", Mix_GetError());
+        SDL_Log("Mix Error beim Audio oeffnen! [%s] SDLW_Init()\n", Mix_GetError());
         SDLW_Quit();
         return ERR_FAIL;
     }
 
     if (!Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG | MIX_INIT_MID | MIX_INIT_OPUS)) { // Initialisierung Sound
         SDLW_Quit();
-        printf("Mix Error beim initialisieren! [%s] SDLW_Init()\n", Mix_GetError());
+        SDL_Log("Mix Error beim initialisieren! [%s] SDLW_Init()\n", Mix_GetError());
         return ERR_FAIL;
     }
 
     if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG)) { // Initialisierung IMG
         SDLW_Quit();
-        printf("SDL_image Error beim initialisieren! [%s] SDLW_Init()\n", IMG_GetError());
+        SDL_Log("SDL_image Error beim initialisieren! [%s] SDLW_Init()\n", IMG_GetError());
         return ERR_FAIL;
     }
 
     if (TTF_Init()) { // Initialisierung Fonts
         SDLW_Quit();
-        printf("TTF Error beim initialisieren! [%s] SDLW_Init()\n", TTF_GetError());
+        SDL_Log("TTF Error beim initialisieren! [%s] SDLW_Init()\n", TTF_GetError());
         return ERR_FAIL;
     }
 
     if (SDLNet_Init()) { // Initialisierung Networking
         SDLW_Quit();
-        printf("SDLNet Error beim initialisieren! [%s] SDLW_Init()\n", SDLNet_GetError());
+        SDL_Log("SDLNet Error beim initialisieren! [%s] SDLW_Init()\n", SDLNet_GetError());
         return ERR_FAIL;
     }
 
@@ -166,7 +166,7 @@ int SDLW_Init(int windowWidth, int windowHeight) {
     window = SDL_CreateWindow("Tanks", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
     if (!window) {
         SDLW_Quit();
-        printf("SDL_CreateWindow Error! [%s] SDLW_Init()\n", SDL_GetError());
+        SDL_Log("SDL_CreateWindow Error! [%s] SDLW_Init()\n", SDL_GetError());
         return ERR_FAIL;
     }
 
@@ -174,14 +174,14 @@ int SDLW_Init(int windowWidth, int windowHeight) {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         SDLW_Quit();
-        printf("SDL_CreateRenderer Error! [%s] SDLW_Init()\n", SDL_GetError());
+        SDL_Log("SDL_CreateRenderer Error! [%s] SDLW_Init()\n", SDL_GetError());
         return ERR_FAIL;
     }
 
     // Initialisierung der Ressourcenliste
     if (List_Init(&resourceList)) {
         SDLW_Quit();
-        printf("Ressourcenliste konnte nicht initialisiert werden! SDLW_Init()\n");
+        SDL_Log("Ressourcenliste konnte nicht initialisiert werden! SDLW_Init()\n");
         return ERR_FAIL;
     }
     resourceList.dataAutoFree = (fnPntrDataCallback)FreeSDLWResource;
@@ -224,12 +224,12 @@ int SDLW_Quit() {
 int SDLW_LoadResources(char *resourceConfigLocation) {
     // Fehlerüberprüfung
     if (!initialized) {
-        printf("SLDW nicht initialisiert! SDLW_LoadRessource()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_LoadRessource()\n");
         return ERR_FAIL;
     }
 
     if (!resourceConfigLocation) {
-        printf("Dateipfad ist ungueltig! SDLW_LoadRessource()\n");
+        SDL_Log("Dateipfad ist ungueltig! SDLW_LoadRessource()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -238,7 +238,7 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
     file = fopen(resourceConfigLocation, "r");
 
     if (!file) { // Fehlerüberprüfungs
-        printf("Fehler beim öffnen des Dokuments %s! SDLW_LoadRessource()\n", resourceConfigLocation);
+        SDL_Log("Fehler beim öffnen des Dokuments %s! SDLW_LoadRessource()\n", resourceConfigLocation);
         return ERR_PARAMETER;
     }
 
@@ -258,14 +258,14 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
             continue;
 
         if(count < 2){ // Zu wenig Argumente in der Konfigurationszeile
-            printf("Konfigurationszeile %d ungueltig! [%s]\n", line, resourceConfigLocation);
+            SDL_Log("Konfigurationszeile %d ungueltig! [%s]\n", line, resourceConfigLocation);
             fclose(file);
             return ERR_FAIL;
         }
 
         sdlwResource_t *resource = malloc(sizeof(sdlwResource_t));
         if (!resource) { // Allozierung überprüfen
-            printf("Ressource konnte nicht alloziert werden! SDLW_LoadRessource()!\n");
+            SDL_Log("Ressource konnte nicht alloziert werden! SDLW_LoadRessource()!\n");
             fclose(file);
             return ERR_MEMORY;
         }
@@ -301,7 +301,7 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
         }
 
         // Hinzufügen der geladenen Ressource
-        printf("Geladen %s als %s\n", key, type);
+        SDL_Log("Geladen %s als %s\n", key, type);
         List_Add(&resourceList, resource);
     }    
     // Abschluss
@@ -311,19 +311,19 @@ int SDLW_LoadResources(char *resourceConfigLocation) {
 
 int SDLW_GetResource(char *id, resourceType_t type, void **resource) {
     if (!resource) {
-        printf("Zielpointer ungueltig!\n");
+        SDL_Log("Zielpointer ungueltig!\n");
         return ERR_NULLPARAMETER;
     }
     // Garantieren dass bei allen anderen Fehlern der Rückgabewert NULL ist
     (*resource) = NULL;
 
     if (!initialized) { // Fehlerüberprüfung
-        printf("SLDW nicht initialisiert! SDLW_GetTexture()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_GetTexture()\n");
         return ERR_FAIL;
     }
 
     if (!id) {
-        printf("Id ungueltig!\n");
+        SDL_Log("Id ungueltig!\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -335,18 +335,18 @@ int SDLW_GetResource(char *id, resourceType_t type, void **resource) {
         (*resource) = foundResource->resource.any;
         return ERR_OK;
     }
-    printf("Ressource mit id [%s] nicht gefunden!\n", id);
+    SDL_Log("Ressource mit id [%s] nicht gefunden!\n", id);
     return ERR_FAIL;
 }
 
 int SDLW_DrawTexture(sprite_t sprite) {
     // Fehlerüberprüfung
     if (!initialized) {
-        printf("SLDW nicht initialisiert! SDLW_DrawTexture()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_DrawTexture()\n");
         return ERR_FAIL;
     }
     if (!sprite.texture) {
-        printf("Keine Textur definiert! SDLW_DrawTexture()\n");
+        SDL_Log("Keine Textur definiert! SDLW_DrawTexture()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -365,7 +365,7 @@ int SDLW_DrawTexture(sprite_t sprite) {
 
 int SDLW_DrawFilledRect(SDL_Rect rect, SDL_Color color) {
     if (!initialized) { // Fehlerüberprüfung
-        printf("SLDW nicht initialisiert! SDLW_DrawFilledRect()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_DrawFilledRect()\n");
         return ERR_FAIL;
     }
 
@@ -376,19 +376,19 @@ int SDLW_DrawFilledRect(SDL_Rect rect, SDL_Color color) {
 
 int SDLW_CreateTextTexture(char *text, char *font, SDL_Color color, SDL_Texture **texture) {
     if (!initialized) { // Fehlerüberprüfung
-        printf("SLDW nicht initialisiert! SDLW_CreateTextTexture()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_CreateTextTexture()\n");
         return ERR_FAIL;
     }
     if (!text) { // Fehlerüberprüfung
-        printf("Text ungueltig! SDLW_CreateTextTexture()\n");
+        SDL_Log("Text ungueltig! SDLW_CreateTextTexture()\n");
         return ERR_NULLPARAMETER;
     }
     if (!font) { // Fehlerüberprüfung
-        printf("font ungueltig! SDLW_CreateTextTexture()\n");
+        SDL_Log("font ungueltig! SDLW_CreateTextTexture()\n");
         return ERR_NULLPARAMETER;
     }
     if (!texture) { // Fehlerüberprüfung
-        printf("Texturespeicherort ungluetig! SDLW_CreateTextTexture()\n");
+        SDL_Log("Texturespeicherort ungluetig! SDLW_CreateTextTexture()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -419,7 +419,7 @@ int SDLW_CreateTextTexture(char *text, char *font, SDL_Color color, SDL_Texture 
 
 int SDLW_Clear(SDL_Color color) {
     if (!initialized) { // Fehlerüberprüfung
-        printf("SLDW nicht initialisiert! SDLW_Clear()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_Clear()\n");
         return ERR_FAIL;
     }
 
@@ -430,7 +430,7 @@ int SDLW_Clear(SDL_Color color) {
 
 int SDLW_Render() {
     if (!initialized) { // Fehlerüberprüfung
-        printf("SLDW nicht initialisiert! SDLW_Render()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_Render()\n");
         return ERR_FAIL;
     }
     SDL_RenderPresent(renderer);
@@ -439,11 +439,11 @@ int SDLW_Render() {
 
 int SDLW_PlayMusic(char *musicid) {
     if (!initialized) { // Fehlerüberprüfung
-        printf("SLDW nicht initialisiert! SDLW_PlayMusic()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_PlayMusic()\n");
         return ERR_FAIL;
     }
     if (!musicid) { // Fehlerüberprüfung
-        printf("Musikid ungueltig! SDLW_PlayMusic()\n");
+        SDL_Log("Musikid ungueltig! SDLW_PlayMusic()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -451,7 +451,7 @@ int SDLW_PlayMusic(char *musicid) {
     SDLW_GetResource(musicid, RESOURCETYPE_SOUND_MUSIC, (void **)&music);
 
     if (!music) { // Fehlerüberprüfung
-        printf("Musik konnte nicht geladen werden!\n");
+        SDL_Log("Musik konnte nicht geladen werden!\n");
         return ERR_FAIL;
     }
 
@@ -462,11 +462,11 @@ int SDLW_PlayMusic(char *musicid) {
 
 int SDLW_PlaySoundEffect(char *chunk) {
     if (!initialized) { // Fehlerüberprüfung
-        printf("SLDW nicht initialisiert! SDLW_PlayMusic()\n");
+        SDL_Log("SLDW nicht initialisiert! SDLW_PlayMusic()\n");
         return ERR_FAIL;
     }
     if (!chunk) { // Fehlerüberprüfung
-        printf("Musikid ungueltig! SDLW_PlayMusic()\n");
+        SDL_Log("Musikid ungueltig! SDLW_PlayMusic()\n");
         return ERR_NULLPARAMETER;
     }
 
@@ -474,7 +474,7 @@ int SDLW_PlaySoundEffect(char *chunk) {
     SDLW_GetResource(chunk, RESOURCETYPE_SOUND_EFFECT, (void **)&sound);
 
     if (!sound) { // Fehlerüberprüfung
-        printf("Soundeffekt konnte nicht geladen werden!\n");
+        SDL_Log("Soundeffekt konnte nicht geladen werden!\n");
         return ERR_FAIL;
     }
 
@@ -513,14 +513,14 @@ static int SDLW_LoadTexture(char *config, sdlwResource_t *resource) {
     // Konfiguration lesen
     int count = sscanf(config, "%31s %31s %63s %15s %7s", key, type, fileName, mode, modeType);
     if (count < 3) {
-        printf("Pfad nicht angegeben %s! static SDLW_LoadTexture()\n", key);
+        SDL_Log("Pfad nicht angegeben %s! static SDLW_LoadTexture()\n", key);
         return ERR_FAIL;
     }
 
     resource->type = RESOURCETYPE_TEXTURE_N;
     resource->resource.texture = IMG_LoadTexture(renderer, fileName);
     if (!resource->resource.texture) { // Fehlerüberprüfung
-        printf("IMG_LoadTexture error! [%s]\n", IMG_GetError());
+        SDL_Log("IMG_LoadTexture error! [%s]\n", IMG_GetError());
         return ERR_FAIL;
     }
 
@@ -530,12 +530,12 @@ static int SDLW_LoadTexture(char *config, sdlwResource_t *resource) {
 
     if (count == 5) {                    // Textur als stamp oder mask laden
         if (strcmp(mode, "blendmode")) { // Konfigurationsfehlerüberprüfung
-            printf("Rendermodus für %s ungültig! [%s]\n", key, mode);
+            SDL_Log("Rendermodus für %s ungültig! [%s]\n", key, mode);
             SDL_DestroyTexture(resource->resource.texture);
             return ERR_FAIL;
         }
         if (strcmp(modeType, "stamp") && strcmp(modeType, "mask")) { // Konfigurationsfehlerüberprüfung
-            printf("Rendermodustyp für %s ungültig! [%s]\n", key, modeType);
+            SDL_Log("Rendermodustyp für %s ungültig! [%s]\n", key, modeType);
             SDL_DestroyTexture(resource->resource.texture);
             return ERR_FAIL;
         }
@@ -567,12 +567,12 @@ static int SDLW_LoadFont(char *config, sdlwResource_t *resource) {
     int count = sscanf(config, "%31s %31s %63s %d", key, type, fileName, &size);
 
     if (count != 4) { // Konfigurationsfehlerüberprüfung
-        printf("Konfigurationsargumente für %s ungültig!\n", key);
+        SDL_Log("Konfigurationsargumente für %s ungültig!\n", key);
         return ERR_FAIL;
     }
 
     if (size < 5 || size > 200) { // Bounds für Schriftgrösse überprüfen
-        printf("Schriftgrösse für %s zu gross oder zu klein! [%d]\n", key, size);
+        SDL_Log("Schriftgrösse für %s zu gross oder zu klein! [%d]\n", key, size);
         return ERR_FAIL;
     }
 
@@ -580,7 +580,7 @@ static int SDLW_LoadFont(char *config, sdlwResource_t *resource) {
     resource->resource.font = TTF_OpenFont(fileName, size);
     if (resource->resource.font)
         return ERR_OK;
-    printf("TTF_OpenFont error! [%s]\n", TTF_GetError());
+    SDL_Log("TTF_OpenFont error! [%s]\n", TTF_GetError());
     return ERR_FAIL;
 }
 
@@ -593,12 +593,12 @@ static int SDLW_LoadSound(char *config, sdlwResource_t *resource) {
     int count = sscanf(config, "%31s %31s %63s %7s", key, type, fileName, soundType);
 
     if (count != 4) { // Konfigurationsfehlerüberprüfung
-        printf("Konfigurationsargumente für %s ungültig!\n", key);
+        SDL_Log("Konfigurationsargumente für %s ungültig!\n", key);
         return ERR_FAIL;
     }
 
     if (strcmp(soundType, "effect") && strcmp(soundType, "music")) { // Bounds für Schriftgrösse überprüfen
-        printf("Typ für %s ungueltig! [%s]\n", key, soundType);
+        SDL_Log("Typ für %s ungueltig! [%s]\n", key, soundType);
         return ERR_FAIL;
     }
 
@@ -610,17 +610,17 @@ static int SDLW_LoadSound(char *config, sdlwResource_t *resource) {
         if (resource->resource.bgMusic)
             return ERR_OK;
         else
-            printf("[%s] konnte nicht geladen werden!\n", key);
+            SDL_Log("[%s] konnte nicht geladen werden!\n", key);
     } else { // Laden von Soundeffekten
         resource->type = RESOURCETYPE_SOUND_EFFECT;
         resource->resource.soundEffect = Mix_LoadWAV(fileName);
         if (resource->resource.soundEffect)
             return ERR_OK;
         else
-            printf("[%s] konnte nicht geladen werden!\n", key);
+            SDL_Log("[%s] konnte nicht geladen werden!\n", key);
     }
 
-    printf("Mix_Load error! [%s]\n", Mix_GetError());
+    SDL_Log("Mix_Load error! [%s]\n", Mix_GetError());
     return ERR_FAIL;
 }
 
