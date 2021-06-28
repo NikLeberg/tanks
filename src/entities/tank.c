@@ -153,7 +153,7 @@ static void rotateTube(tankData_t *tankData, SDL_Point axisWASD);
  * Wenn der Panzer dem aktuellen Psieler gehört so aktualisiert diese Funktion
  * die Sichtbarkeit des Pfeils und schaltet dessen Animation weiter.
  * 
- * @param self Panzer dessen Pfeil aktualisiert werden soll
+ * @param tank Panzer dessen Pfeil aktualisiert werden soll
  * @param step Aktueller Spielschritt aus \ref inputEvent_t
  * 
  */
