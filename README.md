@@ -1,5 +1,7 @@
 # Tanks
 
+![SpielAufbau](./doc/SpielAufbau.png)
+
 Ein Artilleriespiel. Erstellt als Projekt für das Informatik Modul BTE5052. Anstelle der zur Verfügung gestellten Qt Library wird [SDL2](https://libsdl.org) verwendet.
 
 ## Dokumentation
